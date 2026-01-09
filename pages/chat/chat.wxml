@@ -12,8 +12,8 @@
     <view class="message bot">
       <view class="message-avatar">🤖</view>
       <view class="message-content">
-        <text class="privacy-text">🔒 隐私保护：对话记录仅保存在您的手机本地，不会上传到服务器。</text>
-        <text>\n\n你好！我是反诈AI助手，可以帮你：\n\n• 解答反诈骗问题\n• 识别可疑信息\n• 提供防骗建议\n• 分析上传的截图\n\n💡 我会记住最近5轮对话，所以您可以追问"那怎么办"、"还有呢"等问题，我会基于之前的对话内容回答。\n\n有什么可以帮你的吗？</text>
+        <text class="privacy-text">{{privacyText}}</text>
+        <text class="welcome-text">{{welcomeMessage}}</text>
       </view>
     </view>
 

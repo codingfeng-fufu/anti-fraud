@@ -4,7 +4,10 @@ Page({
     messages: [],
     inputValue: '',
     loading: false,
-    scrollToView: ''
+    scrollToView: '',
+    // 欢迎消息
+    welcomeMessage: '你好！我是反诈AI助手，可以帮你：\n\n• 解答反诈骗问题\n• 识别可疑信息\n• 提供防骗建议\n• 分析上传的截图\n\n💡 我会记住最近5轮对话，所以您可以追问"那怎么办"、"还有呢"等问题，我会基于之前的对话内容回答。\n\n有什么可以帮你的吗？',
+    privacyText: '🔒 隐私保护：对话记录仅保存在您的手机本地，不会上传到服务器。'
   },
 
   onLoad(options) {

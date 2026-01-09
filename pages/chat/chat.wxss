@@ -46,6 +46,8 @@
   display: flex;
   margin-bottom: 40rpx;
   animation: fadeIn 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -94,12 +96,18 @@
 
 /* 消息内容 */
 .message-content {
-  max-width: 70%;
+  max-width: calc(100% - 120rpx);
   padding: 28rpx 36rpx;
   border-radius: 32rpx;
   font-size: 28rpx;
   line-height: 1.7;
   word-break: break-all;
+}
+
+/* 消息内容中的文本 - 保留换行符 */
+.message-content text {
+  white-space: pre-wrap;
+  display: block;
 }
 
 .message.bot .message-content {
