@@ -1,0 +1,119 @@
+<!--pages/bind-student/bind-student.wxml-->
+<view class="bind-container">
+  <!-- 顶部提示 -->
+  <view class="bind-header">
+    <view class="header-icon">🎓</view>
+    <view class="header-title">绑定学生信息</view>
+    <view class="header-desc">为了提供更好的反诈教育服务，请完善您的学生信息</view>
+  </view>
+
+  <!-- 表单 -->
+  <view class="bind-form">
+    <!-- 学校信息（固定显示） -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>所属学校</text>
+      </view>
+      <view class="school-fixed">
+        <text class="school-name">{{schoolInfo.schoolName}}</text>
+        <text class="school-badge">✓</text>
+      </view>
+    </view>
+
+    <!-- 学号输入 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>学号</text>
+      </view>
+      <input 
+        class="form-input" 
+        type="text" 
+        value="{{studentId}}"
+        bindinput="onStudentIdInput"
+        placeholder="{{studentIdPlaceholder}}"
+      />
+    </view>
+
+    <!-- 真实姓名 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>真实姓名</text>
+        <text class="optional">（选填）</text>
+      </view>
+      <input 
+        class="form-input" 
+        type="text" 
+        value="{{realName}}"
+        bindinput="onRealNameInput"
+        placeholder="请输入真实姓名"
+      />
+    </view>
+
+    <!-- 院系选择 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>院系</text>
+        <text class="optional">（选填）</text>
+      </view>
+      <picker 
+        mode="selector" 
+        range="{{colleges}}" 
+        range-key="collegeName"
+        value="{{collegeIndex}}"
+        bindchange="onCollegeChange"
+      >
+        <view class="picker-value">
+          {{selectedCollege ? selectedCollege.collegeName : '请选择院系'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 年级选择 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>年级</text>
+        <text class="optional">（选填）</text>
+      </view>
+      <picker 
+        mode="selector" 
+        range="{{grades}}"
+        value="{{gradeIndex}}"
+        bindchange="onGradeChange"
+      >
+        <view class="picker-value">
+          {{grade || '请选择年级'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 手机号 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>手机号</text>
+        <text class="optional">（选填）</text>
+      </view>
+      <input 
+        class="form-input" 
+        type="number" 
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+        placeholder="请输入手机号"
+        maxlength="11"
+      />
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="bind-tips">
+    <view class="tip-item">🔒 您的信息将被加密存储，仅用于身份验证</view>
+    <view class="tip-item">✨ 首次绑定可获得 50 积分奖励</view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="bind-actions">
+    <button class="submit-btn" bindtap="handleSubmit">提交绑定</button>
+  </view>
+</view>
+

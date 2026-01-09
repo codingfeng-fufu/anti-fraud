@@ -1,0 +1,10 @@
+{
+  "name": "getSchools",
+  "version": "1.0.0",
+  "description": "获取学校、院系、专业列表",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

@@ -1,0 +1,53 @@
+<!--pages/article-detail/article-detail.wxml-->
+<view class="article-container">
+  <!-- 文章头部 -->
+  <view class="article-header">
+    <view class="tag tag-{{article.tagType}}">{{article.tag}}</view>
+    <view class="article-title">{{article.title}}</view>
+    <view class="article-meta">
+      <text class="meta-item">📅 {{article.time}}</text>
+      <text class="meta-item">👁️ {{article.views}}</text>
+      <text class="meta-item">👍 {{article.likes}}</text>
+    </view>
+  </view>
+
+  <!-- 文章内容 -->
+  <view class="article-content">
+    <rich-text nodes="{{article.content}}"></rich-text>
+  </view>
+
+  <!-- 相关文章推荐 -->
+  <view class="related-section" wx:if="{{relatedArticles.length > 0}}">
+    <view class="section-title">📚 相关推荐</view>
+    <view 
+      wx:for="{{relatedArticles}}" 
+      wx:key="id"
+      class="related-card"
+      bindtap="viewArticle"
+      data-id="{{item.id}}"
+    >
+      <view class="related-title">{{item.title}}</view>
+      <view class="related-meta">
+        <text>{{item.time}}</text>
+        <text>👁️ {{item.views}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="article-actions">
+    <button class="action-btn" bindtap="handleLike">
+      <text class="action-icon">{{liked ? '❤️' : '🤍'}}</text>
+      <text class="action-text">{{liked ? '已点赞' : '点赞'}}</text>
+    </button>
+    <button class="action-btn" bindtap="handleCollect">
+      <text class="action-icon">{{collected ? '⭐' : '☆'}}</text>
+      <text class="action-text">{{collected ? '已收藏' : '收藏'}}</text>
+    </button>
+    <button class="action-btn" open-type="share">
+      <text class="action-icon">📤</text>
+      <text class="action-text">分享</text>
+    </button>
+  </view>
+</view>
+

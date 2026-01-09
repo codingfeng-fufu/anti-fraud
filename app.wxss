@@ -1,0 +1,137 @@
+/**app.wxss**/
+/* 全局样式变量 */
+page {
+  --primary-color: #0ea5e9;
+  --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  --secondary-color: #06b6d4;
+  --bg-color: #f0f9ff;
+  --bg-secondary: #e0f2fe;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border-color: #f1f5f9;
+  --white: #ffffff;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+  
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+/* 通用容器 */
+.container {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 内容区域 */
+.content-area {
+  padding: 0 40rpx;
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+}
+
+/* 卡片样式 */
+.card {
+  background: var(--white);
+  border-radius: 32rpx;
+  padding: 36rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 50rpx;
+  padding: 24rpx 48rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.btn-primary:active {
+  opacity: 0.9;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-block;
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.tag-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+}
+
+.tag-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+}
+
+.tag-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+}
+
+/* 文字样式 */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.text-bold {
+  font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* 间距工具类 */
+.mt-10 { margin-top: 20rpx; }
+.mt-15 { margin-top: 30rpx; }
+.mt-20 { margin-top: 40rpx; }
+.mb-10 { margin-bottom: 20rpx; }
+.mb-15 { margin-bottom: 30rpx; }
+.mb-20 { margin-bottom: 40rpx; }
+
+/* Flex布局 */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}

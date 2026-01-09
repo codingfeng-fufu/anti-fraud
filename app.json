@@ -1,0 +1,45 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/chat/chat",
+    "pages/user/user",
+    "pages/article-detail/article-detail",
+    "pages/bind-student/bind-student"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "反诈卫士",
+    "navigationBarBackgroundColor": "#0ea5e9",
+    "backgroundColor": "#f0f9ff"
+  },
+  "tabBar": {
+    "color": "#94a3b8",
+    "selectedColor": "#0ea5e9",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/反诈骗.png",
+        "selectedIconPath": "images/反诈骗 (1).png"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "AI助手",
+        "iconPath": "images/ai-聊天-思考-copy.png",
+        "selectedIconPath": "images/ai-聊天-思考-copy (1).png"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的",
+        "iconPath": "images/个人中心.png",
+        "selectedIconPath": "images/个人中心 (1).png"
+      }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

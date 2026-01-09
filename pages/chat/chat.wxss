@@ -1,0 +1,236 @@
+/* pages/chat/chat.wxss */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+/* 顶部工具栏 */
+.chat-toolbar {
+  padding: 20rpx 40rpx;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10rpx);
+  border-bottom: 1rpx solid #e0f2fe;
+}
+
+.clear-btn {
+  padding: 12rpx 32rpx;
+  font-size: 26rpx;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 2rpx solid #fecaca;
+  border-radius: 32rpx;
+  line-height: 1;
+}
+
+.clear-btn::after {
+  border: none;
+}
+
+.clear-btn:active {
+  background: #fee2e2;
+}
+
+/* 消息区域 */
+.chat-messages {
+  flex: 1;
+  padding: 40rpx;
+  overflow-y: auto;
+}
+
+/* 单条消息 */
+.message {
+  display: flex;
+  margin-bottom: 40rpx;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+/* 消息头像 */
+.message-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  flex-shrink: 0;
+  box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
+}
+
+.message.user .message-avatar {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  order: 2;
+  margin-left: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(14, 165, 233, 0.15);
+}
+
+.message.bot .message-avatar {
+  margin-right: 24rpx;
+}
+
+/* 消息内容 */
+.message-content {
+  max-width: 70%;
+  padding: 28rpx 36rpx;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.message.bot .message-content {
+  background: white;
+  color: #1e293b;
+  border-bottom-left-radius: 8rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  font-family: "KaiTi", "楷体", "STKaiti", "华文楷体", serif;
+  letter-spacing: 1rpx;
+}
+
+.message.user .message-content {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: white;
+  border-bottom-right-radius: 8rpx;
+  box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.25);
+}
+
+/* 加载动画 */
+.loading-text {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 输入区域 */
+.chat-input-area {
+  background: white;
+  padding: 30rpx 40rpx;
+  padding-bottom: calc(-35rpx + env(safe-area-inset-bottom));
+  border-top: 2rpx solid #e0f2fe;
+  box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 按钮行 */
+.input-buttons {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 24rpx;
+}
+
+.chat-input {
+  width: 100%;
+  height: 96rpx;
+  padding: 0 36rpx;
+  border: 3rpx solid #bae6fd;
+  border-radius: 24rpx;
+  font-size: 30rpx;
+  background: #ffffff;
+  color: #1e293b;
+  box-shadow: inset 0 2rpx 8rpx rgba(14, 165, 233, 0.08);
+  box-sizing: border-box;
+}
+
+.chat-input:focus {
+  border-color: #0ea5e9;
+  background: #ffffff;
+  box-shadow: 0 0 0 4rpx rgba(14, 165, 233, 0.1);
+}
+
+/* 增强 placeholder 可见性 */
+.chat-input::-webkit-input-placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* 上传按钮 */
+.upload-btn {
+  width: 120rpx;
+  height: 72rpx;
+  border: 2rpx solid #bae6fd;
+  border-radius: 16rpx;
+  background: #f0f9ff;
+  color: #0ea5e9;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(14, 165, 233, 0.12);
+  padding: 0;
+  line-height: 1;
+}
+
+/* 发送按钮 */
+.send-btn {
+  width: 160rpx;
+  height: 72rpx;
+  border: none;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: white;
+  font-size: 32rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.35);
+  padding: 0;
+  line-height: 1;
+}
+
+.send-btn:active,
+.upload-btn:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+}
+
+/* 按钮默认样式重置 */
+.send-btn::after,
+.upload-btn::after {
+  border: none;
+}
+
+/* 隐私提示样式 */
+.privacy-text {
+  display: block;
+  color: #10b981;
+  font-size: 26rpx;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+

@@ -1,0 +1,43 @@
+# 微信小程序
+node_modules/
+miniprogram_npm/
+.DS_Store
+
+# 云函数
+cloudfunctions/**/node_modules/
+cloudfunctions/**/.DS_Store
+
+# 编译产物
+dist/
+build/
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+.tmp/
+temp/
+
+# ⚠️ 重要：不要上传包含 API Key 的文件
+# 如果您已经在 cloudfunctions/aiChat/index.js 中填写了 API Key
+# 请注意不要将其上传到公开仓库！
+
+# 可选：如果想要忽略包含 API Key 的文件，可以取消下面这行的注释
+# cloudfunctions/aiChat/index.js
+
+# 或者使用环境变量配置文件（推荐）
+.env
+.env.local
+.env.production
+config/api-keys.js
+

@@ -1,0 +1,58 @@
+<!--pages/chat/chat.wxml-->
+<view class="chat-container">
+  <!-- 顶部工具栏 -->
+  <view class="chat-toolbar" wx:if="{{messages.length > 0}}">
+    <button class="clear-btn" bindtap="clearLocalMessages">
+      <text>🗑️ 清除历史</text>
+    </button>
+  </view>
+  <!-- 聊天消息区域 -->
+  <scroll-view class="chat-messages" scroll-y scroll-into-view="{{scrollToView}}" scroll-with-animation>
+    <!-- 欢迎消息 -->
+    <view class="message bot">
+      <view class="message-avatar">🤖</view>
+      <view class="message-content">
+        <text class="privacy-text">🔒 隐私保护：对话记录仅保存在您的手机本地，不会上传到服务器。</text>
+        <text>\n\n你好！我是反诈AI助手，可以帮你：\n\n• 解答反诈骗问题\n• 识别可疑信息\n• 提供防骗建议\n• 分析上传的截图\n\n💡 我会记住最近5轮对话，所以您可以追问"那怎么办"、"还有呢"等问题，我会基于之前的对话内容回答。\n\n有什么可以帮你的吗？</text>
+      </view>
+    </view>
+
+    <!-- 聊天记录 -->
+    <view wx:for="{{messages}}" wx:key="id" class="message {{item.role}}" id="msg-{{index}}">
+      <view class="message-avatar">{{item.role === 'user' ? '👤' : '🤖'}}</view>
+      <view class="message-content">
+        <text>{{item.content}}</text>
+      </view>
+    </view>
+
+    <!-- 加载中提示 -->
+    <view wx:if="{{loading}}" class="message bot">
+      <view class="message-avatar">🤖</view>
+      <view class="message-content loading-text">
+        <text>正在思考中...</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="chat-input-area">
+    <!-- 按钮行 -->
+    <view class="input-buttons">
+      <button class="upload-btn" bindtap="uploadImage">📷</button>
+      <button class="send-btn" bindtap="sendMessage">发送</button>
+    </view>
+    <!-- 输入框 -->
+    <input 
+      class="chat-input" 
+      type="text" 
+      placeholder="输入您的问题，点击上方「发送」按钮..."
+      placeholder-style="color: #94a3b8; font-size: 28rpx;"
+      value="{{inputValue}}"
+      bindinput="onInput"
+      bindconfirm="sendMessage"
+      confirm-type="send"
+      cursor-spacing="20"
+    />
+  </view>
+</view>
+

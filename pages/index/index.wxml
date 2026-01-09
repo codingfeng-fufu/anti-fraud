@@ -1,0 +1,83 @@
+<!--pages/index/index.wxml-->
+<view class="index-container">
+  <!-- 顶部搜索栏 -->
+  <view class="top-bar">
+    <view class="top-title">
+      <text class="title-icon">🛡️</text>
+      <text class="title-text">反诈卫士</text>
+    </view>
+    <view class="subtitle">守护校园，识破骗局</view>
+  </view>
+
+  <view class="search-bar">
+    <input 
+      class="search-input" 
+      type="text" 
+      placeholder="搜索反诈知识、典型案例..."
+      bindconfirm="handleSearch"
+    />
+    <text class="search-icon">🔍</text>
+  </view>
+
+  <!-- 轮播图 -->
+  <view class="banner-slider">
+    <swiper 
+      class="slider-container" 
+      indicator-dots 
+      indicator-color="rgba(255,255,255,0.5)"
+      indicator-active-color="#ffffff"
+      autoplay 
+      interval="3000" 
+      circular
+    >
+      <swiper-item wx:for="{{banners}}" wx:key="id">
+        <view class="slide-content" style="background: {{item.bgColor}};">
+          <view class="slide-icon">{{item.icon}}</view>
+          <view class="slide-title">{{item.title}}</view>
+          <view class="slide-desc">{{item.desc}}</view>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 分类标签 -->
+  <view class="category-tabs">
+    <view 
+      wx:for="{{categories}}" 
+      wx:key="index"
+      class="tab-item {{selectedCategory === item ? 'active' : ''}}"
+      bindtap="selectCategory"
+      data-category="{{item}}"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 新闻列表 -->
+  <view class="content-area">
+    <view class="section-title">🔥 最新资讯</view>
+
+    <view 
+      wx:for="{{articles}}" 
+      wx:key="id"
+      class="news-card"
+      bindtap="viewArticle"
+      data-id="{{item.id}}"
+    >
+      <view class="tag tag-{{item.tagType}}">{{item.tag}}</view>
+      <view class="news-title">{{item.title}}</view>
+      <view class="news-meta">
+        <text class="meta-time">{{item.time}}</text>
+        <text class="meta-view">👁️ {{item.viewsText}}</text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}">
+      <text>下拉加载更多</text>
+    </view>
+    <view class="load-more" wx:else>
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

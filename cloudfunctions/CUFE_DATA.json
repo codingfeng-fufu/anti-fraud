@@ -1,0 +1,316 @@
+{
+  "schools": [
+    {
+      "schoolId": "CUFE",
+      "schoolName": "中央财经大学",
+      "province": "北京市",
+      "city": "北京市",
+      "studentIdPattern": "\\d{10}",
+      "studentIdExample": "2023010001",
+      "logo": "",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    }
+  ],
+  "colleges": [
+    {
+      "schoolId": "CUFE",
+      "collegeId": "FIN",
+      "collegeName": "金融学院",
+      "shortName": "金融学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ACC",
+      "collegeName": "会计学院",
+      "shortName": "会计学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ECO",
+      "collegeName": "经济学院",
+      "shortName": "经济学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "BUS",
+      "collegeName": "商学院",
+      "shortName": "商学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "TAX",
+      "collegeName": "财政税务学院",
+      "shortName": "财税学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "LAW",
+      "collegeName": "法学院",
+      "shortName": "法学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "INS",
+      "collegeName": "保险学院",
+      "shortName": "保险学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "STAT",
+      "collegeName": "统计与数学学院",
+      "shortName": "统数学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "IT",
+      "collegeName": "信息学院",
+      "shortName": "信息学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "COMM",
+      "collegeName": "文化与传媒学院",
+      "shortName": "文传学院",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    }
+  ],
+  "majors": [
+    {
+      "schoolId": "CUFE",
+      "collegeId": "FIN",
+      "majorId": "FIN01",
+      "majorName": "金融学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "FIN",
+      "majorId": "FIN02",
+      "majorName": "金融工程",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "FIN",
+      "majorId": "FIN03",
+      "majorName": "投资学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ACC",
+      "majorId": "ACC01",
+      "majorName": "会计学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ACC",
+      "majorId": "ACC02",
+      "majorName": "财务管理",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ACC",
+      "majorId": "ACC03",
+      "majorName": "审计学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ECO",
+      "majorId": "ECO01",
+      "majorName": "经济学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "ECO",
+      "majorId": "ECO02",
+      "majorName": "国际经济与贸易",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "BUS",
+      "majorId": "BUS01",
+      "majorName": "工商管理",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "BUS",
+      "majorId": "BUS02",
+      "majorName": "市场营销",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "BUS",
+      "majorId": "BUS03",
+      "majorName": "人力资源管理",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "TAX",
+      "majorId": "TAX01",
+      "majorName": "财政学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "TAX",
+      "majorId": "TAX02",
+      "majorName": "税收学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "LAW",
+      "majorId": "LAW01",
+      "majorName": "法学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "INS",
+      "majorId": "INS01",
+      "majorName": "保险学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "INS",
+      "majorId": "INS02",
+      "majorName": "精算学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "STAT",
+      "majorId": "STAT01",
+      "majorName": "统计学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "STAT",
+      "majorId": "STAT02",
+      "majorName": "数学与应用数学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "STAT",
+      "majorId": "STAT03",
+      "majorName": "数据科学与大数据技术",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "IT",
+      "majorId": "IT01",
+      "majorName": "计算机科学与技术",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "IT",
+      "majorId": "IT02",
+      "majorName": "信息管理与信息系统",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "IT",
+      "majorId": "IT03",
+      "majorName": "电子商务",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "COMM",
+      "majorId": "COMM01",
+      "majorName": "新闻学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    },
+    {
+      "schoolId": "CUFE",
+      "collegeId": "COMM",
+      "majorId": "COMM02",
+      "majorName": "广告学",
+      "degree": "本科",
+      "isActive": true,
+      "createdAt": {"$date": "2026-01-07T00:00:00.000Z"}
+    }
+  ]
+}
+

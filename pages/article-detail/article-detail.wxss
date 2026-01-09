@@ -1,0 +1,164 @@
+/* pages/article-detail/article-detail.wxss */
+.article-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding-bottom: 140rpx;
+}
+
+/* 文章头部 */
+.article-header {
+  background: white;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  margin-bottom: 24rpx;
+  font-weight: 600;
+}
+
+.tag-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+}
+
+.tag-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+}
+
+.tag-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+}
+
+.article-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+}
+
+.article-meta {
+  display: flex;
+  gap: 32rpx;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+/* 文章内容 */
+.article-content {
+  background: white;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  line-height: 1.8;
+  color: #1e293b;
+}
+
+.article-content rich-text {
+  word-break: break-all;
+}
+
+/* 相关推荐 */
+.related-section {
+  background: white;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+}
+
+.related-card {
+  padding: 24rpx;
+  background: #f8fafc;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  transition: all 0.3s;
+}
+
+.related-card:last-child {
+  margin-bottom: 0;
+}
+
+.related-card:active {
+  background: #f1f5f9;
+  transform: translateX(10rpx);
+}
+
+.related-title {
+  font-size: 28rpx;
+  color: #1e293b;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.related-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+/* 底部操作栏 */
+.article-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20rpx 40rpx 30rpx 40rpx;
+  display: flex;
+  gap: 20rpx;
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+  border-top: 1rpx solid #f1f5f9;
+  z-index: 100;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: none;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 24rpx;
+  color: #0ea5e9;
+  transition: all 0.3s;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-icon {
+  font-size: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
