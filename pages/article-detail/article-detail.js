@@ -23,7 +23,53 @@ Page({
   },
 
   // 加载文章详情
-  loadArticle(id) {
+  async loadArticle(id) {
+    wx.showLoading({ title: '加载中...' })
+    
+    try {
+      // 先尝试从云数据库加载
+      const db = wx.cloud.database()
+      const result = await db.collection('articles').doc(id).get()
+      
+      if (result.data) {
+        console.log('从云数据库加载文章成功')
+        const article = {
+          id: result.data._id,
+          tag: result.data.tag || '知识科普',
+          tagType: result.data.tagType || 'info',
+          title: result.data.title,
+          time: this.formatTime(result.data.timestamp),
+          views: this.formatViews(result.data.views || 0),
+          likes: result.data.likes || 0,
+          content: result.data.content || '',
+          coverImage: result.data.coverImage || '',
+          author: result.data.author || '反诈小助手'
+        }
+        
+        this.setData({ article })
+        wx.hideLoading()
+        
+        // 增加浏览量
+        this.incrementViews(id)
+        
+        // 检查点赞、收藏状态
+        this.checkLikeStatus(id)
+        this.checkCollectStatus(id)
+        
+        return
+      }
+    } catch (err) {
+      console.error('从云数据库加载失败：', err)
+    }
+    
+    // 云数据库加载失败，使用本地备份数据
+    console.log('使用本地备份数据')
+    wx.hideLoading()
+    this.loadMockArticle(id)
+  },
+  
+  // 加载本地备份文章（云数据库失败时使用）
+  loadMockArticle(id) {
     // 模拟文章数据
     const mockArticles = {
       '1': {
@@ -99,6 +145,46 @@ Page({
     // 检查是否已点赞、收藏
     this.checkLikeStatus(id)
     this.checkCollectStatus(id)
+  },
+  
+  // 格式化时间
+  formatTime(timestamp) {
+    const date = new Date(timestamp)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hour = String(date.getHours()).padStart(2, '0')
+    const minute = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  },
+  
+  // 格式化浏览量
+  formatViews(views) {
+    if (views >= 10000) {
+      return `${(views / 10000).toFixed(1)}w`
+    } else if (views >= 1000) {
+      return `${(views / 1000).toFixed(1)}k`
+    } else {
+      return views.toString()
+    }
+  },
+  
+  // 增加浏览量（同步到云数据库）
+  async incrementViews(articleId) {
+    try {
+      const db = wx.cloud.database()
+      const _ = db.command
+      
+      await db.collection('articles').doc(articleId).update({
+        data: {
+          views: _.inc(1)  // 浏览量 +1
+        }
+      })
+      
+      console.log('浏览量已更新')
+    } catch (err) {
+      console.error('更新浏览量失败：', err)
+    }
   },
 
   // 加载相关文章

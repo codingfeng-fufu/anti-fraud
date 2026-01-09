@@ -170,11 +170,8 @@ Page({
   },
 
   onLoad(options) {
-    // 从本地存储加载文章数据（包含浏览量更新）
-    this.loadArticlesFromStorage()
-    
-    // 格式化并显示所有文章
-    this.updateArticlesList(this.data.allArticles)
+    // 优先从云数据库加载文章
+    this.loadArticlesFromCloud()
   },
   
   onShow() {
@@ -187,6 +184,79 @@ Page({
         }
       })
     }
+  },
+  
+  // 从云数据库加载文章
+  async loadArticlesFromCloud() {
+    wx.showLoading({ title: '加载中...' })
+    
+    try {
+      const db = wx.cloud.database()
+      
+      // 查询已发布的文章
+      const result = await db.collection('articles')
+        .where({
+          status: 'published'  // 只显示已发布的文章
+        })
+        .orderBy('timestamp', 'desc')  // 按时间倒序
+        .limit(50)  // 最多50篇
+        .get()
+      
+      console.log('从云数据库加载到文章：', result.data.length)
+      
+      if (result.data && result.data.length > 0) {
+        // 将云数据库的文章转换为本地格式
+        const articles = result.data.map(article => ({
+          id: article._id,
+          title: article.title,
+          tag: article.tag || '知识科普',
+          tagType: article.tagType || 'info',
+          category: article.category || '大学生',
+          content: article.content || '',
+          coverImage: article.coverImage || '',
+          timestamp: article.timestamp || Date.now(),
+          views: article.views || 0,
+          author: article.author || '反诈小助手'
+        }))
+        
+        // 更新数据
+        this.setData({
+          allArticles: articles
+        })
+        
+        this.updateArticlesList(articles)
+        
+        wx.hideLoading()
+        console.log('文章加载成功')
+      } else {
+        // 云数据库没有数据，使用本地备份
+        console.log('云数据库暂无文章，使用本地备份')
+        this.loadLocalArticles()
+      }
+    } catch (err) {
+      console.error('加载文章失败：', err)
+      wx.hideLoading()
+      
+      // 失败时使用本地数据
+      wx.showToast({
+        title: '加载失败，使用离线数据',
+        icon: 'none',
+        duration: 2000
+      })
+      
+      this.loadLocalArticles()
+    }
+  },
+  
+  // 加载本地备份文章
+  loadLocalArticles() {
+    // 从本地存储加载文章数据（包含浏览量更新）
+    this.loadArticlesFromStorage()
+    
+    // 格式化并显示所有文章
+    this.updateArticlesList(this.data.allArticles)
+    
+    wx.hideLoading()
   },
   
   // 从本地存储加载文章数据
@@ -236,14 +306,20 @@ Page({
   },
 
   onPullDownRefresh() {
-    // 下拉刷新
-    setTimeout(() => {
+    // 下拉刷新，重新从云数据库加载
+    this.loadArticlesFromCloud().then(() => {
+      wx.stopPullDownRefresh()
       wx.showToast({
         title: '刷新成功',
         icon: 'success'
       })
+    }).catch(() => {
       wx.stopPullDownRefresh()
-    }, 1000)
+      wx.showToast({
+        title: '刷新失败',
+        icon: 'none'
+      })
+    })
   },
 
   // 选择分类
@@ -328,7 +404,7 @@ Page({
   },
   
   // 增加文章浏览量
-  incrementViews(articleId) {
+  async incrementViews(articleId) {
     // 更新 allArticles 中的浏览量
     this.data.allArticles = this.data.allArticles.map(article => {
       if (article.id === articleId) {
@@ -356,5 +432,22 @@ Page({
     
     // 保存到本地存储
     this.saveArticlesToStorage()
+    
+    // 同步到云数据库（使用原子操作）
+    try {
+      const db = wx.cloud.database()
+      const _ = db.command
+      
+      await db.collection('articles').doc(articleId).update({
+        data: {
+          views: _.inc(1)  // 浏览量 +1
+        }
+      })
+      
+      console.log('浏览量已同步到云数据库')
+    } catch (err) {
+      console.error('更新云数据库浏览量失败：', err)
+      // 不影响用户体验，静默失败
+    }
   }
 })
