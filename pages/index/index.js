@@ -471,8 +471,42 @@ Page({
       console.log('从云数据库加载轮播图：', res.data.length)
       
       if (res.data.length > 0) {
+        // 转换云存储路径为临时 HTTPS 链接
+        const banners = res.data
+        const imageFileIds = banners
+          .filter(banner => banner.image && banner.image.startsWith('cloud://'))
+          .map(banner => banner.image)
+        
+        if (imageFileIds.length > 0) {
+          try {
+            // 批量获取临时链接
+            const tempUrlRes = await wx.cloud.getTempFileURL({
+              fileList: imageFileIds
+            })
+            
+            console.log('获取临时链接成功：', tempUrlRes.fileList.length)
+            
+            // 替换为临时链接
+            const fileMap = {}
+            tempUrlRes.fileList.forEach(item => {
+              if (item.status === 0) {
+                fileMap[item.fileID] = item.tempFileURL
+              }
+            })
+            
+            banners.forEach(banner => {
+              if (banner.image && fileMap[banner.image]) {
+                banner.image = fileMap[banner.image]
+              }
+            })
+          } catch (urlErr) {
+            console.error('获取临时链接失败：', urlErr)
+            // 失败时仍使用原始 cloud:// 路径
+          }
+        }
+        
         this.setData({
-          banners: res.data
+          banners: banners
         })
       } else {
         // 云端没有数据，使用默认轮播图

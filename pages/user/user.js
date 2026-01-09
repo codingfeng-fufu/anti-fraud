@@ -33,6 +33,12 @@ Page({
       if (result.result.success) {
         const data = result.result.data
         
+        // 保存云端的签到日期到本地（关键修复！）
+        if (data.userInfo.lastSignDate) {
+          wx.setStorageSync('lastSignDate', data.userInfo.lastSignDate)
+          console.log('从云端同步签到日期:', data.userInfo.lastSignDate)
+        }
+        
         // 检查今天是否已签到
         const todaySigned = this.checkTodaySigned()
         
@@ -49,6 +55,8 @@ Page({
         wx.setStorageSync('openid', data.openid)
         wx.setStorageSync('signDays', data.userInfo.signDays || 0)
         wx.setStorageSync('points', data.userInfo.points || 0)
+        
+        console.log('自动登录成功，签到状态:', todaySigned ? '已签到' : '未签到')
       }
     } catch (err) {
       console.error('自动登录失败：', err)
@@ -200,13 +208,12 @@ Page({
           todaySigned: true
         })
         
-        // 保存到本地缓存（使用 YYYY-MM-DD 格式）
-        const today = new Date().toISOString().split('T')[0]
+        // 保存到本地缓存（使用云函数返回的日期，确保一致性）
         wx.setStorageSync('signDays', data.signDays)
         wx.setStorageSync('points', data.points)
-        wx.setStorageSync('lastSignDate', today)
+        wx.setStorageSync('lastSignDate', data.lastSignDate)
         
-        console.log('签到成功，保存日期:', today)
+        console.log('签到成功，保存日期:', data.lastSignDate)
         
         wx.showModal({
           title: '签到成功 ✨',

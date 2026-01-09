@@ -72,7 +72,7 @@ exports.main = async (event, context) => {
       data: {
         signDays: newSignDays,
         points: newPoints,
-        lastSignDate: new Date(),
+        lastSignDate: today,  // 保存为 YYYY-MM-DD 字符串格式，与前端保持一致
         updatedAt: new Date()
       }
     })
@@ -109,7 +109,8 @@ exports.main = async (event, context) => {
       data: {
         signDays: newSignDays,
         points: newPoints,
-        earnedPoints
+        earnedPoints,
+        lastSignDate: today  // 返回签到日期，用于前端同步
       },
       message: `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分`
     }
