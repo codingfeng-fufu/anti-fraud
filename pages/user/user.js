@@ -101,11 +101,12 @@ Page({
       wx.setStorageSync('lastSignDate', lastSignDate)
     }
     
-    // 使用 YYYY-MM-DD 格式，与云函数保持一致
+    // 使用北京时间（UTC+8），与云函数保持一致
     const now = new Date()
-    const today = now.toISOString().split('T')[0]
+    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
+    const today = beijingTime.toISOString().split('T')[0]
     const isSigned = lastSignDate === today
-    console.log('检查签到状态 - 上次签到:', lastSignDate, '今天:', today, '结果:', isSigned ? '已签到' : '未签到')
+    console.log('检查签到状态 - 上次签到:', lastSignDate, '今天(北京时间):', today, '结果:', isSigned ? '已签到' : '未签到')
     return isSigned
   },
 
