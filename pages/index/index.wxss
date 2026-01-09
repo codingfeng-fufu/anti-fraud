@@ -98,7 +98,7 @@
 }
 
 .slider-container {
-  height: 320rpx;
+  height: 400rpx;
   border-radius: 32rpx;
   overflow: hidden;
   box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.1);
@@ -107,29 +107,61 @@
 .slide-content {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 轮播图背景图片 */
+.slide-bg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* 半透明遮罩（让文字更清晰） */
+.slide-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+  z-index: 2;
+}
+
+/* 文字内容容器 */
+.slide-text {
+  position: absolute;
+  bottom: 50rpx;
+  left: 40rpx;
+  right: 40rpx;
+  z-index: 3;
   color: white;
-  text-align: center;
-  padding: 40rpx;
 }
 
+/* 图标（可选） */
 .slide-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
+  font-size: 60rpx;
+  margin-bottom: 10rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.3);
 }
 
+/* 标题 */
 .slide-title {
-  font-size: 40rpx;
+  font-size: 42rpx;
   font-weight: 700;
-  margin-bottom: 16rpx;
+  margin-bottom: 10rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.3);
 }
 
+/* 描述 */
 .slide-desc {
-  font-size: 28rpx;
+  font-size: 26rpx;
   opacity: 0.95;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
 }
 
 /* 分类标签 */

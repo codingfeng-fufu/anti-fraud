@@ -37,14 +37,17 @@ function formatViews(views) {
 
 Page({
   data: {
-    // 轮播图数据
-    banners: [
+    // 轮播图数据（从云端加载）
+    banners: [],
+    
+    // 默认轮播图（加载失败时使用）
+    defaultBanners: [
       {
         id: 1,
         icon: '🛡️',
         title: '防范电信诈骗',
         desc: '守护你的钱包安全',
-        bgColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        bgColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       },
       {
         id: 2,
@@ -170,6 +173,8 @@ Page({
   },
 
   onLoad(options) {
+    // 加载轮播图
+    this.loadBanners()
     // 优先从云数据库加载文章
     this.loadArticlesFromCloud()
   },
@@ -194,9 +199,10 @@ Page({
       const db = wx.cloud.database()
       
       // 查询已发布的文章
+      // CMS 枚举字段：draft=1, published=2
       const result = await db.collection('articles')
         .where({
-          status: 'published'  // 只显示已发布的文章
+          status:"2"  // 2 代表 published（已发布）
         })
         .orderBy('timestamp', 'desc')  // 按时间倒序
         .limit(50)  // 最多50篇
@@ -448,6 +454,55 @@ Page({
     } catch (err) {
       console.error('更新云数据库浏览量失败：', err)
       // 不影响用户体验，静默失败
+    }
+  },
+  
+  // 加载轮播图
+  async loadBanners() {
+    try {
+      const db = wx.cloud.database()
+      const res = await db.collection('banners')
+        .where({
+          status: true  // 只显示启用的轮播图
+        })
+        .orderBy('sort', 'asc')  // 按排序升序
+        .get()
+
+      console.log('从云数据库加载轮播图：', res.data.length)
+      
+      if (res.data.length > 0) {
+        this.setData({
+          banners: res.data
+        })
+      } else {
+        // 云端没有数据，使用默认轮播图
+        console.log('云端暂无轮播图，使用默认')
+        this.setData({
+          banners: this.data.defaultBanners
+        })
+      }
+    } catch (err) {
+      console.error('加载轮播图失败：', err)
+      // 加载失败，使用默认轮播图
+      this.setData({
+        banners: this.data.defaultBanners
+      })
+    }
+  },
+  
+  // 点击轮播图
+  onBannerTap(e) {
+    const link = e.currentTarget.dataset.link
+    if (link) {
+      wx.navigateTo({
+        url: link,
+        fail: () => {
+          wx.showToast({
+            title: '页面不存在',
+            icon: 'none'
+          })
+        }
+      })
     }
   }
 })
