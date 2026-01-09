@@ -35,8 +35,16 @@ Page({
         
         // 保存云端的签到日期到本地（关键修复！）
         if (data.userInfo.lastSignDate) {
-          wx.setStorageSync('lastSignDate', data.userInfo.lastSignDate)
-          console.log('从云端同步签到日期:', data.userInfo.lastSignDate)
+          let lastSignDate = data.userInfo.lastSignDate
+          
+          // 兼容旧数据：如果是 ISO 格式，转换为 YYYY-MM-DD
+          if (typeof lastSignDate === 'string' && lastSignDate.includes('T')) {
+            lastSignDate = lastSignDate.split('T')[0]
+            console.log('转换旧格式日期:', data.userInfo.lastSignDate, '→', lastSignDate)
+          }
+          
+          wx.setStorageSync('lastSignDate', lastSignDate)
+          console.log('从云端同步签到日期:', lastSignDate)
         }
         
         // 检查今天是否已签到
@@ -83,12 +91,22 @@ Page({
 
   // 检查今天是否已签到
   checkTodaySigned() {
-    const lastSignDate = wx.getStorageSync('lastSignDate') || ''
+    let lastSignDate = wx.getStorageSync('lastSignDate') || ''
+    
+    // 兼容旧数据：如果是 ISO 格式（包含 T），提取日期部分
+    if (lastSignDate && lastSignDate.includes('T')) {
+      lastSignDate = lastSignDate.split('T')[0]
+      console.log('检测到旧格式日期，转换为:', lastSignDate)
+      // 保存转换后的格式
+      wx.setStorageSync('lastSignDate', lastSignDate)
+    }
+    
     // 使用 YYYY-MM-DD 格式，与云函数保持一致
     const now = new Date()
     const today = now.toISOString().split('T')[0]
-    console.log('检查签到状态 - 上次签到:', lastSignDate, '今天:', today)
-    return lastSignDate === today
+    const isSigned = lastSignDate === today
+    console.log('检查签到状态 - 上次签到:', lastSignDate, '今天:', today, '结果:', isSigned ? '已签到' : '未签到')
+    return isSigned
   },
 
   // 选择头像
@@ -180,7 +198,13 @@ Page({
 
   // 处理签到
   async handleSignIn() {
-    if (this.data.todaySigned) {
+    // 重新检查签到状态（避免缓存问题）
+    const todaySigned = this.checkTodaySigned()
+    
+    console.log('点击签到 - 检查状态:', todaySigned ? '已签到' : '未签到')
+    
+    if (todaySigned) {
+      this.setData({ todaySigned: true })  // 同步 UI 状态
       wx.showToast({
         title: '今天已签到',
         icon: 'none'
@@ -222,8 +246,21 @@ Page({
           confirmText: '太棒了'
         })
       } else {
+        // 签到失败，检查是否是"已签到"错误
+        const errMsg = result.result.errMsg || '签到失败'
+        
+        console.log('签到失败:', errMsg)
+        
+        if (errMsg.includes('已经签到') || errMsg.includes('已签到')) {
+          // 云端显示已签到，但本地缓存可能不同步
+          console.log('检测到数据不同步，从云端重新加载用户数据')
+          
+          // 重新从云端加载数据，确保同步
+          this.autoLogin()
+        }
+        
         wx.showToast({
-          title: result.result.errMsg || '签到失败',
+          title: errMsg,
           icon: 'none'
         })
       }
