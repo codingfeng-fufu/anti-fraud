@@ -1,0 +1,67 @@
+<!--pages/settings/settings.wxml-->
+<view class="settings-container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">设置</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="settings-section">
+    <view class="section-title">通知设置</view>
+    <view class="settings-item">
+      <view class="item-left">
+        <text class="item-icon">🔔</text>
+        <text class="item-label">消息通知</text>
+      </view>
+      <switch checked="{{settings.notifications}}" bindchange="toggleSwitch" data-key="notifications" />
+    </view>
+    <view class="settings-item">
+      <view class="item-left">
+        <text class="item-icon">🔊</text>
+        <text class="item-label">提示音</text>
+      </view>
+      <switch checked="{{settings.sound}}" bindchange="toggleSwitch" data-key="sound" />
+    </view>
+    <view class="settings-item">
+      <view class="item-left">
+        <text class="item-icon">📳</text>
+        <text class="item-label">振动</text>
+      </view>
+      <switch checked="{{settings.vibrate}}" bindchange="toggleSwitch" data-key="vibrate" />
+    </view>
+  </view>
+
+  <view class="settings-section">
+    <view class="section-title">账号设置</view>
+    <view class="settings-item">
+      <view class="item-left">
+        <text class="item-icon">🔐</text>
+        <text class="item-label">自动登录</text>
+      </view>
+      <switch checked="{{settings.autoLogin}}" bindchange="toggleSwitch" data-key="autoLogin" />
+    </view>
+    <view class="settings-item" bindtap="clearCache">
+      <view class="item-left">
+        <text class="item-icon">🗑️</text>
+        <text class="item-label">清除缓存</text>
+      </view>
+      <text class="item-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="settings-section">
+    <view class="section-title">关于</view>
+    <view class="settings-item" bindtap="checkUpdate">
+      <view class="item-left">
+        <text class="item-icon">🔄</text>
+        <text class="item-label">检查更新</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">v{{version}}</text>
+        <text class="item-arrow">›</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,286 @@
+/* pages/points/points.wxss */
+.points-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding-bottom: 40rpx;
+}
+
+/* 顶部导航 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left,
+.header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 64rpx;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.record-btn {
+  font-size: 28rpx;
+  color: #0ea5e9;
+}
+
+/* 积分卡片 */
+.points-card {
+  margin: 40rpx;
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  border-radius: 32rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 16rpx 48rpx rgba(245, 158, 11, 0.3);
+}
+
+.points-content {
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+}
+
+.points-icon {
+  font-size: 88rpx;
+  line-height: 1;
+}
+
+.points-info {
+  flex: 1;
+}
+
+.points-label {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8rpx;
+}
+
+.points-value {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.get-points-btn {
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  color: #f59e0b;
+  background: white;
+  border-radius: 32rpx;
+  border: none;
+  font-weight: 500;
+}
+
+.get-points-btn::after {
+  border: none;
+}
+
+/* 分类筛选 */
+.category-filter {
+  display: flex;
+  gap: 24rpx;
+  padding: 0 40rpx 32rpx;
+  overflow-x: auto;
+}
+
+.filter-item {
+  padding: 16rpx 32rpx;
+  font-size: 28rpx;
+  color: #64748b;
+  background: white;
+  border-radius: 32rpx;
+  border: 2rpx solid #e0f2fe;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.filter-item.active {
+  color: white;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  border-color: #0ea5e9;
+  font-weight: 600;
+}
+
+/* 商品列表 */
+.products-list {
+  padding: 0 40rpx;
+}
+
+.product-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+}
+
+.hot-badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  padding: 8rpx 16rpx;
+  font-size: 22rpx;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 16rpx;
+  font-weight: 500;
+}
+
+/* 商品图标 */
+.product-icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-emoji {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+/* 商品内容 */
+.product-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+}
+
+.product-desc {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 12rpx;
+  line-height: 1.5;
+}
+
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.price-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.price-unit {
+  font-size: 22rpx;
+  color: #f59e0b;
+}
+
+.product-stock {
+  font-size: 24rpx;
+  color: #10b981;
+}
+
+.out-of-stock {
+  color: #ef4444;
+}
+
+/* 兑换按钮 */
+.exchange-btn {
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  color: white;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  border-radius: 32rpx;
+  border: none;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.exchange-btn::after {
+  border: none;
+}
+
+.exchange-btn.disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #64748b;
+  margin-bottom: 16rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #94a3b8;
+}
+
+/* 积分说明 */
+.points-tips {
+  margin: 32rpx 40rpx;
+  padding: 32rpx;
+  background: white;
+  border-radius: 24rpx;
+  border: 2rpx solid #bae6fd;
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0ea5e9;
+  margin-bottom: 20rpx;
+}
+
+.tips-list {
+  font-size: 26rpx;
+  color: #64748b;
+  line-height: 2;
+}
+
+.tip-item {
+  padding: 4rpx 0;
+}

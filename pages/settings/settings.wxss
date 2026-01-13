@@ -1,0 +1,89 @@
+/* pages/settings/settings.wxss */
+.settings-container {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+}
+
+.header-left, .header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 64rpx;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.settings-section {
+  margin: 32rpx 0;
+  background: white;
+}
+
+.section-title {
+  font-size: 26rpx;
+  color: #94a3b8;
+  padding: 24rpx 40rpx 16rpx;
+  background: #f8fafc;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.item-icon {
+  font-size: 40rpx;
+}
+
+.item-label {
+  font-size: 30rpx;
+  color: #1e293b;
+}
+
+.item-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.item-value {
+  font-size: 26rpx;
+  color: #94a3b8;
+}
+
+.item-arrow {
+  font-size: 48rpx;
+  color: #cbd5e1;
+}
+
+switch {
+  transform: scale(0.9);
+}

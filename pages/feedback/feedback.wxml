@@ -1,0 +1,51 @@
+<!--pages/feedback/feedback.wxml-->
+<view class="feedback-container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">帮助与反馈</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="tab-bar">
+    <view class="tab-item {{currentTab === 'help' ? 'active' : ''}}" bindtap="switchTab" data-tab="help">
+      常见问题
+    </view>
+    <view class="tab-item {{currentTab === 'feedback' ? 'active' : ''}}" bindtap="switchTab" data-tab="feedback">
+      意见反馈
+    </view>
+  </view>
+
+  <!-- 常见问题 -->
+  <view wx:if="{{currentTab === 'help'}}" class="help-content">
+    <view wx:for="{{faqs}}" wx:key="index" class="faq-item">
+      <view class="faq-q">{{item.q}}</view>
+      <view class="faq-a">{{item.a}}</view>
+    </view>
+  </view>
+
+  <!-- 意见反馈 -->
+  <view wx:if="{{currentTab === 'feedback'}}" class="feedback-content">
+    <view class="feedback-form">
+      <view class="form-label">反馈内容</view>
+      <textarea 
+        class="feedback-textarea" 
+        placeholder="请描述您的问题或建议..." 
+        value="{{feedbackContent}}"
+        bindinput="onFeedbackInput"
+        maxlength="500"
+      />
+      
+      <view class="form-label">联系方式（选填）</view>
+      <input 
+        class="feedback-input" 
+        placeholder="手机号或微信号"
+        value="{{contactInfo}}"
+        bindinput="onContactInput"
+      />
+      
+      <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+    </view>
+  </view>
+</view>

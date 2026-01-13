@@ -1,0 +1,292 @@
+// pages/points/points.js
+Page({
+  data: {
+    // 用户积分
+    userPoints: 0,
+    
+    // 商品列表
+    products: [
+      {
+        id: 'gift_1',
+        name: '微信红包封面',
+        desc: '限量反诈主题红包封面',
+        icon: '🧧',
+        points: 100,
+        stock: 50,
+        category: 'virtual',
+        hot: true
+      },
+      {
+        id: 'gift_2',
+        name: '防诈骗知识手册',
+        desc: 'PDF电子版，涵盖常见诈骗类型',
+        icon: '📖',
+        points: 50,
+        stock: 999,
+        category: 'virtual',
+        hot: false
+      },
+      {
+        id: 'gift_3',
+        name: '反诈头像框',
+        desc: '专属反诈卫士头像框',
+        icon: '🖼️',
+        points: 80,
+        stock: 100,
+        category: 'virtual',
+        hot: true
+      },
+      {
+        id: 'gift_4',
+        name: '免签到卡',
+        desc: '补签一次签到记录',
+        icon: '🎫',
+        points: 30,
+        stock: 200,
+        category: 'tool',
+        hot: false
+      },
+      {
+        id: 'gift_5',
+        name: '双倍积分卡',
+        desc: '签到积分翻倍（3天）',
+        icon: '✨',
+        points: 150,
+        stock: 50,
+        category: 'tool',
+        hot: false
+      },
+      {
+        id: 'gift_6',
+        name: '经验加速卡',
+        desc: '阅读经验翻倍（7天）',
+        icon: '🚀',
+        points: 200,
+        stock: 30,
+        category: 'tool',
+        hot: true
+      },
+      {
+        id: 'gift_7',
+        name: '学校周边纪念品',
+        desc: '学校主题文具套装',
+        icon: '🎁',
+        points: 500,
+        stock: 10,
+        category: 'physical',
+        hot: true
+      },
+      {
+        id: 'gift_8',
+        name: '校园一卡通充值',
+        desc: '10元充值券',
+        icon: '💳',
+        points: 1000,
+        stock: 5,
+        category: 'physical',
+        hot: false
+      }
+    ],
+    
+    // 当前筛选分类
+    currentCategory: 'all',
+    
+    // 兑换记录
+    exchangeRecords: []
+  },
+
+  onLoad() {
+    this.loadUserPoints()
+    this.loadExchangeRecords()
+  },
+
+  onShow() {
+    this.loadUserPoints()
+  },
+
+  // 加载用户积分
+  loadUserPoints() {
+    try {
+      const points = wx.getStorageSync('points') || 0
+      this.setData({
+        userPoints: points
+      })
+    } catch (e) {
+      console.error('加载积分失败：', e)
+    }
+  },
+
+  // 加载兑换记录
+  loadExchangeRecords() {
+    try {
+      const records = wx.getStorageSync('exchangeRecords') || []
+      this.setData({
+        exchangeRecords: records
+      })
+    } catch (e) {
+      console.error('加载兑换记录失败：', e)
+    }
+  },
+
+  // 筛选分类
+  filterCategory(e) {
+    const category = e.currentTarget.dataset.category
+    this.setData({
+      currentCategory: category
+    })
+  },
+
+  // 获取筛选后的商品
+  getFilteredProducts() {
+    const { products, currentCategory } = this.data
+    if (currentCategory === 'all') {
+      return products
+    }
+    return products.filter(item => item.category === currentCategory)
+  },
+
+  // 兑换商品
+  exchangeProduct(e) {
+    const id = e.currentTarget.dataset.id
+    const product = this.data.products.find(item => item.id === id)
+    
+    if (!product) return
+    
+    // 检查库存
+    if (product.stock <= 0) {
+      wx.showToast({
+        title: '商品已兑完',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // 检查积分是否足够
+    if (this.data.userPoints < product.points) {
+      wx.showModal({
+        title: '积分不足',
+        content: `兑换${product.name}需要${product.points}积分，当前积分${this.data.userPoints}`,
+        showCancel: false
+      })
+      return
+    }
+    
+    // 确认兑换
+    wx.showModal({
+      title: '确认兑换',
+      content: `确定用${product.points}积分兑换${product.name}吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          this.doExchange(product)
+        }
+      }
+    })
+  },
+
+  // 执行兑换
+  doExchange(product) {
+    try {
+      // 扣除积分
+      const newPoints = this.data.userPoints - product.points
+      wx.setStorageSync('points', newPoints)
+      
+      // 减少库存
+      const products = this.data.products.map(item => {
+        if (item.id === product.id) {
+          return {
+            ...item,
+            stock: item.stock - 1
+          }
+        }
+        return item
+      })
+      
+      // 添加兑换记录
+      const record = {
+        id: Date.now(),
+        productId: product.id,
+        productName: product.name,
+        points: product.points,
+        time: new Date().toISOString(),
+        status: 'pending' // pending: 待发货, completed: 已完成
+      }
+      
+      const records = [record, ...this.data.exchangeRecords]
+      wx.setStorageSync('exchangeRecords', records)
+      
+      // 更新页面
+      this.setData({
+        userPoints: newPoints,
+        products,
+        exchangeRecords: records
+      })
+      
+      // 提示成功
+      wx.showToast({
+        title: '兑换成功！',
+        icon: 'success'
+      })
+      
+      // 如果是虚拟商品，显示使用提示
+      if (product.category === 'virtual' || product.category === 'tool') {
+        setTimeout(() => {
+          wx.showModal({
+            title: '兑换成功',
+            content: product.category === 'virtual' 
+              ? '虚拟商品已发放到您的账户，请在"我的"页面查看'
+              : '道具卡已发放到您的背包',
+            showCancel: false
+          })
+        }, 1500)
+      } else {
+        // 实体商品需要填写地址
+        setTimeout(() => {
+          wx.showModal({
+            title: '兑换成功',
+            content: '请联系管理员填写收货地址',
+            showCancel: false
+          })
+        }, 1500)
+      }
+      
+    } catch (e) {
+      console.error('兑换失败：', e)
+      wx.showToast({
+        title: '兑换失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  // 查看兑换记录
+  viewRecords() {
+    if (this.data.exchangeRecords.length === 0) {
+      wx.showToast({
+        title: '暂无兑换记录',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // TODO: 跳转到兑换记录页面
+    wx.showModal({
+      title: '兑换记录',
+      content: `共有${this.data.exchangeRecords.length}条兑换记录`,
+      showCancel: false
+    })
+  },
+
+  // 获取更多积分
+  getMorePoints() {
+    wx.showModal({
+      title: '获取积分',
+      content: '完成每日签到、阅读文章、AI对话等任务可获得积分',
+      showCancel: false
+    })
+  },
+
+  // 返回上一页
+  goBack() {
+    wx.navigateBack()
+  }
+})

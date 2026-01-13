@@ -1,0 +1,93 @@
+<!--pages/achievements/achievements.wxml-->
+<view class="achievements-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">我的成就</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 成就概览卡片 -->
+  <view class="stats-card">
+    <view class="stats-content">
+      <view class="stats-icon">🏆</view>
+      <view class="stats-info">
+        <view class="stats-title">成就进度</view>
+        <view class="stats-desc">已解锁 {{stats.unlocked}}/{{stats.total}} 个成就</view>
+      </view>
+      <view class="stats-progress-box">
+        <view class="stats-percent">{{stats.progress}}%</view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{stats.progress}}%"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户数据统计 -->
+  <view class="user-data">
+    <view class="data-item">
+      <view class="data-value">{{signDays}}</view>
+      <view class="data-label">连续签到</view>
+    </view>
+    <view class="data-item">
+      <view class="data-value">{{totalPoints}}</view>
+      <view class="data-label">总积分</view>
+    </view>
+    <view class="data-item">
+      <view class="data-value">{{readArticles}}</view>
+      <view class="data-label">阅读文章</view>
+    </view>
+    <view class="data-item">
+      <view class="data-value">{{chatTimes}}</view>
+      <view class="data-label">AI对话</view>
+    </view>
+  </view>
+
+  <!-- 成就列表 -->
+  <view class="achievements-list">
+    <view class="section-title">全部成就</view>
+    
+    <view wx:for="{{achievements}}" wx:key="id" 
+          class="achievement-item {{item.unlocked ? 'unlocked' : 'locked'}}">
+      <view class="achievement-icon">
+        <text class="icon-emoji">{{item.icon}}</text>
+        <view wx:if="item.unlocked" class="unlock-badge">✓</view>
+      </view>
+      
+      <view class="achievement-content">
+        <view class="achievement-header">
+          <text class="achievement-title">{{item.title}}</text>
+          <text wx:if="item.points > 0" class="achievement-points">+{{item.points}}积分</text>
+        </view>
+        <view class="achievement-desc">{{item.desc}}</view>
+        <view class="achievement-progress">
+          <view class="progress-text">{{item.current}}/{{item.target}}</view>
+          <view class="progress-bar-mini">
+            <view class="progress-fill-mini" 
+                  style="width: {{item.current / item.target * 100}}%"></view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="achievement-action">
+        <button wx:if="item.unlocked" 
+                class="share-btn" 
+                bindtap="shareAchievement" 
+                data-id="{{item.id}}">
+          分享
+        </button>
+        <text wx:else class="lock-icon">🔒</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态提示 -->
+  <view wx:if="{{stats.unlocked === 0}}" class="empty-state">
+    <text class="empty-icon">🎯</text>
+    <view class="empty-text">还没有解锁任何成就</view>
+    <view class="empty-hint">完成签到、阅读文章、AI对话来解锁成就吧！</view>
+  </view>
+</view>

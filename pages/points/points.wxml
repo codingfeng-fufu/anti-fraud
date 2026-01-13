@@ -1,0 +1,103 @@
+<!--pages/points/points.wxml-->
+<view class="points-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">积分商城</view>
+    <view class="header-right" bindtap="viewRecords">
+      <text class="record-btn">记录</text>
+    </view>
+  </view>
+
+  <!-- 积分卡片 -->
+  <view class="points-card">
+    <view class="points-content">
+      <view class="points-icon">⭐</view>
+      <view class="points-info">
+        <view class="points-label">我的积分</view>
+        <view class="points-value">{{userPoints}}</view>
+      </view>
+      <button class="get-points-btn" bindtap="getMorePoints">
+        获取积分
+      </button>
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="category-filter">
+    <view class="filter-item {{currentCategory === 'all' ? 'active' : ''}}" 
+          bindtap="filterCategory" data-category="all">
+      全部
+    </view>
+    <view class="filter-item {{currentCategory === 'virtual' ? 'active' : ''}}" 
+          bindtap="filterCategory" data-category="virtual">
+      虚拟商品
+    </view>
+    <view class="filter-item {{currentCategory === 'tool' ? 'active' : ''}}" 
+          bindtap="filterCategory" data-category="tool">
+      道具卡
+    </view>
+    <view class="filter-item {{currentCategory === 'physical' ? 'active' : ''}}" 
+          bindtap="filterCategory" data-category="physical">
+      实体商品
+    </view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="products-list">
+    <view wx:for="{{products}}" wx:key="id" 
+          wx:if="{{currentCategory === 'all' || item.category === currentCategory}}"
+          class="product-item">
+      
+      <!-- 热门标签 -->
+      <view wx:if="{{item.hot}}" class="hot-badge">🔥 热门</view>
+      
+      <view class="product-icon">
+        <text class="icon-emoji">{{item.icon}}</text>
+      </view>
+      
+      <view class="product-content">
+        <view class="product-name">{{item.name}}</view>
+        <view class="product-desc">{{item.desc}}</view>
+        
+        <view class="product-footer">
+          <view class="product-price">
+            <text class="price-value">{{item.points}}</text>
+            <text class="price-unit">积分</text>
+          </view>
+          <view class="product-stock">
+            <text wx:if="{{item.stock > 0}}">库存：{{item.stock}}</text>
+            <text wx:else class="out-of-stock">已兑完</text>
+          </view>
+        </view>
+      </view>
+      
+      <button class="exchange-btn {{item.stock <= 0 || userPoints < item.points ? 'disabled' : ''}}" 
+              bindtap="exchangeProduct" 
+              data-id="{{item.id}}"
+              disabled="{{item.stock <= 0 || userPoints < item.points}}">
+        {{item.stock <= 0 ? '已兑完' : userPoints < item.points ? '积分不足' : '兑换'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{products.length === 0}}" class="empty-state">
+    <text class="empty-icon">🎁</text>
+    <view class="empty-text">暂无商品</view>
+    <view class="empty-hint">敬请期待更多精彩商品</view>
+  </view>
+
+  <!-- 积分说明 -->
+  <view class="points-tips">
+    <view class="tips-title">💡 积分获取方式</view>
+    <view class="tips-list">
+      <view class="tip-item">• 每日签到：10积分</view>
+      <view class="tip-item">• 连续签到7天：额外5积分</view>
+      <view class="tip-item">• 阅读文章：5积分/篇</view>
+      <view class="tip-item">• AI对话咨询：2积分/次</view>
+    </view>
+  </view>
+</view>

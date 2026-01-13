@@ -4,7 +4,13 @@
     "pages/chat/chat",
     "pages/user/user",
     "pages/article-detail/article-detail",
-    "pages/bind-student/bind-student"
+    "pages/bind-student/bind-student",
+    "pages/achievements/achievements",
+    "pages/points/points",
+    "pages/learning/learning",
+    "pages/settings/settings",
+    "pages/feedback/feedback",
+    "pages/about/about"
   ],
   "window": {
     "navigationBarTextStyle": "white",

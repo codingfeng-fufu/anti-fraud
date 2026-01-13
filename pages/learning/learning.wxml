@@ -1,0 +1,89 @@
+<!--pages/learning/learning.wxml-->
+<view class="learning-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">学习记录</view>
+    <view class="header-right" bindtap="clearHistory">
+      <text class="clear-btn">清空</text>
+    </view>
+  </view>
+
+  <!-- 学习统计卡片 -->
+  <view class="stats-grid">
+    <view class="stat-card">
+      <view class="stat-icon">📚</view>
+      <view class="stat-value">{{stats.totalArticles}}</view>
+      <view class="stat-label">阅读文章</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon">⏱️</view>
+      <view class="stat-value">{{stats.totalTime}}</view>
+      <view class="stat-label">学习时长(分)</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon">💬</view>
+      <view class="stat-value">{{stats.totalChats}}</view>
+      <view class="stat-label">AI对话</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon">📅</view>
+      <view class="stat-value">{{stats.continuousDays}}</view>
+      <view class="stat-label">连续签到</view>
+    </view>
+  </view>
+
+  <!-- Tab切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{currentTab === 'articles' ? 'active' : ''}}" 
+          bindtap="switchTab" data-tab="articles">
+      阅读历史
+    </view>
+    <view class="tab-item {{currentTab === 'chats' ? 'active' : ''}}" 
+          bindtap="switchTab" data-tab="chats">
+      对话记录
+    </view>
+  </view>
+
+  <!-- 阅读历史列表 -->
+  <view wx:if="{{currentTab === 'articles'}}" class="history-list">
+    <view wx:for="{{readHistory}}" wx:key="id" 
+          class="history-item" 
+          bindtap="viewArticle" 
+          data-id="{{item.id}}">
+      <view class="history-content">
+        <view class="history-title">{{item.title}}</view>
+        <view class="history-meta">
+          <text class="meta-time">{{item.readTime}}分钟</text>
+          <text class="meta-date">{{item.date}}</text>
+        </view>
+      </view>
+      <view class="history-arrow">›</view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view wx:if="{{readHistory.length === 0}}" class="empty-state">
+      <text class="empty-icon">📖</text>
+      <view class="empty-text">暂无阅读记录</view>
+      <view class="empty-hint">去首页阅读反诈文章吧！</view>
+    </view>
+  </view>
+
+  <!-- AI对话记录 -->
+  <view wx:if="{{currentTab === 'chats'}}" class="chat-summary">
+    <view class="summary-card">
+      <view class="summary-icon">🤖</view>
+      <view class="summary-content">
+        <view class="summary-title">AI对话统计</view>
+        <view class="summary-text">累计与AI助手对话 {{stats.totalChats}} 次</view>
+        <view class="summary-hint">对话记录本地存储，保护您的隐私</view>
+      </view>
+    </view>
+    
+    <button class="goto-chat-btn" bindtap="{{()=>{wx.switchTab({url:'/pages/chat/chat'});}}}">
+      前往对话
+    </button>
+  </view>
+</view>

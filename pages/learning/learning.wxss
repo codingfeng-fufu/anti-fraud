@@ -1,0 +1,222 @@
+/* pages/learning/learning.wxss */
+.learning-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding-bottom: 40rpx;
+}
+
+/* 顶部导航 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left, .header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 64rpx;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.clear-btn {
+  font-size: 28rpx;
+  color: #ef4444;
+}
+
+/* 学习统计网格 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  padding: 40rpx;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx 24rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+}
+
+.stat-icon {
+  font-size: 56rpx;
+  margin-bottom: 16rpx;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #0ea5e9;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+/* Tab栏 */
+.tab-bar {
+  display: flex;
+  margin: 0 40rpx 32rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.tab-item {
+  flex: 1;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #64748b;
+  text-align: center;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  color: white;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  font-weight: 600;
+}
+
+/* 历史记录列表 */
+.history-list {
+  padding: 0 40rpx;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.history-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-meta {
+  display: flex;
+  gap: 24rpx;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.history-arrow {
+  font-size: 48rpx;
+  color: #cbd5e1;
+}
+
+/* 对话摘要 */
+.chat-summary {
+  padding: 0 40rpx;
+}
+
+.summary-card {
+  display: flex;
+  gap: 24rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+}
+
+.summary-icon {
+  font-size: 80rpx;
+  flex-shrink: 0;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12rpx;
+}
+
+.summary-text {
+  font-size: 26rpx;
+  color: #64748b;
+  margin-bottom: 8rpx;
+}
+
+.summary-hint {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.goto-chat-btn {
+  width: 100%;
+  padding: 28rpx 0;
+  font-size: 32rpx;
+  color: white;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  border-radius: 16rpx;
+  border: none;
+  font-weight: 600;
+}
+
+.goto-chat-btn::after {
+  border: none;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #64748b;
+  margin-bottom: 16rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #94a3b8;
+}

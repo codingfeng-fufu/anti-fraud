@@ -1,0 +1,66 @@
+<!--pages/about/about.wxml-->
+<view class="about-container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">关于我们</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 应用信息 -->
+  <view class="app-info">
+    <view class="app-logo">🛡️</view>
+    <view class="app-name">{{appInfo.name}}</view>
+    <view class="app-version">v{{appInfo.version}}</view>
+    <view class="app-desc">{{appInfo.description}}</view>
+  </view>
+
+  <!-- 核心功能 -->
+  <view class="features-section">
+    <view class="section-title">✨ 核心功能</view>
+    <view class="features-grid">
+      <view wx:for="{{features}}" wx:key="title" class="feature-card">
+        <view class="feature-icon">{{item.icon}}</view>
+        <view class="feature-title">{{item.title}}</view>
+        <view class="feature-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 团队介绍 -->
+  <view class="team-section">
+    <view class="section-title">👥 开发团队</view>
+    <view class="team-list">
+      <view wx:for="{{team}}" wx:key="name" class="team-member">
+        <view class="member-role">{{item.role}}</view>
+        <view class="member-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系方式 -->
+  <view class="contact-section">
+    <view class="section-title">📧 联系我们</view>
+    <view class="contact-list">
+      <view class="contact-item" bindtap="copyContact" data-text="{{contact.email}}">
+        <view class="contact-label">📮 邮箱</view>
+        <view class="contact-value">{{contact.email}}</view>
+      </view>
+      <view class="contact-item" bindtap="copyContact" data-text="{{contact.wechat}}">
+        <view class="contact-label">💬 微信</view>
+        <view class="contact-value">{{contact.wechat}}</view>
+      </view>
+      <view class="contact-item" bindtap="copyContact" data-text="{{contact.hotline}}">
+        <view class="contact-label">📞 反诈专线</view>
+        <view class="contact-value">{{contact.hotline}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版权信息 -->
+  <view class="copyright">
+    <text>© 2026 反诈卫士团队</text>
+    <text>发布日期：{{appInfo.releaseDate}}</text>
+  </view>
+</view>
