@@ -82,7 +82,7 @@
       </view>
     </view>
     
-    <button class="goto-chat-btn" bindtap="{{()=>{wx.switchTab({url:'/pages/chat/chat'});}}}">
+    <button class="goto-chat-btn" bindtap="goToChat">
       前往对话
     </button>
   </view>
