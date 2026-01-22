@@ -252,6 +252,28 @@
   line-height: 1.5;
 }
 
+.title-reward {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: #f0fdf4;
+  border: 2rpx solid #bbf7d0;
+  padding: 12rpx 16rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  font-size: 24rpx;
+}
+
+.reward-icon {
+  font-size: 28rpx;
+  color: #10b981;
+}
+
+.reward-text {
+  color: #065f46;
+  font-weight: 500;
+}
+
 .achievement-progress {
   display: flex;
   align-items: center;

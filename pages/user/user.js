@@ -18,7 +18,9 @@ Page({
     signDays: 0,
     points: 0,
     achievements: 0,
-    todaySigned: false
+    todaySigned: false,
+    equippedTitles: [], // 当前佩戴的称号
+    allTitles: []       // 用户所有称号
   },
 
   onLoad(options) {
@@ -29,6 +31,7 @@ Page({
   onShow() {
     // 每次显示页面时刷新数据
     this.loadUserData()
+    this.loadUserTitles()
   },
   
   // 自动登录（静默登录）
@@ -290,12 +293,33 @@ Page({
     const url = e.currentTarget.dataset.url
     if (!url) return
     
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+    wx.navigateTo({ url })
+  },
+
+  // 加载用户称号
+  async loadUserTitles() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserTitles',
+        data: {}
+      })
+
+      if (result.result.success) {
+        this.setData({
+          equippedTitles: result.result.data.equippedTitles || [],
+          allTitles: result.result.data.allTitles || []
+        })
+      }
+    } catch (err) {
+      console.error('加载用户称号失败：', err)
+    }
+  },
+
+  // 显示称号管理
+  showTitleManagement() {
+    wx.navigateTo({
+      url: '/pages/title-management/title-management'
     })
-    // TODO: 实现页面跳转
-    // wx.navigateTo({ url })
   }
 })
 

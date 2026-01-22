@@ -112,6 +112,42 @@
   box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.1);
 }
 
+/* 称号展示区域 (内联样式) */
+.title-display-inline {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.title-label-inline {
+  font-size: 26rpx;
+  color: #64748b;
+  margin-right: 12rpx;
+  font-weight: 500;
+}
+
+.current-titles-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.title-tag-inline {
+  font-size: 24rpx;
+  color: #0ea5e9;
+  background: #e0f2fe;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+
+.no-title-inline {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-style: italic;
+}
+
 .stat-item {
   text-align: center;
 }

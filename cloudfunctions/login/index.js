@@ -36,19 +36,25 @@ exports.main = async (event, context) => {
     if (userResult.data.length === 0) {
       // 新用户，创建用户记录
       const now = new Date()
-      const newUser = {
-        _openid: openid,
-        nickName: event.nickName || '反诈用户',
-        avatarUrl: event.avatarUrl || '',
-        signDays: 0,
-        points: 0,
-        achievements: [],
-        totalReadCount: 0,
-        totalChatCount: 0,
-        lastSignDate: null,
-        createdAt: now,
-        updatedAt: now
-      }
+       const newUser = {
+         _openid: openid,
+         nickName: event.nickName || '反诈用户',
+         avatarUrl: event.avatarUrl || '',
+         signDays: 0,
+         points: 0,
+         achievements: [],
+         titles: [], // 新增：已获得的称号ID数组
+         equippedTitles: [], // 新增：当前佩戴的称号ID数组
+         continuousLearnDays: 0, // 新增：连续学习天数
+         lastLearnDate: null, // 新增：最后学习日期
+         totalReadCount: 0,
+         totalChatCount: 0,
+         lastChatDate: null, // 新增：最后对话日期
+         lastReadDate: null, // 新增：最后阅读日期
+         lastSignDate: null,
+         createdAt: now,
+         updatedAt: now
+       }
       
       const addResult = await db.collection('users').add({
         data: newUser

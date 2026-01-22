@@ -55,43 +55,64 @@
     </view>
   </view>
 
-  <!-- 商品列表 -->
-  <view class="products-list">
-    <view wx:for="{{products}}" wx:key="id" 
-          wx:if="{{currentCategory === 'all' || item.category === currentCategory}}"
-          class="product-item">
-      
-      <!-- 热门标签 -->
-      <view wx:if="{{item.hot}}" class="hot-badge">🔥 热门</view>
-      
-      <view class="product-icon">
-        <text class="icon-emoji">{{item.icon}}</text>
-      </view>
-      
-      <view class="product-content">
-        <view class="product-name">{{item.name}}</view>
-        <view class="product-desc">{{item.desc}}</view>
-        
-        <view class="product-footer">
-          <view class="product-price">
-            <text class="price-value">{{item.points}}</text>
-            <text class="price-unit">积分</text>
-          </view>
-          <view class="product-stock">
-            <text wx:if="{{item.stock > 0}}">库存：{{item.stock}}</text>
-            <text wx:else class="out-of-stock">已兑完</text>
-          </view>
-        </view>
-      </view>
-      
-      <button class="exchange-btn {{item.stock <= 0 || userPoints < item.points ? 'disabled' : ''}}" 
-              bindtap="exchangeProduct" 
-              data-id="{{item.id}}"
-              disabled="{{item.stock <= 0 || userPoints < item.points}}">
-        {{item.stock <= 0 ? '已兑完' : userPoints < item.points ? '积分不足' : '兑换'}}
-      </button>
-    </view>
-  </view>
+   <!-- 称号兑换专区 -->
+   <view class="title-exchange-section" wx:if="{{titleProducts && titleProducts.length > 0}}">
+     <view class="section-title">称号兑换</view>
+     <view class="title-products">
+       <view wx:for="{{titleProducts}}" wx:key="id" class="title-product-item">
+         <view class="title-icon">{{item.icon}}</view>
+         <view class="title-content">
+           <view class="title-name">{{item.name}}</view>
+           <view class="title-desc">{{item.desc}}</view>
+           <view class="title-rarity {{item.rarity}}">{{item.rarity}}</view>
+         </view>
+         <button class="exchange-btn {{userPoints < item.points || item.owned ? 'disabled' : ''}}"
+                 bindtap="exchangeTitle"
+                 data-id="{{item.titleId}}"
+                 disabled="{{userPoints < item.points || item.owned}}">
+           {{item.owned ? '已获得' : userPoints < item.points ? '积分不足' : '兑换'}}
+         </button>
+       </view>
+     </view>
+   </view>
+
+   <!-- 商品列表 -->
+   <view class="products-list">
+     <view wx:for="{{products}}" wx:key="id" 
+           wx:if="{{currentCategory === 'all' || item.category === currentCategory}}"
+           class="product-item">
+       
+       <!-- 热门标签 -->
+       <view wx:if="{{item.hot}}" class="hot-badge">🔥 热门</view>
+       
+       <view class="product-icon">
+         <text class="icon-emoji">{{item.icon}}</text>
+       </view>
+       
+       <view class="product-content">
+         <view class="product-name">{{item.name}}</view>
+         <view class="product-desc">{{item.desc}}</view>
+         
+         <view class="product-footer">
+           <view class="product-price">
+             <text class="price-value">{{item.points}}</text>
+             <text class="price-unit">积分</text>
+           </view>
+           <view class="product-stock">
+             <text wx:if="{{item.stock > 0}}">库存：{{item.stock}}</text>
+             <text wx:else class="out-of-stock">已兑完</text>
+           </view>
+         </view>
+       </view>
+       
+       <button class="exchange-btn {{item.stock <= 0 || userPoints < item.points ? 'disabled' : ''}}" 
+               bindtap="exchangeProduct" 
+               data-id="{{item.id}}"
+               disabled="{{item.stock <= 0 || userPoints < item.points}}">
+         {{item.stock <= 0 ? '已兑完' : userPoints < item.points ? '积分不足' : '兑换'}}
+       </button>
+     </view>
+   </view>
 
   <!-- 空状态 -->
   <view wx:if="{{products.length === 0}}" class="empty-state">

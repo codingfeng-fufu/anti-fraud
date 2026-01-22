@@ -14,6 +14,9 @@ Page({
     // 用户积分
     userPoints: 0,
     
+    // 称号产品列表
+    titleProducts: [],
+    
     // 商品列表
     products: [
       {
@@ -108,6 +111,7 @@ Page({
   onLoad() {
     this.loadUserPoints()
     this.loadExchangeRecords()
+    this.loadTitleProducts()
   },
 
   onShow() {
@@ -293,6 +297,111 @@ Page({
       content: '完成每日签到、阅读文章、AI对话等任务可获得积分',
       showCancel: false
     })
+  },
+
+  // 加载称号产品
+  async loadTitleProducts() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getTitles',
+        data: {}
+      })
+
+      if (result.result.success) {
+        this.setData({
+          titleProducts: result.result.data.titles || []
+        })
+      }
+    } catch (err) {
+      console.error('加载称号产品失败：', err)
+    }
+  },
+
+  // 兑换称号
+  async exchangeTitle(e) {
+    const titleId = e.currentTarget.dataset.id
+    const title = this.data.titleProducts.find(item => item.titleId === titleId)
+
+    if (!title) return
+
+    // 检查积分是否足够
+    if (this.data.userPoints < title.points) {
+      wx.showModal({
+        title: '积分不足',
+        content: `兑换${title.name}需要${title.points}积分，当前积分${this.data.userPoints}`,
+        showCancel: false
+      })
+      return
+    }
+
+    // 检查是否已拥有此称号
+    if (title.owned) {
+      wx.showToast({
+        title: '称号已拥有',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 确认兑换
+    wx.showModal({
+      title: '确认兑换',
+      content: `确定用${title.points}积分兑换称号"${title.name}"吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          this.doExchangeTitle(title)
+        }
+      }
+    })
+  },
+
+  // 执行称号兑换
+  async doExchangeTitle(title) {
+    wx.showLoading({
+      title: '兑换中...'
+    })
+
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'redeemTitle',
+        data: {
+          titleId: title.titleId
+        }
+      })
+
+      if (result.result.success) {
+        wx.hideLoading()
+        
+        // 更新本地积分
+        const newPoints = this.data.userPoints - title.points
+        wx.setStorageSync('points', newPoints)
+        
+        // 重新加载称号产品和用户积分
+        this.setData({
+          userPoints: newPoints
+        })
+        
+        this.loadTitleProducts()
+        
+        wx.showToast({
+          title: '兑换成功！',
+          icon: 'success'
+        })
+      } else {
+        wx.hideLoading()
+        wx.showToast({
+          title: result.result.errMsg || '兑换失败',
+          icon: 'none'
+        })
+      }
+    } catch (err) {
+      wx.hideLoading()
+      console.error('兑换称号失败：', err)
+      wx.showToast({
+        title: '兑换失败',
+        icon: 'none'
+      })
+    }
   },
 
   // 返回上一页

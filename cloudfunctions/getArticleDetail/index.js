@@ -74,12 +74,28 @@ exports.main = async (event, context) => {
             }
           })
           
-          // 更新用户阅读总数
-          await db.collection('users').doc(userId).update({
-            data: {
-              totalReadCount: _.inc(1)
-            }
-          })
+           // 调用trackAction记录阅读行为，以检查阅读类成就并更新统计
+           try {
+             const trackActionResult = await cloud.callFunction({
+               name: 'trackAction',
+               data: {
+                 action: 'read',
+                 increment: 1
+               }
+             })
+             
+             console.log('Track read action result:', trackActionResult)
+           } catch (trackErr) {
+             console.log('Track read action failed:', trackErr.message)
+             // 不影响获取文章详情成功，继续执行
+             
+             // 保持原有的阅读次数更新作为备用
+             await db.collection('users').doc(userId).update({
+               data: {
+                 totalReadCount: _.inc(1)
+               }
+             })
+           }
         }
       } catch (err) {
         console.error('记录阅读历史失败：', err)

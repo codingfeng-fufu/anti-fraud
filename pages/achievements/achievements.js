@@ -19,156 +19,176 @@ Page({
     
     // 成就列表
     achievements: [
-      // 签到类成就
-      {
-        id: 'sign_1',
-        title: '初来乍到',
-        desc: '完成首次签到',
-        icon: '🎯',
-        points: 10,
-        target: 1,
-        current: 0,
-        type: 'sign',
-        unlocked: false
-      },
-      {
-        id: 'sign_7',
-        title: '坚持不懈',
-        desc: '连续签到7天',
-        icon: '📅',
-        points: 50,
-        target: 7,
-        current: 0,
-        type: 'sign',
-        unlocked: false
-      },
-      {
-        id: 'sign_30',
-        title: '月度冠军',
-        desc: '连续签到30天',
-        icon: '🏆',
-        points: 200,
-        target: 30,
-        current: 0,
-        type: 'sign',
-        unlocked: false
-      },
-      {
-        id: 'sign_100',
-        title: '坚如磐石',
-        desc: '连续签到100天',
-        icon: '💎',
-        points: 1000,
-        target: 100,
-        current: 0,
-        type: 'sign',
-        unlocked: false
-      },
+       // 签到类成就
+       {
+         id: 'sign_1',
+         title: '初来乍到',
+         desc: '完成首次签到',
+         icon: '🎯',
+         points: 10,
+         target: 1,
+         current: 0,
+         type: 'sign',
+         unlocked: false,
+         rewardTitleId: null
+       },
+       {
+         id: 'sign_7',
+         title: '坚持不懈',
+         desc: '连续签到7天',
+         icon: '📅',
+         points: 50,
+         target: 7,
+         current: 0,
+         type: 'sign',
+         unlocked: false,
+         rewardTitleId: 'sign_7_title',  // 示例称号ID
+         rewardTitleName: '七日勤勉'     // 示例称号名称
+       },
+       {
+         id: 'sign_30',
+         title: '月度冠军',
+         desc: '连续签到30天',
+         icon: '🏆',
+         points: 200,
+         target: 30,
+         current: 0,
+         type: 'sign',
+         unlocked: false,
+         rewardTitleId: 'sign_30_title',  // 示例称号ID
+         rewardTitleName: '签到大师'      // 示例称号名称
+       },
+       {
+         id: 'sign_100',
+         title: '坚如磐石',
+         desc: '连续签到100天',
+         icon: '💎',
+         points: 1000,
+         target: 100,
+         current: 0,
+         type: 'sign',
+         unlocked: false,
+         rewardTitleId: 'sign_100_title',  // 示例称号ID
+         rewardTitleName: '百日传奇'       // 示例称号名称
+       },
       
-      // 学习类成就
-      {
-        id: 'read_1',
-        title: '求知若渴',
-        desc: '阅读1篇反诈文章',
-        icon: '📖',
-        points: 10,
-        target: 1,
-        current: 0,
-        type: 'read',
-        unlocked: false
-      },
-      {
-        id: 'read_10',
-        title: '博览群书',
-        desc: '阅读10篇反诈文章',
-        icon: '📚',
-        points: 100,
-        target: 10,
-        current: 0,
-        type: 'read',
-        unlocked: false
-      },
-      {
-        id: 'read_50',
-        title: '反诈达人',
-        desc: '阅读50篇反诈文章',
-        icon: '🎓',
-        points: 500,
-        target: 50,
-        current: 0,
-        type: 'read',
-        unlocked: false
-      },
+       // 学习类成就
+       {
+         id: 'read_1',
+         title: '求知若渴',
+         desc: '阅读1篇反诈文章',
+         icon: '📖',
+         points: 10,
+         target: 1,
+         current: 0,
+         type: 'read',
+         unlocked: false,
+         rewardTitleId: null
+       },
+       {
+         id: 'read_10',
+         title: '博览群书',
+         desc: '阅读10篇反诈文章',
+         icon: '📚',
+         points: 100,
+         target: 10,
+         current: 0,
+         type: 'read',
+         unlocked: false,
+         rewardTitleId: 'read_10_title',   // 示例称号ID
+         rewardTitleName: '求知者'         // 示例称号名称
+       },
+       {
+         id: 'read_50',
+         title: '反诈达人',
+         desc: '阅读50篇反诈文章',
+         icon: '🎓',
+         points: 500,
+         target: 50,
+         current: 0,
+         type: 'read',
+         unlocked: false,
+         rewardTitleId: 'read_50_title',   // 示例称号ID
+         rewardTitleName: '博学者'         // 示例称号名称
+       },
       
-      // AI对话类成就
-      {
-        id: 'chat_1',
-        title: '初次对话',
-        desc: '与AI助手对话1次',
-        icon: '💬',
-        points: 10,
-        target: 1,
-        current: 0,
-        type: 'chat',
-        unlocked: false
-      },
-      {
-        id: 'chat_10',
-        title: '积极提问',
-        desc: '与AI助手对话10次',
-        icon: '🗨️',
-        points: 50,
-        target: 10,
-        current: 0,
-        type: 'chat',
-        unlocked: false
-      },
-      {
-        id: 'chat_50',
-        title: '防诈专家',
-        desc: '与AI助手对话50次',
-        icon: '🎖️',
-        points: 200,
-        target: 50,
-        current: 0,
-        type: 'chat',
-        unlocked: false
-      },
+       // AI对话类成就
+       {
+         id: 'chat_1',
+         title: '初次对话',
+         desc: '与AI助手对话1次',
+         icon: '💬',
+         points: 10,
+         target: 1,
+         current: 0,
+         type: 'chat',
+         unlocked: false,
+         rewardTitleId: null
+       },
+       {
+         id: 'chat_10',
+         title: '积极提问',
+         desc: '与AI助手对话10次',
+         icon: '🗨️',
+         points: 50,
+         target: 10,
+         current: 0,
+         type: 'chat',
+         unlocked: false,
+         rewardTitleId: 'chat_expert_10',   // 对应称号ID
+         rewardTitleName: '对话新手'        // 对应称号名称
+       },
+       {
+         id: 'chat_50',
+         title: '防诈专家',
+         desc: '与AI助手对话50次',
+         icon: '🎖️',
+         points: 200,
+         target: 50,
+         current: 0,
+         type: 'chat',
+         unlocked: false,
+         rewardTitleId: 'chat_expert_50',   // 对应称号ID
+         rewardTitleName: '对话达人'        // 对应称号名称
+       },
       
-      // 积分类成就
-      {
-        id: 'points_100',
-        title: '初级卫士',
-        desc: '累计获得100积分',
-        icon: '⭐',
-        points: 0,
-        target: 100,
-        current: 0,
-        type: 'points',
-        unlocked: false
-      },
-      {
-        id: 'points_500',
-        title: '中级卫士',
-        desc: '累计获得500积分',
-        icon: '🌟',
-        points: 0,
-        target: 500,
-        current: 0,
-        type: 'points',
-        unlocked: false
-      },
-      {
-        id: 'points_1000',
-        title: '高级卫士',
-        desc: '累计获得1000积分',
-        icon: '✨',
-        points: 0,
-        target: 1000,
-        current: 0,
-        type: 'points',
-        unlocked: false
-      }
+       // 积分类成就
+       {
+         id: 'points_100',
+         title: '初级卫士',
+         desc: '累计获得100积分',
+         icon: '⭐',
+         points: 0,
+         target: 100,
+         current: 0,
+         type: 'points',
+         unlocked: false,
+         rewardTitleId: null
+       },
+       {
+         id: 'points_500',
+         title: '中级卫士',
+         desc: '累计获得500积分',
+         icon: '🌟',
+         points: 0,
+         target: 500,
+         current: 0,
+         type: 'points',
+         unlocked: false,
+         rewardTitleId: null
+       },
+       {
+         id: 'points_1000',
+         title: '高级卫士',
+         desc: '累计获得1000积分',
+         icon: '✨',
+         points: 0,
+         target: 1000,
+         current: 0,
+         type: 'points',
+         unlocked: false,
+         rewardTitleId: null
+       }
     ],
     
     // 统计数据

@@ -104,16 +104,32 @@ exports.main = async (event, context) => {
       // 不影响签到成功，继续执行
     }
     
-    // 检查成就（可选，如果集合不存在会跳过）
-    try {
-      await checkAchievements(openid, user._id, {
-        signDays: newSignDays,
-        points: newPoints
-      })
-    } catch (err) {
-      console.log('检查成就失败（集合可能不存在）：', err.message)
-      // 不影响签到成功，继续执行
-    }
+     // 检查成就（可选，如果集合不存在会跳过）
+     try {
+       await checkAchievements(openid, user._id, {
+         signDays: newSignDays,
+         points: newPoints
+       })
+     } catch (err) {
+       console.log('检查成就失败（集合可能不存在）：', err.message)
+       // 不影响签到成功，继续执行
+     }
+     
+     // 调用trackAction记录签到行为，以检查签到类成就
+     try {
+       const trackActionResult = await cloud.callFunction({
+         name: 'trackAction',
+         data: {
+           action: 'sign',
+           increment: 1
+         }
+       })
+       
+       console.log('Track sign action result:', trackActionResult)
+     } catch (err) {
+       console.log('Track sign action failed:', err.message)
+       // 不影响签到成功，继续执行
+     }
     
     return {
       success: true,

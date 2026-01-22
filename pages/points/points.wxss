@@ -144,6 +144,90 @@
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
 }
 
+/* 称号兑换专区 */
+.title-exchange-section {
+  padding: 0 40rpx;
+  margin-top: 40rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 24rpx;
+}
+
+.title-products {
+  margin-bottom: 40rpx;
+}
+
+.title-product-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  border: 2rpx solid #e0f2fe;
+}
+
+.title-icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 48rpx;
+}
+
+.title-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+}
+
+.title-desc {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 8rpx;
+  line-height: 1.5;
+}
+
+.title-rarity {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+}
+
+.title-rarity.common {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.title-rarity.rare {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.title-rarity.epic {
+  background: #fce7f3;
+  color: #c026d3;
+}
+
 .hot-badge {
   position: absolute;
   top: 16rpx;

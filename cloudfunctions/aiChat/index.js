@@ -74,23 +74,39 @@ exports.main = async (event, context) => {
     // 🔒 隐私保护：不再保存AI回复到数据库
     // await saveMessage(openid, 'bot', reply, '')  // 已移除
     
-    // 更新用户对话次数（仅统计数量，不存内容）
-    try {
-      const userResult = await db.collection('users').where({
-        _openid: openid
-      }).get()
-      
-      if (userResult.data.length > 0) {
-        await db.collection('users').doc(userResult.data[0]._id).update({
-          data: {
-            totalChatCount: _.inc(1)
-          }
-        })
-      }
-    } catch (e) {
-      // 统计失败不影响对话
-      console.warn('更新对话次数失败：', e)
-    }
+     // 调用trackAction记录对话行为，以检查对话类成就并更新统计
+     try {
+       const trackActionResult = await cloud.callFunction({
+         name: 'trackAction',
+         data: {
+           action: 'chat',
+           increment: 1
+         }
+       })
+       
+       console.log('Track chat action result:', trackActionResult)
+     } catch (err) {
+       console.log('Track chat action failed:', err.message)
+       // 不影响对话成功，继续执行
+       
+       // 保持原有的对话次数更新作为备用
+       try {
+         const userResult = await db.collection('users').where({
+           _openid: openid
+         }).get()
+         
+         if (userResult.data.length > 0) {
+           await db.collection('users').doc(userResult.data[0]._id).update({
+             data: {
+               totalChatCount: _.inc(1)
+             }
+           })
+         }
+       } catch (e) {
+         // 统计失败不影响对话
+         console.warn('更新对话次数失败：', e)
+       }
+     }
     
     return {
       success: true,

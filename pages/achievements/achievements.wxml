@@ -67,20 +67,24 @@
         <view wx:if="item.unlocked" class="unlock-badge">✓</view>
       </view>
       
-      <view class="achievement-content">
-        <view class="achievement-header">
-          <text class="achievement-title">{{item.title}}</text>
-          <text wx:if="item.points > 0" class="achievement-points">+{{item.points}}积分</text>
-        </view>
-        <view class="achievement-desc">{{item.desc}}</view>
-        <view class="achievement-progress">
-          <view class="progress-text">{{item.current}}/{{item.target}}</view>
-          <view class="progress-bar-mini">
-            <view class="progress-fill-mini" 
-                  style="width: {{item.current / item.target * 100}}%"></view>
-          </view>
-        </view>
-      </view>
+       <view class="achievement-content">
+         <view class="achievement-header">
+           <text class="achievement-title">{{item.title}}</text>
+           <text wx:if="item.points > 0" class="achievement-points">+{{item.points}}积分</text>
+         </view>
+         <view class="achievement-desc">{{item.desc}}</view>
+         <view wx:if="{{item.rewardTitleName}}" class="title-reward">
+           <text class="reward-icon">🏆</text>
+           <text class="reward-text">奖励: {{item.rewardTitleName}}</text>
+         </view>
+         <view class="achievement-progress">
+           <view class="progress-text">{{item.current}}/{{item.target}}</view>
+           <view class="progress-bar-mini">
+             <view class="progress-fill-mini" 
+                   style="width: {{item.current / item.target * 100}}%"></view>
+           </view>
+         </view>
+       </view>
       
       <view class="achievement-action">
         <button wx:if="item.unlocked" 
