@@ -76,6 +76,7 @@ Page({
         wx.setStorageSync('openid', data.openid)
         wx.setStorageSync('signDays', data.userInfo.signDays || 0)
         wx.setStorageSync('points', data.userInfo.points || 0)
+        wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
         
         console.log('自动登录成功，签到状态:', todaySigned ? '已签到' : '未签到')
       }
@@ -90,7 +91,9 @@ Page({
     const userInfo = wx.getStorageSync('userInfo') || {}
     const signDays = wx.getStorageSync('signDays') || 0
     const points = wx.getStorageSync('points') || 0
-    const achievements = wx.getStorageSync('achievements') || 0
+    const achievements = userInfo.achievements
+      ? userInfo.achievements.length
+      : (wx.getStorageSync('achievements') || 0)
     const todaySigned = this.checkTodaySigned()
 
     this.setData({
@@ -286,6 +289,21 @@ Page({
         icon: 'none'
       })
     }
+  },
+
+  // 打开我的页面
+  openMyProfile() {
+    if (!this.data.userInfo.nickName) {
+      wx.showToast({
+        title: '请先设置昵称',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: '/pages/my/my'
+    })
   },
 
   // 页面跳转

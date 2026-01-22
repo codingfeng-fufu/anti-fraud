@@ -29,7 +29,7 @@
           placeholder="输入昵称"
           bindchange="onNicknameChange"
         />
-        <view wx:else class="user-name">{{userInfo.nickName}}</view>
+        <view wx:else class="user-name" bindtap="openMyProfile">{{userInfo.nickName}}</view>
          <view class="user-status">{{userInfo.nickName ? '开启反诈学习之旅 ✨' : '完善信息开启反诈学习之旅 ✨'}}</view>
          <!-- 称号展示区域 -->
          <view class="title-display-inline" bindtap="showTitleManagement">
@@ -61,7 +61,7 @@
 
   <!-- 功能菜单 -->
   <view class="user-menu">
-    <view class="menu-item" bindtap="handleSignIn">
+    <view class="menu-item" bindtap="navigateTo" data-url="/pages/sign-in/sign-in">
       <view class="menu-left">
         <text class="menu-icon">📅</text>
         <text class="menu-label">每日签到</text>

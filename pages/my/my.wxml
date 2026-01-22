@@ -1,0 +1,67 @@
+<!--
+我的页面 - 用户个人资料模块
+
+上游依赖：my.js页面逻辑，my.wxss样式文件
+入口：通过用户昵称点击跳转至/pages/my/my
+主要功能：展示用户基本信息、成就数、称号列表、积分等数据
+输出：渲染用户个人资料界面，触发返回事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<!--pages/my/my.wxml-->
+<view class="my-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="header-title">我的主页</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 用户信息 -->
+  <view class="profile-card">
+    <view class="profile-header">
+      <view class="profile-avatar">
+        <text wx:if="{{!userInfo.avatarUrl}}">头像</text>
+        <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      </view>
+      <view class="profile-info">
+        <view class="profile-name">{{userInfo.nickName || '未设置昵称'}}</view>
+        <view class="profile-sub">{{userInfo.nickName ? '反诈学习者' : '完善昵称后展示'}}</view>
+      </view>
+    </view>
+
+    <view class="profile-stats">
+      <view class="stat-item">
+        <view class="stat-value">{{signDays}}</view>
+        <view class="stat-label">连续签到</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{points}}</view>
+        <view class="stat-label">积分</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{achievements}}</view>
+        <view class="stat-label">成就数</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 称号列表 -->
+  <view class="titles-card">
+    <view class="section-title">已获得称号</view>
+    <view class="title-stats">已拥有 {{titleStats.owned}} · 已佩戴 {{titleStats.equipped}}</view>
+    <view wx:if="{{displayTitles.length === 0}}" class="empty-text">暂无称号，继续努力解锁吧</view>
+    <view wx:else class="title-list">
+      <view wx:for="{{displayTitles}}" wx:key="titleId" class="title-item {{item.isEquipped ? 'equipped' : ''}}">
+        <view class="title-icon">{{item.icon}}</view>
+        <view class="title-info">
+          <view class="title-name">{{item.name}}</view>
+          <view class="title-desc">{{item.desc}}</view>
+        </view>
+        <view class="title-badge {{item.rarity}}">{{item.rarity}}</view>
+      </view>
+    </view>
+  </view>
+</view>

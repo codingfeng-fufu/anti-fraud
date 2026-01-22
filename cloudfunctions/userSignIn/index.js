@@ -105,17 +105,20 @@ exports.main = async (event, context) => {
     }
     
      // 检查成就（可选，如果集合不存在会跳过）
+     let achievementRewardPoints = 0
      try {
-       await checkAchievements(openid, user._id, {
+       const achievementResult = await checkAchievements(openid, user._id, {
          signDays: newSignDays,
          points: newPoints
        })
+       achievementRewardPoints = achievementResult?.rewardPoints || 0
      } catch (err) {
        console.log('检查成就失败（集合可能不存在）：', err.message)
        // 不影响签到成功，继续执行
      }
      
      // 调用trackAction记录签到行为，以检查签到类成就
+     let trackActionPoints = 0
      try {
        const trackActionResult = await cloud.callFunction({
          name: 'trackAction',
@@ -125,21 +128,31 @@ exports.main = async (event, context) => {
          }
        })
        
+       if (trackActionResult.result && trackActionResult.result.success) {
+         trackActionPoints = trackActionResult.result.data?.totalPoints || 0
+       }
+       
        console.log('Track sign action result:', trackActionResult)
      } catch (err) {
        console.log('Track sign action failed:', err.message)
        // 不影响签到成功，继续执行
      }
     
+    const achievementPoints = achievementRewardPoints + trackActionPoints
+    const finalPoints = newPoints + achievementPoints
+    
     return {
       success: true,
       data: {
         signDays: newSignDays,
-        points: newPoints,
+        points: finalPoints,
         earnedPoints,
+        achievementPoints,
         lastSignDate: today  // 返回签到日期，用于前端同步
       },
-      message: `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分`
+      message: achievementPoints > 0
+        ? `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分，成就奖励${achievementPoints}积分`
+        : `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分`
     }
   } catch (err) {
     console.error('签到失败：', err)
@@ -156,18 +169,25 @@ async function checkAchievements(openid, userId, stats) {
     const achievements = []
     
     // 签到相关成就
-    if (stats.signDays === 7) {
-      achievements.push({ id: 'sign_7', name: '初来乍到', points: 50 })
-    } else if (stats.signDays === 30) {
-      achievements.push({ id: 'sign_30', name: '坚持不懈', points: 100 })
-    } else if (stats.signDays === 100) {
-      achievements.push({ id: 'sign_100', name: '百日勤勉', points: 300 })
+    if (stats.signDays >= 1) {
+      achievements.push({ id: 'sign_1', name: '初来乍到', points: 10 })
+    }
+    if (stats.signDays >= 7) {
+      achievements.push({ id: 'sign_7', name: '坚持不懈', points: 50 })
+    }
+    if (stats.signDays >= 30) {
+      achievements.push({ id: 'sign_30', name: '月度冠军', points: 200 })
+    }
+    if (stats.signDays >= 100) {
+      achievements.push({ id: 'sign_100', name: '百日传奇', points: 1000 })
     }
     
-    // 如果没有达成成就，直接返回
     if (achievements.length === 0) {
-      return
+      return { rewardPoints: 0, newAchievements: [] }
     }
+    
+    const newAchievements = []
+    let rewardPoints = 0
     
     // 授予成就
     for (const achievement of achievements) {
@@ -198,6 +218,8 @@ async function checkAchievements(openid, userId, stats) {
             }
           })
           
+          rewardPoints += achievement.points
+          newAchievements.push(achievement)
           console.log(`授予成就成功：${achievement.name}`)
         }
       } catch (err) {
@@ -205,9 +227,12 @@ async function checkAchievements(openid, userId, stats) {
         // 继续处理下一个成就
       }
     }
+    
+    return { rewardPoints, newAchievements }
   } catch (err) {
     console.error('检查成就失败：', err.message)
     // 不抛出错误，避免影响签到功能
+    return { rewardPoints: 0, newAchievements: [] }
   }
 }
 

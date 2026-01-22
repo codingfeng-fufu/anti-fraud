@@ -1,0 +1,223 @@
+/*
+我的页面 - 用户个人资料模块
+
+上游依赖：my.wxml结构文件
+入口：页面加载时自动应用样式
+主要功能：定义个人资料界面的视觉样式，包括头像、统计卡片、称号列表等组件
+输出：渲染美观的用户个人资料界面样式
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+*/
+/* pages/my/my.wxss */
+.my-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding-bottom: 40rpx;
+}
+
+/* 顶部导航 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left,
+.header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 64rpx;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* 用户卡片 */
+.profile-card {
+  margin: 40rpx;
+  background: white;
+  border-radius: 32rpx;
+  padding: 40rpx;
+  box-shadow: 0 16rpx 48rpx rgba(14, 165, 233, 0.12);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.profile-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52rpx;
+  color: #0ea5e9;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-avatar image {
+  width: 100%;
+  height: 100%;
+}
+
+.profile-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+}
+
+.profile-sub {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24rpx;
+  background: #f8fafc;
+  padding: 24rpx;
+  border-radius: 24rpx;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #0ea5e9;
+  margin-bottom: 6rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+/* 称号列表 */
+.titles-card {
+  margin: 0 40rpx 40rpx;
+  background: white;
+  border-radius: 32rpx;
+  padding: 32rpx;
+  box-shadow: 0 12rpx 36rpx rgba(15, 23, 42, 0.08);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12rpx;
+}
+
+.title-stats {
+  font-size: 24rpx;
+  color: #94a3b8;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 24rpx;
+  color: #94a3b8;
+  text-align: center;
+  padding: 24rpx 0;
+}
+
+.title-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.title-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #f8fafc;
+  border: 2rpx solid #e2e8f0;
+}
+
+.title-item.equipped {
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+}
+
+.title-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 16rpx;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.title-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.title-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6rpx;
+}
+
+.title-desc {
+  font-size: 22rpx;
+  color: #64748b;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.title-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 999rpx;
+  background: #e2e8f0;
+  color: #64748b;
+  text-transform: capitalize;
+}
+
+.title-badge.common {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.title-badge.rare {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.title-badge.epic {
+  background: #fce7f3;
+  color: #c026d3;
+}

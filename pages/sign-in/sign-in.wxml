@@ -1,0 +1,68 @@
+<!--
+每日签到页面 - 签到日历模块
+
+上游依赖：sign-in.js页面逻辑，sign-in.wxss样式文件
+入口：页面路由跳转至/pages/sign-in/sign-in
+主要功能：展示签到日历、连续签到天数、自动触发当日签到
+输出：渲染签到日历界面，触发JS事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<!--pages/sign-in/sign-in.wxml-->
+<view class="sign-in-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="header-title">每日签到</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 签到信息卡 -->
+  <view class="sign-card">
+    <view class="sign-main">
+      <view class="sign-days">
+        <view class="sign-days-value">{{signDays}}</view>
+        <view class="sign-days-label">连续签到(天)</view>
+      </view>
+      <view class="sign-status {{todaySigned ? 'signed' : 'unsigned'}}">
+        {{todaySigned ? '今日已签到' : '今日未签到'}}
+      </view>
+    </view>
+    <view class="sign-points">当前积分：{{points}}</view>
+    <button class="sign-btn {{todaySigned || isSigning ? 'disabled' : ''}}"
+            bindtap="handleSignIn"
+            disabled="{{todaySigned || isSigning}}">
+      {{todaySigned ? '已签到' : '立即签到'}}
+    </button>
+  </view>
+
+  <!-- 签到日历 -->
+  <view class="calendar-card">
+    <view class="calendar-header">
+      <text class="calendar-title">{{currentMonthLabel}}</text>
+      <text class="calendar-subtitle">签到日历</text>
+    </view>
+    <view class="calendar-weekdays">
+      <view class="weekday" wx:for="{{weekdays}}" wx:key="day">{{item}}</view>
+    </view>
+    <view class="calendar-days">
+      <view wx:for="{{calendarDays}}"
+            wx:key="index"
+            class="day-cell {{item.isPlaceholder ? 'empty' : ''}} {{item.isToday ? 'today' : ''}} {{item.isSigned ? 'signed' : ''}}">
+        <text wx:if="{{!item.isPlaceholder}}">{{item.day}}</text>
+      </view>
+    </view>
+    <view class="calendar-legend">
+      <view class="legend-item">
+        <view class="legend-dot signed"></view>
+        <text>已签到</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot today"></view>
+        <text>今天</text>
+      </view>
+    </view>
+  </view>
+</view>

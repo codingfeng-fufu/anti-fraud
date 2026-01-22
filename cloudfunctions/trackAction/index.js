@@ -34,7 +34,7 @@ exports.main = async (event, context) => {
       case 'sign':
         // 签到行为不需要额外更新用户数据，因为已经在userSignIn中处理
         // 但我们仍需要检查是否有相关的成就
-        countValue = (user.signDays || 0) + increment
+        countValue = user.signDays || 0
         break
       case 'chat':
         updateData = {

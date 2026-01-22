@@ -18,6 +18,8 @@
 - [x] `pages/user/FOLDER.md` - 用户页面目录说明
 - [x] `pages/achievements/FOLDER.md` - 成就页面目录说明
 - [x] `pages/points/FOLDER.md` - 积分商城页面目录说明
+- [x] `pages/sign-in/FOLDER.md` - 每日签到页面目录说明
+- [x] `pages/my/FOLDER.md` - 我的页面目录说明
 - [x] `pages/index/FOLDER.md` - 首页目录说明
 - [x] `pages/chat/FOLDER.md` - AI对话页面目录说明
 - [x] `pages/settings/FOLDER.md` - 设置页面目录说明
@@ -47,6 +49,12 @@
 - [x] `pages/user/user.js` - 添加架构描述注释
 - [x] `pages/user/user.wxml` - 添加架构描述注释
 - [x] `pages/user/user.wxss` - 添加架构描述注释
+- [x] `pages/sign-in/sign-in.js` - 添加架构描述注释
+- [x] `pages/sign-in/sign-in.wxml` - 添加架构描述注释
+- [x] `pages/sign-in/sign-in.wxss` - 添加架构描述注释
+- [x] `pages/my/my.js` - 添加架构描述注释
+- [x] `pages/my/my.wxml` - 添加架构描述注释
+- [x] `pages/my/my.wxss` - 添加架构描述注释
 - [x] `pages/achievements/achievements.js` - 添加架构描述注释
 - [x] `pages/achievements/achievements.wxml` - 添加架构描述注释
 - [x] `pages/achievements/achievements.wxss` - 添加架构描述注释

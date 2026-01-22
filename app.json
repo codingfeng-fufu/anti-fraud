@@ -3,6 +3,8 @@
     "pages/index/index",
     "pages/chat/chat",
     "pages/user/user",
+    "pages/sign-in/sign-in",
+    "pages/my/my",
     "pages/article-detail/article-detail",
     "pages/bind-student/bind-student",
     "pages/achievements/achievements",
