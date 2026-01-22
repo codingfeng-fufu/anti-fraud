@@ -33,14 +33,15 @@
         <text class="title-icon">{{item.icon}}</text>
         <text class="title-name">{{item.name}}</text>
         <text class="title-rarity {{item.rarity}}">{{item.rarity}}</text>
-        <button wx:if="{{!isEquipped(item.titleId)}}" 
-                class="equip-btn" 
-                bindtap="equipTitle" 
+        <button wx:if="{{!isEquipped(item.titleId)}}"
+                class="equip-btn"
+                bindtap="equipTitle"
                 data-id="{{item.titleId}}"
                 disabled="{{equippedTitles.length >= 3}}">
           佩戴
         </button>
         <button wx:else class="equipped-btn" disabled>已佩戴</button>
+        <button class="delete-btn" bindtap="deleteTitle" data-id="{{item.titleId}}">×</button>
       </view>
     </view>
   </view>

@@ -60,40 +60,39 @@
   <view class="achievements-list">
     <view class="section-title">全部成就</view>
     
-    <view wx:for="{{achievements}}" wx:key="id" 
+    <view wx:for="{{achievements}}" wx:key="id"
           class="achievement-item {{item.unlocked ? 'unlocked' : 'locked'}}">
-      <view class="achievement-icon">
-        <text class="icon-emoji">{{item.icon}}</text>
-        <view wx:if="item.unlocked" class="unlock-badge">✓</view>
+      
+      <view class="achievement-icon-wrapper">
+        <text class="achievement-emoji">{{item.icon}}</text>
+        <view wx:if="item.unlocked" class="achievement-checkmark">
+          <text class="checkmark-icon">✓</text>
+        </view>
       </view>
-      
-       <view class="achievement-content">
-         <view class="achievement-header">
-           <text class="achievement-title">{{item.title}}</text>
-           <text wx:if="item.points > 0" class="achievement-points">+{{item.points}}积分</text>
-         </view>
-         <view class="achievement-desc">{{item.desc}}</view>
-         <view wx:if="{{item.rewardTitleName}}" class="title-reward">
-           <text class="reward-icon">🏆</text>
-           <text class="reward-text">奖励: {{item.rewardTitleName}}</text>
-         </view>
-         <view class="achievement-progress">
-           <view class="progress-text">{{item.current}}/{{item.target}}</view>
-           <view class="progress-bar-mini">
-             <view class="progress-fill-mini" 
-                   style="width: {{item.current / item.target * 100}}%"></view>
-           </view>
-         </view>
-       </view>
-      
-      <view class="achievement-action">
-        <button wx:if="item.unlocked" 
-                class="share-btn" 
-                bindtap="shareAchievement" 
-                data-id="{{item.id}}">
-          分享
-        </button>
-        <text wx:else class="lock-icon">🔒</text>
+
+      <view class="achievement-content" wx:if="{{item.unlocked}}">
+        <view class="achievement-header">
+          <text class="achievement-name">{{item.title}}</text>
+          <text wx:if="{{item.points > 0}}" class="achievement-badge">+{{item.points}}</text>
+        </view>
+        <text class="achievement-description">{{item.desc}}</text>
+        <view wx:if="{{item.rewardTitleName}}" class="achievement-reward">
+          <text class="reward-label">🏆 {{item.rewardTitleName}}</text>
+        </view>
+      </view>
+
+      <view class="achievement-action" wx:if="{{item.unlocked}}">
+        <view class="action-btn" bindtap="shareAchievement" data-id="{{item.id}}">
+          <text class="action-text">分享</text>
+        </view>
+      </view>
+
+      <view class="achievement-progress" wx:if="{{!item.unlocked}}">
+        <view class="progress-container">
+          <view class="progress-track"></view>
+          <view class="progress-value" style="width: {{item.current / item.target * 100}}%"></view>
+        </view>
+        <text class="progress-label">{{item.current}}/{{item.target}}</text>
       </view>
     </view>
   </view>

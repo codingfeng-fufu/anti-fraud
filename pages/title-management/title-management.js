@@ -131,6 +131,47 @@ Page({
     return this.data.equippedTitles.some(title => title.titleId === titleId)
   },
 
+  // 删除称号
+  async deleteTitle(e) {
+    const titleId = e.currentTarget.dataset.id
+
+    wx.showLoading({
+      title: '删除中...'
+    })
+
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'deleteTitle',
+        data: {
+          titleId
+        }
+      })
+
+      if (result.result.success) {
+        wx.showToast({
+          title: '删除成功',
+          icon: 'success'
+        })
+
+        // 重新加载数据
+        this.loadUserTitles()
+      } else {
+        wx.showToast({
+          title: result.result.errMsg || '删除失败',
+          icon: 'error'
+        })
+      }
+    } catch (err) {
+      console.error('删除称号失败：', err)
+      wx.showToast({
+        title: '删除失败',
+        icon: 'error'
+      })
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
   // 返回上一页
   goBack() {
     wx.navigateBack()

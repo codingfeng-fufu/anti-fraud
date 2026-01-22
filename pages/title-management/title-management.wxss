@@ -79,7 +79,7 @@
 .title-name {
   flex: 1;
   font-size: 30rpx;
-  font-weight: 500;
+  font-weight: bold;
   color: #1e293b;
 }
 
@@ -131,6 +131,20 @@
 .equip-btn[disabled] {
   background: #cbd5e1;
   color: #64748b;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+  padding: 4rpx 16rpx;
+  border-radius: 50%;
+  border: none;
+  margin-left: 10rpx;
+  min-width: 48rpx;
+  height: 48rpx;
+  line-height: 40rpx;
 }
 
 .title-stats {
