@@ -1,3 +1,13 @@
+<!--
+成就页面 - 成就系统模块
+
+上游依赖：achievements.js页面逻辑，achievements.wxss样式文件
+入口：页面路由跳转至/pages/achievements/achievements
+主要功能：展示用户成就列表、成就解锁状态、成就统计数据
+输出：渲染成就界面，触发JS事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
 <!--pages/achievements/achievements.wxml-->
 <view class="achievements-container">
   <!-- 顶部导航 -->

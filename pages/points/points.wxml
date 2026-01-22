@@ -1,3 +1,13 @@
+<!--
+积分商城页面 - 积分兑换模块
+
+上游依赖：points.js页面逻辑，points.wxss样式文件
+入口：页面路由跳转至/pages/points/points
+主要功能：展示可兑换商品、积分余额、分类筛选、兑换操作
+输出：渲染积分商城界面，触发JS事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
 <!--pages/points/points.wxml-->
 <view class="points-container">
   <!-- 顶部导航 -->

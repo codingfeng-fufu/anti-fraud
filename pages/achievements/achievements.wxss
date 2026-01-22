@@ -1,3 +1,13 @@
+/*
+成就页面 - 成就系统模块
+
+上游依赖：achievements.wxml结构文件
+入口：页面加载时自动应用样式
+主要功能：定义成就界面的视觉样式，包括统计卡片、成就列表、进度条等组件
+输出：渲染美观的成就界面样式
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+*/
 /* pages/achievements/achievements.wxss */
 .achievements-container {
   min-height: 100vh;
