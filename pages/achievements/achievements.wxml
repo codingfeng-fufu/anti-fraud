@@ -65,18 +65,18 @@
       
       <view class="achievement-icon-wrapper">
         <text class="achievement-emoji">{{item.icon}}</text>
-        <view wx:if="item.unlocked" class="achievement-checkmark">
+        <view wx:if="{{item.unlocked}}" class="achievement-checkmark">
           <text class="checkmark-icon">✓</text>
         </view>
       </view>
 
-      <view class="achievement-content" wx:if="{{item.unlocked}}">
+      <view class="achievement-content">
         <view class="achievement-header">
           <text class="achievement-name">{{item.title}}</text>
-          <text wx:if="{{item.points > 0}}" class="achievement-badge">+{{item.points}}</text>
+          <text wx:if="{{item.unlocked && item.points > 0}}" class="achievement-badge">+{{item.points}}</text>
         </view>
         <text class="achievement-description">{{item.desc}}</text>
-        <view wx:if="{{item.rewardTitleName}}" class="achievement-reward">
+        <view wx:if="{{item.unlocked && item.rewardTitleName}}" class="achievement-reward">
           <text class="reward-label">🏆 {{item.rewardTitleName}}</text>
         </view>
       </view>
