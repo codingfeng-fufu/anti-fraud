@@ -45,15 +45,26 @@ exports.main = async (event, context) => {
       }
     }
     
+    const currentViews = result.data.views ?? result.data.viewCount ?? 0
+    const viewUpdate = {}
+    if (Object.prototype.hasOwnProperty.call(result.data, 'views')) {
+      viewUpdate.views = _.inc(1)
+    }
+    if (Object.prototype.hasOwnProperty.call(result.data, 'viewCount')) {
+      viewUpdate.viewCount = _.inc(1)
+    }
+    if (Object.keys(viewUpdate).length === 0) {
+      viewUpdate.views = _.inc(1)
+    }
+    
     // 增加浏览量
     await db.collection('articles').doc(articleId).update({
-      data: {
-        viewCount: _.inc(1)
-      }
+      data: viewUpdate
     })
     
     // 记录用户阅读历史
     const openid = wxContext.OPENID
+    let actionData = null
     if (openid) {
       try {
         // 查找用户ID
@@ -83,6 +94,10 @@ exports.main = async (event, context) => {
                  increment: 1
                }
              })
+             
+             if (trackActionResult.result && trackActionResult.result.success) {
+               actionData = trackActionResult.result.data
+             }
              
              console.log('Track read action result:', trackActionResult)
            } catch (trackErr) {
@@ -114,8 +129,12 @@ exports.main = async (event, context) => {
     return {
       success: true,
       data: {
-        article: result.data,
-        relatedArticles: relatedResult.data
+        article: {
+          ...result.data,
+          views: currentViews + 1
+        },
+        relatedArticles: relatedResult.data,
+        actionData
       }
     }
   } catch (err) {

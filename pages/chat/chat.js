@@ -131,6 +131,34 @@ Page({
 
       if (result.result.success) {
         const reply = result.result.data.reply
+        const actionData = result.result.data.actionData
+        if (actionData) {
+          if (typeof actionData.updatedCount === 'number') {
+            wx.setStorageSync('chatTimes', actionData.updatedCount)
+          }
+          if (typeof actionData.userPoints === 'number') {
+            wx.setStorageSync('points', actionData.userPoints)
+          } else if (actionData.totalPoints) {
+            const points = wx.getStorageSync('points') || 0
+            wx.setStorageSync('points', points + actionData.totalPoints)
+          }
+          if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
+            const achievementIds = actionData.newAchievements
+              .map(item => item.achievementId)
+              .filter(Boolean)
+            const userInfo = wx.getStorageSync('userInfo') || {}
+            
+            if (Array.isArray(userInfo.achievements) && achievementIds.length > 0) {
+              const merged = Array.from(new Set([...userInfo.achievements, ...achievementIds]))
+              userInfo.achievements = merged
+              wx.setStorageSync('userInfo', userInfo)
+              wx.setStorageSync('achievements', merged.length)
+            } else {
+              const achievements = wx.getStorageSync('achievements') || 0
+              wx.setStorageSync('achievements', achievements + actionData.newAchievements.length)
+            }
+          }
+        }
         const botMsg = {
           id: Date.now() + 1,
           role: 'bot',

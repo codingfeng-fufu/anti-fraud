@@ -13,6 +13,11 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   
   const { action, increment = 1 } = event // action: 'sign', 'chat', 'read', 'learn'
+  const basePointsMap = {
+    chat: 2,
+    read: 5
+  }
+  const basePoints = (basePointsMap[action] || 0) * increment
   
   try {
     // 获取用户信息
@@ -89,11 +94,6 @@ exports.main = async (event, context) => {
       })
     }
     
-    // 更新用户统计信息
-    await db.collection('users').doc(user._id).update({
-      data: updateData
-    })
-    
     // 检查并授予成就
     const achievementsResult = await db.collection('achievements')
       .where({
@@ -104,6 +104,9 @@ exports.main = async (event, context) => {
       .get()
     
     const newAchievements = []
+    const newAchievementIds = []
+    const rewardTitleIds = []
+    let achievementPoints = 0
     
     for (const achievement of achievementsResult.data) {
       // 检查是否已获得
@@ -129,28 +132,30 @@ exports.main = async (event, context) => {
         })
         
         newAchievements.push(achievement)
+        newAchievementIds.push(achievement.achievementId)
+        achievementPoints += achievement.points || 0
         
-        // 添加称号到用户
         if (achievement.rewardTitleId) {
-          await db.collection('users').doc(user._id).update({
-            data: {
-              titles: _.push(achievement.rewardTitleId)
-            }
-          })
+          rewardTitleIds.push(achievement.rewardTitleId)
         }
       }
     }
     
-    // 更新用户积分
-    if (newAchievements.length > 0) {
-      const totalRewardPoints = newAchievements.reduce(
-        (sum, ach) => sum + ach.points, 0
-      )
-      
+    const totalRewardPoints = basePoints + achievementPoints
+    const rewardUpdate = {}
+    if (totalRewardPoints > 0) {
+      rewardUpdate.points = _.inc(totalRewardPoints)
+    }
+    if (newAchievementIds.length > 0) {
+      rewardUpdate.achievements = _.push(newAchievementIds)
+    }
+    if (rewardTitleIds.length > 0) {
+      rewardUpdate.titles = _.push([...new Set(rewardTitleIds)])
+    }
+    
+    if (Object.keys(rewardUpdate).length > 0) {
       await db.collection('users').doc(user._id).update({
-        data: {
-          points: _.inc(totalRewardPoints)
-        }
+        data: rewardUpdate
       })
     }
     
@@ -158,8 +163,11 @@ exports.main = async (event, context) => {
       success: true,
       data: {
         newAchievements,
-        totalPoints: newAchievements.reduce((sum, ach) => sum + ach.points, 0),
-        updatedCount: countValue
+        basePoints,
+        achievementPoints,
+        totalPoints: totalRewardPoints,
+        updatedCount: countValue,
+        userPoints: (user.points || 0) + totalRewardPoints
       }
     }
   } catch (err) {

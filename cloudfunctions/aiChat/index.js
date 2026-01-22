@@ -56,6 +56,7 @@ exports.main = async (event, context) => {
     
     // 生成AI回复
     let reply = ''
+    let actionData = null
     
     if (imageUrl) {
       // 如果有图片，进行图片识别（需要接入OCR服务）
@@ -84,6 +85,10 @@ exports.main = async (event, context) => {
          }
        })
        
+       if (trackActionResult.result && trackActionResult.result.success) {
+         actionData = trackActionResult.result.data
+       }
+       
        console.log('Track chat action result:', trackActionResult)
      } catch (err) {
        console.log('Track chat action failed:', err.message)
@@ -111,7 +116,8 @@ exports.main = async (event, context) => {
     return {
       success: true,
       data: {
-        reply
+        reply,
+        actionData
       }
     }
   } catch (err) {
