@@ -5,10 +5,11 @@ Page({
 
   onLoad() {
     this.loadUserData()
+    this.loadUserDataFromCloud()
   },
 
   onShow() {
-    this.loadUserData()
+    this.loadUserDataFromCloud()
   },
 
   loadUserData() {
@@ -31,8 +32,11 @@ Page({
           userInfo
         })
         wx.setStorageSync('userInfo', userInfo)
+      } else {
+        this.loadUserData()
       }
     } catch (err) {
+      this.loadUserData()
       console.error('加载用户数据失败：', err)
     }
   },

@@ -25,13 +25,18 @@ Page({
   },
 
   onLoad() {
-    this.loadUserData()
+    this.refreshUserData()
     this.loadUserTitles()
   },
 
   onShow() {
-    this.loadUserData()
+    this.refreshUserData()
     this.loadUserTitles()
+  },
+
+  refreshUserData() {
+    this.loadUserData()
+    this.loadUserDataFromCloud()
   },
 
   loadUserData() {
@@ -49,6 +54,84 @@ Page({
       achievements,
       tempNickname: userInfo.nickName || ''
     })
+  },
+
+  async loadUserDataFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+
+      if (result.result.success) {
+        const userInfo = result.result.data.userInfo || {}
+        const signDates = Array.isArray(userInfo.signDates)
+          ? userInfo.signDates
+          : (wx.getStorageSync('signDates') || [])
+        const signDays = this.calculateConsecutiveDays(signDates)
+        const points = typeof userInfo.points === 'number'
+          ? userInfo.points
+          : (wx.getStorageSync('points') || 0)
+        const achievements = Array.isArray(userInfo.achievements)
+          ? userInfo.achievements.length
+          : (wx.getStorageSync('achievements') || 0)
+
+        this.setData({
+          userInfo,
+          signDays,
+          points,
+          achievements,
+          tempNickname: userInfo.nickName || ''
+        })
+
+        wx.setStorageSync('userInfo', userInfo)
+        wx.setStorageSync('signDates', signDates)
+        wx.setStorageSync('signDays', signDays)
+        wx.setStorageSync('points', points)
+        wx.setStorageSync('achievements', achievements)
+      } else {
+        this.loadUserData()
+      }
+    } catch (err) {
+      console.error('loadUserDataFromCloud failed:', err)
+      this.loadUserData()
+    }
+  },
+
+  getBeijingDate() {
+    const now = new Date()
+    return new Date(now.getTime() + (8 * 60 * 60 * 1000))
+  },
+
+  calculateConsecutiveDays(signDates) {
+    if (!Array.isArray(signDates) || signDates.length === 0) return 0
+
+    const beijingTime = this.getBeijingDate()
+    const today = beijingTime.toISOString().split('T')[0]
+    const sortedDates = [...signDates].sort().reverse()
+
+    if (!sortedDates.includes(today)) {
+      const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
+      const yesterday = yesterdayDate.toISOString().split('T')[0]
+      if (!sortedDates.includes(yesterday)) {
+        return 0
+      }
+    }
+
+    let consecutiveDays = 0
+    let checkDate = beijingTime
+
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0]
+      if (sortedDates.includes(dateStr)) {
+        consecutiveDays += 1
+        checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+      } else {
+        break
+      }
+    }
+
+    return consecutiveDays
   },
 
   async loadUserTitles() {

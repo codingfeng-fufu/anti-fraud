@@ -127,7 +127,7 @@ exports.main = async (event, context) => {
       
       if (nickName || avatarUrl) {
         if (nickName && nickName !== userData.nickName) {
-          const exists = await checkNicknameExists(nickname, openid)
+          const exists = await checkNicknameExists(nickName, openid)
           if (exists) {
             return {
               success: false,
