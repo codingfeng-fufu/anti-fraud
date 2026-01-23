@@ -132,17 +132,40 @@ Page({
       if (result.result.success) {
         const reply = result.result.data.reply
         const actionData = result.result.data.actionData
+        console.log('AI对话成功，actionData:', actionData)
+        console.log('当前本地积分:', wx.getStorageSync('points') || 0)
+        
         if (actionData) {
+          console.log('处理actionData数据')
+          
           if (typeof actionData.updatedCount === 'number') {
+            console.log('更新对话次数:', actionData.updatedCount)
             wx.setStorageSync('chatTimes', actionData.updatedCount)
+          } else {
+            console.warn('actionData.updatedCount不是数字:', actionData.updatedCount)
+            // 备用：从本地消息计算并更新
+            const currentChatTimes = wx.getStorageSync('chatTimes') || 0
+            const newChatTimes = currentChatTimes + 1
+            console.log('备用更新对话次数:', currentChatTimes, '+', 1, '=', newChatTimes)
+            wx.setStorageSync('chatTimes', newChatTimes)
           }
+          
           if (typeof actionData.userPoints === 'number') {
+            console.log('更新用户积分:', actionData.userPoints)
             wx.setStorageSync('points', actionData.userPoints)
+            console.log('积分已更新，新积分:', actionData.userPoints)
           } else if (actionData.totalPoints) {
             const points = wx.getStorageSync('points') || 0
-            wx.setStorageSync('points', points + actionData.totalPoints)
+            const newPoints = points + actionData.totalPoints
+            console.log('增加积分:', points, '+', actionData.totalPoints, '=', newPoints)
+            wx.setStorageSync('points', newPoints)
+            console.log('积分已更新，新积分:', newPoints)
+          } else {
+            console.warn('actionData中没有积分信息:', { userPoints: actionData.userPoints, totalPoints: actionData.totalPoints })
           }
+          
           if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
+            console.log('获得新成就:', actionData.newAchievements)
             const achievementIds = actionData.newAchievements
               .map(item => item.achievementId)
               .filter(Boolean)
@@ -153,11 +176,28 @@ Page({
               userInfo.achievements = merged
               wx.setStorageSync('userInfo', userInfo)
               wx.setStorageSync('achievements', merged.length)
+              console.log('更新用户成就列表:', merged)
             } else {
               const achievements = wx.getStorageSync('achievements') || 0
-              wx.setStorageSync('achievements', achievements + actionData.newAchievements.length)
+              const newAchievementsCount = achievements + actionData.newAchievements.length
+              wx.setStorageSync('achievements', newAchievementsCount)
+              console.log('更新成就数量:', achievements, '+', actionData.newAchievements.length, '=', newAchievementsCount)
             }
+          } else {
+            console.log('没有新成就获得')
           }
+        } else {
+          console.warn('actionData为空，使用备用逻辑')
+          // 备用：手动更新本地计数
+          const currentChatTimes = wx.getStorageSync('chatTimes') || 0
+          const newChatTimes = currentChatTimes + 1
+          const points = wx.getStorageSync('points') || 0
+          const newPoints = points + 2 // 基础积分
+          
+          console.log('备用更新数据:', { chatTimes: newChatTimes, points: newPoints })
+          wx.setStorageSync('chatTimes', newChatTimes)
+          wx.setStorageSync('points', newPoints)
+          console.log('积分已更新，新积分:', newPoints)
         }
         const botMsg = {
           id: Date.now() + 1,

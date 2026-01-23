@@ -103,12 +103,17 @@ exports.main = async (event, context) => {
       })
       .get()
     
+    console.log('查询成就条件:', { action, countValue })
+    console.log('找到符合条件的成就数量:', achievementsResult.data.length)
+    
     const newAchievements = []
     const newAchievementIds = []
     const rewardTitleIds = []
     let achievementPoints = 0
     
     for (const achievement of achievementsResult.data) {
+      console.log('检查成就:', achievement.achievementId)
+      
       // 检查是否已获得
       const existed = await db.collection('user_achievements')
         .where({
@@ -117,8 +122,12 @@ exports.main = async (event, context) => {
         })
         .count()
       
+      console.log(`成就 ${achievement.achievementId} 已获得数量:`, existed.total)
+      
       if (existed.total === 0) {
         // 授予新成就
+        console.log('授予新成就:', achievement.name, '积分:', achievement.points)
+        
         await db.collection('user_achievements').add({
           data: {
             _openid: openid,
@@ -135,29 +144,56 @@ exports.main = async (event, context) => {
         newAchievementIds.push(achievement.achievementId)
         achievementPoints += achievement.points || 0
         
+        console.log('当前成就积分累计:', achievementPoints)
+        
         if (achievement.rewardTitleId) {
           rewardTitleIds.push(achievement.rewardTitleId)
         }
       }
     }
     
+    console.log('成就检查完成:', { 
+      newAchievements: newAchievements.length, 
+      achievementPoints 
+    })
+    
     const totalRewardPoints = basePoints + achievementPoints
+    console.log('积分计算:', { basePoints, achievementPoints, totalRewardPoints })
+    
     const rewardUpdate = {}
     if (totalRewardPoints > 0) {
       rewardUpdate.points = _.inc(totalRewardPoints)
+      console.log('准备更新积分，增加:', totalRewardPoints)
     }
     if (newAchievementIds.length > 0) {
       rewardUpdate.achievements = _.push(newAchievementIds)
+      console.log('准备更新成就列表:', newAchievementIds)
     }
     if (rewardTitleIds.length > 0) {
       rewardUpdate.titles = _.push([...new Set(rewardTitleIds)])
+      console.log('准备更新称号列表:', rewardTitleIds)
     }
+    
+    console.log('rewardUpdate对象:', rewardUpdate)
     
     if (Object.keys(rewardUpdate).length > 0) {
       await db.collection('users').doc(user._id).update({
         data: rewardUpdate
       })
+      console.log('用户数据更新成功')
+    } else {
+      console.log('没有需要更新的数据')
     }
+    
+    const finalUserPoints = (user.points || 0) + totalRewardPoints
+    console.log('返回数据:', { 
+      newAchievements, 
+      basePoints, 
+      achievementPoints, 
+      totalPoints: totalRewardPoints,
+      updatedCount: countValue,
+      userPoints: finalUserPoints 
+    })
     
     return {
       success: true,
@@ -167,7 +203,7 @@ exports.main = async (event, context) => {
         achievementPoints,
         totalPoints: totalRewardPoints,
         updatedCount: countValue,
-        userPoints: (user.points || 0) + totalRewardPoints
+        userPoints: finalUserPoints
       }
     }
   } catch (err) {

@@ -29,8 +29,8 @@ Page({
   },
 
   onShow() {
-    // 每次显示页面时刷新数据
-    this.loadUserData()
+    // 每次显示页面时从云端刷新数据
+    this.loadUserDataFromCloud()
     this.loadUserTitles()
   },
   
@@ -82,6 +82,47 @@ Page({
       }
     } catch (err) {
       console.error('自动登录失败：', err)
+    }
+  },
+
+// 从云端加载用户数据
+  async loadUserDataFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        const data = result.result.data
+        
+        // 检查今天是否已签到
+        const todaySigned = this.checkTodaySigned()
+        
+        this.setData({ 
+          userInfo: data.userInfo,
+          signDays: data.userInfo.signDays || 0,
+          points: data.userInfo.points || 0,
+          achievements: data.userInfo.achievements?.length || 0,
+          todaySigned: todaySigned
+        })
+        
+        // 保存到本地
+        wx.setStorageSync('userInfo', data.userInfo)
+        wx.setStorageSync('openid', data.openid)
+        wx.setStorageSync('signDays', data.userInfo.signDays || 0)
+        wx.setStorageSync('points', data.userInfo.points || 0)
+        wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
+        
+        console.log('从云端加载用户数据成功:', { 
+          points: data.userInfo.points, 
+          signDays: data.userInfo.signDays 
+        })
+      }
+    } catch (err) {
+      console.error('从云端加载用户数据失败：', err)
+      // 降级到本地存储
+      this.loadUserData()
     }
   },
 

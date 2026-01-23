@@ -27,9 +27,42 @@ Page({
   },
 
   onShow() {
-    this.refreshState()
+    this.refreshStateFromCloud()
     this.buildCalendar()
     this.autoSignIn()
+  },
+
+  // 从云端刷新状态
+  async refreshStateFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        const data = result.result.data.userInfo
+        const signDays = data.signDays || 0
+        const points = data.points || 0
+        const todaySigned = this.checkTodaySigned()
+        
+        this.setData({
+          signDays,
+          points,
+          todaySigned
+        })
+        
+        // 更新本地存储
+        wx.setStorageSync('signDays', signDays)
+        wx.setStorageSync('points', points)
+        
+        console.log('从云端刷新签到状态成功:', { signDays, points })
+      }
+    } catch (err) {
+      console.error('从云端刷新签到状态失败：', err)
+      // 降级到本地存储
+      this.refreshState()
+    }
   },
 
   refreshState() {

@@ -114,8 +114,31 @@ Page({
     this.loadTitleProducts()
   },
 
-  onShow() {
-    this.loadUserPoints()
+onShow() {
+    this.loadUserPointsFromCloud()
+  },
+
+  // 从云端加载用户积分
+  async loadUserPointsFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        const points = result.result.data.userInfo.points || 0
+        this.setData({
+          userPoints: points
+        })
+        wx.setStorageSync('points', points)
+        console.log('从云端加载积分成功:', points)
+      }
+    } catch (err) {
+      console.error('从云端加载积分失败：', err)
+      // 降级到本地存储
+      this.loadUserPoints()
+    }
   },
 
   // 加载用户积分

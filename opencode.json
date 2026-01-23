@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "aliglm4.7": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "aliglm4.7",
+      "options": {
+        "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      },
+      "models": {
+        "glm-4.7": {
+          "name": "glm-4.7"
+        }
+      }
+    }
+  }
+}

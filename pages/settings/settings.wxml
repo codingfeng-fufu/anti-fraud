@@ -33,7 +33,7 @@
     </view>
   </view>
 
-  <view class="settings-section">
+<view class="settings-section">
     <view class="section-title">账号设置</view>
     <view class="settings-item">
       <view class="item-left">
@@ -46,6 +46,13 @@
       <view class="item-left">
         <text class="item-icon">🗑️</text>
         <text class="item-label">清除缓存</text>
+      </view>
+      <text class="item-arrow">›</text>
+    </view>
+    <view class="settings-item danger" bindtap="clearAllData">
+      <view class="item-left">
+        <text class="item-icon">⚠️</text>
+        <text class="item-label">清空所有数据</text>
       </view>
       <text class="item-arrow">›</text>
     </view>

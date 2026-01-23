@@ -235,17 +235,26 @@ Page({
     }
   },
 
-  syncActionData(actionData, countKey) {
+syncActionData(actionData, countKey) {
     if (!actionData) return
+
+    console.log('同步actionData:', actionData)
+    console.log('当前本地积分:', wx.getStorageSync('points') || 0)
 
     if (typeof actionData.updatedCount === 'number') {
       wx.setStorageSync(countKey, actionData.updatedCount)
+      console.log(`更新${countKey}:`, actionData.updatedCount)
     }
     if (typeof actionData.userPoints === 'number') {
       wx.setStorageSync('points', actionData.userPoints)
+      console.log('更新用户积分:', actionData.userPoints)
     } else if (actionData.totalPoints) {
       const points = wx.getStorageSync('points') || 0
-      wx.setStorageSync('points', points + actionData.totalPoints)
+      const newPoints = points + actionData.totalPoints
+      wx.setStorageSync('points', newPoints)
+      console.log('增加积分:', points, '+', actionData.totalPoints, '=', newPoints)
+    } else {
+      console.warn('actionData中没有积分信息:', { userPoints: actionData.userPoints, totalPoints: actionData.totalPoints })
     }
     if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
       const achievementIds = actionData.newAchievements
@@ -258,9 +267,12 @@ Page({
         userInfo.achievements = merged
         wx.setStorageSync('userInfo', userInfo)
         wx.setStorageSync('achievements', merged.length)
+        console.log('更新用户成就列表:', merged)
       } else {
         const achievements = wx.getStorageSync('achievements') || 0
-        wx.setStorageSync('achievements', achievements + actionData.newAchievements.length)
+        const newAchievementsCount = achievements + actionData.newAchievements.length
+        wx.setStorageSync('achievements', newAchievementsCount)
+        console.log('更新成就数量:', achievements, '+', actionData.newAchievements.length, '=', newAchievementsCount)
       }
     }
   },

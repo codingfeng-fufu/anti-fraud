@@ -199,24 +199,64 @@ Page({
     }
   },
 
-  onLoad() {
-    this.loadUserData()
+onLoad() {
+    console.log('成就页面onLoad触发')
+    this.loadUserDataFromCloud()
     this.checkAchievements()
   },
 
-  onShow() {
-    // 每次显示页面时刷新数据
-    this.loadUserData()
+  // 从云端加载用户数据
+  async loadUserDataFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        const data = result.result.data.userInfo
+        const signDays = data.signDays || 0
+        const points = data.points || 0
+        const readArticles = data.totalReadCount || 0
+        const chatTimes = data.totalChatCount || 0
+        
+        console.log('从云端加载用户数据:', { signDays, points, readArticles, chatTimes })
+        
+        this.setData({
+          signDays,
+          totalPoints: points,
+          readArticles,
+          chatTimes
+        })
+        
+        // 更新本地存储
+        wx.setStorageSync('signDays', signDays)
+        wx.setStorageSync('points', points)
+        wx.setStorageSync('readArticles', readArticles)
+        wx.setStorageSync('chatTimes', chatTimes)
+      }
+    } catch (err) {
+      console.error('从云端加载用户数据失败：', err)
+      // 降级到本地存储
+      this.loadUserData()
+    }
+  },
+
+onShow() {
+    console.log('成就页面onShow触发')
+    this.loadUserDataFromCloud()
     this.checkAchievements()
   },
 
   // 加载用户数据
-  loadUserData() {
+loadUserData() {
     try {
       const signDays = wx.getStorageSync('signDays') || 0
       const points = wx.getStorageSync('points') || 0
       const readArticles = wx.getStorageSync('readArticles') || 0
       const chatTimes = wx.getStorageSync('chatTimes') || 0
+      
+      console.log('加载用户数据:', { signDays, points, readArticles, chatTimes })
       
       this.setData({
         signDays,
@@ -230,8 +270,10 @@ Page({
   },
 
   // 检查成就解锁状态
-  checkAchievements() {
+checkAchievements() {
     const { signDays, totalPoints, readArticles, chatTimes } = this.data
+    console.log('检查成就状态:', { signDays, totalPoints, readArticles, chatTimes })
+    
     let achievements = this.data.achievements.map(item => {
       let current = 0
       
@@ -254,10 +296,7 @@ Page({
       // 检查是否解锁
       const unlocked = current >= item.target
       
-      // 如果刚解锁，显示提示
-      if (unlocked && !item.unlocked) {
-        this.showUnlockTip(item)
-      }
+      console.log(`成就 ${item.id}: 当前=${current}, 目标=${item.target}, 解锁=${unlocked}`)
       
       return {
         ...item,
@@ -266,10 +305,19 @@ Page({
       }
     })
     
+    // 将已解锁的成就置顶
+    achievements.sort((a, b) => {
+      if (a.unlocked && !b.unlocked) return -1
+      if (!a.unlocked && b.unlocked) return 1
+      return 0
+    })
+    
     // 计算统计数据
     const unlocked = achievements.filter(item => item.unlocked).length
     const total = achievements.length
     const progress = Math.round((unlocked / total) * 100)
+    
+    console.log('成就统计:', { unlocked, total, progress })
     
     this.setData({
       achievements,
