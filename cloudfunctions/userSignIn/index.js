@@ -25,7 +25,6 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   
   try {
-    // 获取用户信息
     const userResult = await db.collection('users').where({
       _openid: openid
     }).get()
@@ -39,56 +38,54 @@ exports.main = async (event, context) => {
     
     const user = userResult.data[0]
     
-    // 使用北京时间（UTC+8）计算日期
     const now = new Date()
     const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
-    const today = beijingTime.toISOString().split('T')[0] // YYYY-MM-DD 格式
+    const today = beijingTime.toISOString().split('T')[0]
     
-    let lastSignDate = null
-    if (user.lastSignDate) {
-      const lastDate = new Date(user.lastSignDate)
-      const lastBeijingTime = new Date(lastDate.getTime() + (8 * 60 * 60 * 1000))
-      lastSignDate = lastBeijingTime.toISOString().split('T')[0]
-    }
+    const signDates = user.signDates || []
     
-    // 检查今天是否已签到
-    if (lastSignDate === today) {
+    if (signDates.includes(today)) {
       return {
         success: false,
         errMsg: '今天已经签到过了'
       }
     }
     
-    // 计算连续签到天数
-    let newSignDays = user.signDays || 0
     const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
     const yesterday = yesterdayDate.toISOString().split('T')[0]
     
-    if (lastSignDate === yesterday) {
-      // 连续签到
-      newSignDays += 1
-    } else if (lastSignDate !== today) {
-      // 断签了，重新开始
-      newSignDays = 1
+    let consecutiveDays = 1
+    if (signDates.length > 0 && signDates[signDates.length - 1] === yesterday) {
+      let checkDate = new Date(yesterday)
+      consecutiveDays = 1
+      
+      while (true) {
+        checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+        const checkDateStr = checkDate.toISOString().split('T')[0]
+        
+        if (signDates.includes(checkDateStr)) {
+          consecutiveDays++
+        } else {
+          break
+        }
+      }
     }
     
-    // 计算获得积分（连续签到有加成）
     const basePoints = 10
-    const bonusPoints = Math.floor(newSignDays / 7) * 5
+    const bonusPoints = Math.floor(consecutiveDays / 7) * 5
     const earnedPoints = basePoints + bonusPoints
     const newPoints = (user.points || 0) + earnedPoints
     
-    // 更新用户数据
+    const newSignDates = [...signDates, today]
+    
     await db.collection('users').doc(user._id).update({
       data: {
-        signDays: newSignDays,
+        signDates: newSignDates,
         points: newPoints,
-        lastSignDate: today,  // 保存为 YYYY-MM-DD 字符串格式，与前端保持一致
         updatedAt: new Date()
       }
     })
     
-    // 保存签到记录（可选，如果集合不存在会跳过）
     try {
       await db.collection('sign_records').add({
         data: {
@@ -96,47 +93,59 @@ exports.main = async (event, context) => {
           userId: user._id,
           signDate: new Date(),
           points: earnedPoints,
-          signDays: newSignDays
+          signDays: consecutiveDays
         }
       })
     } catch (err) {
       console.log('保存签到记录失败（集合可能不存在）：', err.message)
-      // 不影响签到成功，继续执行
     }
     
-     // 检查成就（可选，如果集合不存在会跳过）
-     let achievementRewardPoints = 0
-     try {
-       const achievementResult = await checkAchievements(openid, user._id, {
-         signDays: newSignDays,
-         points: newPoints
-       })
-       achievementRewardPoints = achievementResult?.rewardPoints || 0
-     } catch (err) {
-       console.log('检查成就失败（集合可能不存在）：', err.message)
-       // 不影响签到成功，继续执行
-     }
-     
-     // 调用trackAction记录签到行为，以检查签到类成就
-     let trackActionPoints = 0
-     try {
-       const trackActionResult = await cloud.callFunction({
-         name: 'trackAction',
-         data: {
-           action: 'sign',
-           increment: 1
-         }
-       })
-       
-       if (trackActionResult.result && trackActionResult.result.success) {
-         trackActionPoints = trackActionResult.result.data?.totalPoints || 0
-       }
-       
-       console.log('Track sign action result:', trackActionResult)
-     } catch (err) {
-       console.log('Track sign action failed:', err.message)
-       // 不影响签到成功，继续执行
-     }
+    try {
+      await db.collection('points_records').add({
+        data: {
+          _openid: openid,
+          userId: user._id,
+          type: 'earn',
+          points: earnedPoints,
+          reason: '签到',
+          relatedId: `sign_${today}`,
+          createdAt: new Date()
+        }
+      })
+    } catch (err) {
+      console.log('保存积分记录失败（集合可能不存在）：', err.message)
+    }
+    
+    let achievementRewardPoints = 0
+    try {
+      const achievementResult = await checkAchievements(openid, user._id, {
+        signDays: consecutiveDays,
+        points: newPoints
+      })
+      achievementRewardPoints = achievementResult?.rewardPoints || 0
+    } catch (err) {
+      console.log('检查成就失败（集合可能不存在）：', err.message)
+    }
+    
+    let trackActionPoints = 0
+    try {
+      const trackActionResult = await cloud.callFunction({
+        name: 'trackAction',
+        data: {
+          action: 'sign',
+          increment: 1,
+          signDays: consecutiveDays
+        }
+      })
+      
+      if (trackActionResult.result && trackActionResult.result.success) {
+        trackActionPoints = trackActionResult.result.data?.totalPoints || 0
+      }
+      
+      console.log('Track sign action result:', trackActionResult)
+    } catch (err) {
+      console.log('Track sign action failed:', err.message)
+    }
     
     const achievementPoints = achievementRewardPoints + trackActionPoints
     const finalPoints = newPoints + achievementPoints
@@ -144,15 +153,16 @@ exports.main = async (event, context) => {
     return {
       success: true,
       data: {
-        signDays: newSignDays,
+        signDays: consecutiveDays,
+        signDates: newSignDates,
         points: finalPoints,
         earnedPoints,
         achievementPoints,
-        lastSignDate: today  // 返回签到日期，用于前端同步
+        lastSignDate: today
       },
       message: achievementPoints > 0
-        ? `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分，成就奖励${achievementPoints}积分`
-        : `签到成功！连续签到${newSignDays}天，获得${earnedPoints}积分`
+        ? `签到成功！连续签到${consecutiveDays}天，获得${earnedPoints}积分，成就奖励${achievementPoints}积分`
+        : `签到成功！连续签到${consecutiveDays}天，获得${earnedPoints}积分`
     }
   } catch (err) {
     console.error('签到失败：', err)

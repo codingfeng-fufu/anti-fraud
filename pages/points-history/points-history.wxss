@@ -1,0 +1,111 @@
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx 30rpx;
+  color: white;
+}
+
+.points-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.points-info .label {
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 10rpx;
+}
+
+.points-info .points-value {
+  font-size: 64rpx;
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+  background: white;
+  padding: 0 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab.active {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background: #667eea;
+  border-radius: 2rpx;
+}
+
+.records-list {
+  padding: 0 30rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.record-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.record-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.record-reason {
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-right {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.record-right.earn {
+  color: #52c41a;
+}
+
+.record-right.spend {
+  color: #ff4d4f;
+}

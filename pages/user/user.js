@@ -16,28 +16,43 @@ Page({
       avatarUrl: ''
     },
     signDays: 0,
+    signDates: [],
     points: 0,
     achievements: 0,
     todaySigned: false,
-    equippedTitles: [], // 当前佩戴的称号
-    allTitles: []       // 用户所有称号
+    equippedTitles: [],
+    allTitles: []
   },
 
   onLoad(options) {
-    // 自动登录
     this.autoLogin()
   },
 
   onShow() {
-    // 每次显示页面时从云端刷新数据
     this.loadUserDataFromCloud()
     this.loadUserTitles()
   },
+
+  onHide() {
+    this.saveToLocal()
+  },
+
+  onUnload() {
+    this.saveToLocal()
+  },
+
+  saveToLocal() {
+    wx.setStorageSync('signDays', this.data.signDays)
+    wx.setStorageSync('signDates', this.data.signDates)
+    wx.setStorageSync('points', this.data.points)
+    wx.setStorageSync('achievements', this.data.achievements)
+    if (this.data.signDates.length > 0) {
+      wx.setStorageSync('lastSignDate', this.data.signDates[this.data.signDates.length - 1])
+    }
+  },
   
-  // 自动登录（静默登录）
   async autoLogin() {
     try {
-      // 调用云函数获取用户信息
       const result = await wx.cloud.callFunction({
         name: 'login',
         data: {}
@@ -45,36 +60,29 @@ Page({
       
       if (result.result.success) {
         const data = result.result.data
+        const signDates = data.userInfo.signDates || []
+        const signDays = this.calculateConsecutiveDays(signDates)
         
-        // 保存云端的签到日期到本地（关键修复！）
-        if (data.userInfo.lastSignDate) {
-          let lastSignDate = data.userInfo.lastSignDate
-          
-          // 兼容旧数据：如果是 ISO 格式，转换为 YYYY-MM-DD
-          if (typeof lastSignDate === 'string' && lastSignDate.includes('T')) {
-            lastSignDate = lastSignDate.split('T')[0]
-            console.log('转换旧格式日期:', data.userInfo.lastSignDate, '→', lastSignDate)
-          }
-          
-          wx.setStorageSync('lastSignDate', lastSignDate)
-          console.log('从云端同步签到日期:', lastSignDate)
+        if (signDates.length > 0) {
+          wx.setStorageSync('signDates', signDates)
+          wx.setStorageSync('lastSignDate', signDates[signDates.length - 1])
+          console.log('从云端同步签到日期:', signDates)
         }
         
-        // 检查今天是否已签到
-        const todaySigned = this.checkTodaySigned()
+        const todaySigned = this.checkTodaySigned(signDates)
         
         this.setData({ 
           userInfo: data.userInfo,
-          signDays: data.userInfo.signDays || 0,
+          signDays,
+          signDates,
           points: data.userInfo.points || 0,
           achievements: data.userInfo.achievements?.length || 0,
           todaySigned: todaySigned
         })
         
-        // 保存到本地
         wx.setStorageSync('userInfo', data.userInfo)
         wx.setStorageSync('openid', data.openid)
-        wx.setStorageSync('signDays', data.userInfo.signDays || 0)
+        wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
         
@@ -85,7 +93,6 @@ Page({
     }
   },
 
-// 从云端加载用户数据
   async loadUserDataFromCloud() {
     try {
       const result = await wx.cloud.callFunction({
@@ -95,79 +102,103 @@ Page({
       
       if (result.result.success) {
         const data = result.result.data
+        const signDates = data.userInfo.signDates || []
+        const signDays = this.calculateConsecutiveDays(signDates)
         
-        // 检查今天是否已签到
-        const todaySigned = this.checkTodaySigned()
+        if (signDates.length > 0) {
+          wx.setStorageSync('signDates', signDates)
+          wx.setStorageSync('lastSignDate', signDates[signDates.length - 1])
+        }
+        
+        const todaySigned = this.checkTodaySigned(signDates)
         
         this.setData({ 
           userInfo: data.userInfo,
-          signDays: data.userInfo.signDays || 0,
+          signDays,
+          signDates,
           points: data.userInfo.points || 0,
           achievements: data.userInfo.achievements?.length || 0,
           todaySigned: todaySigned
         })
         
-        // 保存到本地
         wx.setStorageSync('userInfo', data.userInfo)
         wx.setStorageSync('openid', data.openid)
-        wx.setStorageSync('signDays', data.userInfo.signDays || 0)
+        wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
         
         console.log('从云端加载用户数据成功:', { 
           points: data.userInfo.points, 
-          signDays: data.userInfo.signDays 
+          signDays,
+          todaySigned
         })
       }
     } catch (err) {
       console.error('从云端加载用户数据失败：', err)
-      // 降级到本地存储
       this.loadUserData()
     }
   },
 
-  // 加载用户数据
   loadUserData() {
-    // 从本地缓存获取用户信息
     const userInfo = wx.getStorageSync('userInfo') || {}
-    const signDays = wx.getStorageSync('signDays') || 0
+    const signDates = wx.getStorageSync('signDates') || []
+    const signDays = this.calculateConsecutiveDays(signDates)
     const points = wx.getStorageSync('points') || 0
     const achievements = userInfo.achievements
       ? userInfo.achievements.length
       : (wx.getStorageSync('achievements') || 0)
-    const todaySigned = this.checkTodaySigned()
+    const todaySigned = this.checkTodaySigned(signDates)
 
     this.setData({
       userInfo,
       signDays,
+      signDates,
       points,
       achievements,
       todaySigned
     })
   },
 
-  // 检查今天是否已签到
-  checkTodaySigned() {
-    let lastSignDate = wx.getStorageSync('lastSignDate') || ''
+  calculateConsecutiveDays(signDates) {
+    if (!signDates || signDates.length === 0) return 0
     
-    // 兼容旧数据：如果是 ISO 格式（包含 T），提取日期部分
-    if (lastSignDate && lastSignDate.includes('T')) {
-      lastSignDate = lastSignDate.split('T')[0]
-      console.log('检测到旧格式日期，转换为:', lastSignDate)
-      // 保存转换后的格式
-      wx.setStorageSync('lastSignDate', lastSignDate)
-    }
-    
-    // 使用北京时间（UTC+8），与云函数保持一致
     const now = new Date()
     const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
     const today = beijingTime.toISOString().split('T')[0]
-    const isSigned = lastSignDate === today
-    console.log('检查签到状态 - 上次签到:', lastSignDate, '今天(北京时间):', today, '结果:', isSigned ? '已签到' : '未签到')
-    return isSigned
+    const sortedDates = [...signDates].sort()
+    
+    if (!sortedDates.includes(today)) {
+      const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
+      const yesterday = yesterdayDate.toISOString().split('T')[0]
+      if (!sortedDates.includes(yesterday)) {
+        return 0
+      }
+    }
+    
+    let consecutiveDays = 0
+    let checkDate = beijingTime
+    
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0]
+      if (sortedDates.includes(dateStr)) {
+        consecutiveDays++
+        checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+      } else {
+        break
+      }
+    }
+    
+    return consecutiveDays
   },
 
-  // 选择头像
+  checkTodaySigned(signDates) {
+    const dates = signDates || this.data.signDates || wx.getStorageSync('signDates') || []
+    const now = new Date()
+    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
+    const today = beijingTime.toISOString().split('T')[0]
+    return dates.includes(today)
+  },
+
   async onChooseAvatar(e) {
     const { avatarUrl } = e.detail
     console.log('选择头像：', avatarUrl)
@@ -175,7 +206,6 @@ Page({
     wx.showLoading({ title: '更新中...' })
     
     try {
-      // 上传头像到云存储
       const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).substr(2)}.jpg`
       const uploadResult = await wx.cloud.uploadFile({
         cloudPath,
@@ -184,7 +214,6 @@ Page({
       
       const cloudAvatarUrl = uploadResult.fileID
       
-      // 更新用户信息
       const result = await wx.cloud.callFunction({
         name: 'login',
         data: {
@@ -214,7 +243,6 @@ Page({
     }
   },
   
-  // 昵称输入
   async onNicknameChange(e) {
     const nickName = e.detail.value.trim()
     if (!nickName) return
@@ -224,7 +252,6 @@ Page({
     wx.showLoading({ title: '更新中...' })
     
     try {
-      // 更新用户信息
       const result = await wx.cloud.callFunction({
         name: 'login',
         data: {
@@ -254,15 +281,13 @@ Page({
     }
   },
 
-  // 处理签到
   async handleSignIn() {
-    // 重新检查签到状态（避免缓存问题）
     const todaySigned = this.checkTodaySigned()
     
     console.log('点击签到 - 检查状态:', todaySigned ? '已签到' : '未签到')
     
     if (todaySigned) {
-      this.setData({ todaySigned: true })  // 同步 UI 状态
+      this.setData({ todaySigned: true })
       wx.showToast({
         title: '今天已签到',
         icon: 'none'
@@ -273,7 +298,6 @@ Page({
     wx.showLoading({ title: '签到中...' })
     
     try {
-      // 调用云函数签到
       const result = await wx.cloud.callFunction({
         name: 'userSignIn',
         data: {}
@@ -286,14 +310,17 @@ Page({
         
         this.setData({
           signDays: data.signDays,
+          signDates: data.signDates,
           points: data.points,
           todaySigned: true
         })
         
-        // 保存到本地缓存（使用云函数返回的日期，确保一致性）
         wx.setStorageSync('signDays', data.signDays)
+        wx.setStorageSync('signDates', data.signDates)
         wx.setStorageSync('points', data.points)
-        wx.setStorageSync('lastSignDate', data.lastSignDate)
+        if (data.lastSignDate) {
+          wx.setStorageSync('lastSignDate', data.lastSignDate)
+        }
         
         console.log('签到成功，保存日期:', data.lastSignDate)
         
@@ -304,16 +331,11 @@ Page({
           confirmText: '太棒了'
         })
       } else {
-        // 签到失败，检查是否是"已签到"错误
         const errMsg = result.result.errMsg || '签到失败'
         
         console.log('签到失败:', errMsg)
         
         if (errMsg.includes('已经签到') || errMsg.includes('已签到')) {
-          // 云端显示已签到，但本地缓存可能不同步
-          console.log('检测到数据不同步，从云端重新加载用户数据')
-          
-          // 重新从云端加载数据，确保同步
           this.autoLogin()
         }
         
@@ -332,7 +354,6 @@ Page({
     }
   },
 
-  // 打开我的页面
   openMyProfile() {
     if (!this.data.userInfo.nickName) {
       wx.showToast({
@@ -347,7 +368,6 @@ Page({
     })
   },
 
-  // 页面跳转
   navigateTo(e) {
     const url = e.currentTarget.dataset.url
     if (!url) return
@@ -355,7 +375,6 @@ Page({
     wx.navigateTo({ url })
   },
 
-  // 加载用户称号
   async loadUserTitles() {
     try {
       const result = await wx.cloud.callFunction({
@@ -374,7 +393,6 @@ Page({
     }
   },
 
-  // 显示称号管理
   showTitleManagement() {
     wx.navigateTo({
       url: '/pages/title-management/title-management'

@@ -1,5 +1,5 @@
 {
-  "pages": [
+"pages": [
     "pages/index/index",
     "pages/chat/chat",
     "pages/user/user",
@@ -9,6 +9,7 @@
     "pages/bind-student/bind-student",
     "pages/achievements/achievements",
     "pages/points/points",
+    "pages/points-history/points-history",
     "pages/learning/learning",
     "pages/settings/settings",
     "pages/feedback/feedback",

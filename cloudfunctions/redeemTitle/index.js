@@ -15,7 +15,6 @@ exports.main = async (event, context) => {
   const { titleId } = event
   
   try {
-    // 获取称号信息
     const titleResult = await db.collection('titles')
       .where({ titleId, isActive: true })
       .get()
@@ -36,7 +35,6 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 获取用户信息
     const userResult = await db.collection('users')
       .where({ _openid: openid })
       .get()
@@ -50,7 +48,6 @@ exports.main = async (event, context) => {
     
     const user = userResult.data[0]
     
-    // 检查积分是否足够
     if (user.points < title.points) {
       return {
         success: false,
@@ -58,13 +55,28 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 扣除积分并添加称号
     await db.collection('users').doc(user._id).update({
       data: {
         points: _.inc(-title.points),
         titles: _.push(title.titleId)
       }
     })
+    
+    try {
+      await db.collection('points_records').add({
+        data: {
+          _openid: openid,
+          userId: user._id,
+          type: 'spend',
+          points: -title.points,
+          reason: `兑换称号：${title.name}`,
+          relatedId: `title_${titleId}`,
+          createdAt: new Date()
+        }
+      })
+    } catch (err) {
+      console.log('保存积分记录失败（集合可能不存在）：', err.message)
+    }
     
     return {
       success: true,

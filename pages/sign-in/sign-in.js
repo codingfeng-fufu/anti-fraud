@@ -12,6 +12,7 @@
 Page({
   data: {
     signDays: 0,
+    signDates: [],
     points: 0,
     todaySigned: false,
     calendarDays: [],
@@ -32,7 +33,6 @@ Page({
     this.autoSignIn()
   },
 
-  // 从云端刷新状态
   async refreshStateFromCloud() {
     try {
       const result = await wx.cloud.callFunction({
@@ -42,53 +42,71 @@ Page({
       
       if (result.result.success) {
         const data = result.result.data.userInfo
-        const signDays = data.signDays || 0
+        const signDates = data.signDates || []
+        const signDays = this.calculateConsecutiveDays(signDates)
         const points = data.points || 0
-        const todaySigned = this.checkTodaySigned()
+        const todaySigned = this.checkTodaySigned(signDates)
         
         this.setData({
           signDays,
+          signDates,
           points,
           todaySigned
         })
         
-        // 更新本地存储
-        wx.setStorageSync('signDays', signDays)
+        wx.setStorageSync('signDates', signDates)
         wx.setStorageSync('points', points)
         
-        console.log('从云端刷新签到状态成功:', { signDays, points })
+        console.log('从云端刷新签到状态成功:', { signDays, signDates, points })
       }
     } catch (err) {
       console.error('从云端刷新签到状态失败：', err)
-      // 降级到本地存储
       this.refreshState()
     }
   },
 
   refreshState() {
-    const signDays = wx.getStorageSync('signDays') || 0
+    const signDates = wx.getStorageSync('signDates') || []
+    const signDays = this.calculateConsecutiveDays(signDates)
     const points = wx.getStorageSync('points') || 0
-    const todaySigned = this.checkTodaySigned()
+    const todaySigned = this.checkTodaySigned(signDates)
 
     this.setData({
       signDays,
+      signDates,
       points,
       todaySigned
     })
   },
 
-  getLastSignDate() {
-    let lastSignDate = wx.getStorageSync('lastSignDate') || ''
-    if (lastSignDate && lastSignDate.includes('T')) {
-      lastSignDate = lastSignDate.split('T')[0]
-      wx.setStorageSync('lastSignDate', lastSignDate)
+  calculateConsecutiveDays(signDates) {
+    if (!signDates || signDates.length === 0) return 0
+    
+    const today = this.getBeijingDate().toISOString().split('T')[0]
+    const sortedDates = [...signDates].sort().reverse()
+    
+    if (!sortedDates.includes(today)) {
+      const yesterdayDate = new Date(this.getBeijingDate().getTime() - 24 * 60 * 60 * 1000)
+      const yesterday = yesterdayDate.toISOString().split('T')[0]
+      if (!sortedDates.includes(yesterday)) {
+        return 0
+      }
     }
-
-    if (!lastSignDate) return null
-
-    const parts = lastSignDate.split('-').map(Number)
-    if (parts.length !== 3 || parts.some(Number.isNaN)) return null
-    return new Date(parts[0], parts[1] - 1, parts[2])
+    
+    let consecutiveDays = 0
+    let checkDate = this.getBeijingDate()
+    
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0]
+      if (sortedDates.includes(dateStr)) {
+        consecutiveDays++
+        checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+      } else {
+        break
+      }
+    }
+    
+    return consecutiveDays
   },
 
   getBeijingDate() {
@@ -96,17 +114,11 @@ Page({
     return new Date(now.getTime() + (8 * 60 * 60 * 1000))
   },
 
-  checkTodaySigned() {
-    let lastSignDate = wx.getStorageSync('lastSignDate') || ''
-
-    if (lastSignDate && lastSignDate.includes('T')) {
-      lastSignDate = lastSignDate.split('T')[0]
-      wx.setStorageSync('lastSignDate', lastSignDate)
-    }
-
+  checkTodaySigned(signDates) {
+    const dates = signDates || this.data.signDates || wx.getStorageSync('signDates') || []
     const beijingTime = this.getBeijingDate()
     const today = beijingTime.toISOString().split('T')[0]
-    return lastSignDate === today
+    return dates.includes(today)
   },
 
   buildCalendar() {
@@ -118,15 +130,7 @@ Page({
     const totalDays = new Date(year, month + 1, 0).getDate()
     const currentMonthLabel = `${year}年${String(month + 1).padStart(2, '0')}月`
 
-    const lastSignDate = this.getLastSignDate()
-    const signDays = this.data.signDays || 0
-    let startSignDate = null
-
-    if (lastSignDate && signDays > 0) {
-      startSignDate = new Date(lastSignDate)
-      startSignDate.setDate(startSignDate.getDate() - signDays + 1)
-    }
-
+    const signDates = this.data.signDates || []
     const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const calendarDays = []
 
@@ -136,12 +140,9 @@ Page({
 
     for (let day = 1; day <= totalDays; day += 1) {
       const date = new Date(year, month, day)
+      const dateStr = date.toISOString().split('T')[0]
       const isToday = date.getTime() === todayDate.getTime()
-      let isSigned = false
-
-      if (startSignDate && lastSignDate) {
-        isSigned = date >= startSignDate && date <= lastSignDate
-      }
+      const isSigned = signDates.includes(dateStr)
 
       calendarDays.push({
         day,
@@ -204,16 +205,19 @@ Page({
       if (result.result && result.result.success) {
         const data = result.result.data || {}
         const signDays = data.signDays ?? this.data.signDays
+        const signDates = data.signDates ?? this.data.signDates
         const points = data.points ?? this.data.points
         const achievementPoints = data.achievementPoints || 0
 
         this.setData({
           signDays,
+          signDates,
           points,
           todaySigned: true
         })
 
         wx.setStorageSync('signDays', signDays)
+        wx.setStorageSync('signDates', signDates)
         wx.setStorageSync('points', points)
         if (data.lastSignDate) {
           wx.setStorageSync('lastSignDate', data.lastSignDate)

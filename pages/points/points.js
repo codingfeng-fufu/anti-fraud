@@ -296,20 +296,9 @@ onShow() {
   },
 
   // 查看兑换记录
-  viewRecords() {
-    if (this.data.exchangeRecords.length === 0) {
-      wx.showToast({
-        title: '暂无兑换记录',
-        icon: 'none'
-      })
-      return
-    }
-    
-    // TODO: 跳转到兑换记录页面
-    wx.showModal({
-      title: '兑换记录',
-      content: `共有${this.data.exchangeRecords.length}条兑换记录`,
-      showCancel: false
+viewRecords() {
+    wx.navigateTo({
+      url: '/pages/points-history/points-history'
     })
   },
 

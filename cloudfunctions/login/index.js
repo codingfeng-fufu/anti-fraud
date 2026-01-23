@@ -19,14 +19,45 @@ cloud.init({
 
 const db = cloud.database()
 
+function generateUID() {
+  const timestamp = Date.now().toString().slice(-6)
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  return timestamp + random
+}
+
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return ''
+  return input.replace(/[<>\"'%;()&+]/g, '').trim().slice(0, 20)
+}
+
+async function checkNicknameExists(nickname, excludeOpenid = null) {
+  try {
+    const query = db.collection('users').where({
+      nickName: nickname
+    })
+    
+    if (excludeOpenid) {
+      query.where({
+        _openid: db.command.neq(excludeOpenid)
+      })
+    }
+    
+    const result = await query.count()
+    return result.total > 0
+  } catch (err) {
+    console.error('检查昵称重复失败：', err)
+    return false
+  }
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   
   try {
-    // 获取用户的 openid
     const openid = wxContext.OPENID
+    const nickName = event.nickName ? sanitizeInput(event.nickName) : null
+    const avatarUrl = event.avatarUrl || ''
     
-    // 查询用户是否已存在
     const userResult = await db.collection('users').where({
       _openid: openid
     }).get()
@@ -34,27 +65,39 @@ exports.main = async (event, context) => {
     let userData = null
     
     if (userResult.data.length === 0) {
-      // 新用户，创建用户记录
+      const uid = generateUID()
+      const defaultNickname = nickName || `反诈先锋${uid}`
+      
+      if (nickName) {
+        const exists = await checkNicknameExists(nickname)
+        if (exists) {
+          return {
+            success: false,
+            errMsg: '该昵称已被使用，请更换其他昵称'
+          }
+        }
+      }
+      
       const now = new Date()
-       const newUser = {
-         _openid: openid,
-         nickName: event.nickName || '反诈用户',
-         avatarUrl: event.avatarUrl || '',
-         signDays: 0,
-         points: 0,
-         achievements: [],
-         titles: [], // 新增：已获得的称号ID数组
-         equippedTitles: [], // 新增：当前佩戴的称号ID数组
-         continuousLearnDays: 0, // 新增：连续学习天数
-         lastLearnDate: null, // 新增：最后学习日期
-         totalReadCount: 0,
-         totalChatCount: 0,
-         lastChatDate: null, // 新增：最后对话日期
-         lastReadDate: null, // 新增：最后阅读日期
-         lastSignDate: null,
-         createdAt: now,
-         updatedAt: now
-       }
+      const newUser = {
+        _openid: openid,
+        uid: uid,
+        nickName: defaultNickname,
+        avatarUrl: avatarUrl,
+        signDates: [],
+        points: 0,
+        achievements: [],
+        titles: [],
+        equippedTitles: [],
+        continuousLearnDays: 0,
+        lastLearnDate: null,
+        totalReadCount: 0,
+        totalChatCount: 0,
+        lastChatDate: null,
+        lastReadDate: null,
+        createdAt: now,
+        updatedAt: now
+      }
       
       const addResult = await db.collection('users').add({
         data: newUser
@@ -65,18 +108,29 @@ exports.main = async (event, context) => {
         _id: addResult._id
       }
     } else {
-      // 老用户，更新信息
       userData = userResult.data[0]
       
-      // 如果传入了新的昵称和头像，更新用户信息
-      if (event.nickName || event.avatarUrl) {
+      if (nickName || avatarUrl) {
+        if (nickName && nickName !== userData.nickName) {
+          const exists = await checkNicknameExists(nickname, openid)
+          if (exists) {
+            return {
+              success: false,
+              errMsg: '该昵称已被使用，请更换其他昵称'
+            }
+          }
+        }
+        
         await db.collection('users').doc(userData._id).update({
           data: {
-            nickName: event.nickName || userData.nickName,
-            avatarUrl: event.avatarUrl || userData.avatarUrl,
+            nickName: nickName || userData.nickName,
+            avatarUrl: avatarUrl || userData.avatarUrl,
             updatedAt: new Date()
           }
         })
+        
+        userData.nickName = nickName || userData.nickName
+        userData.avatarUrl = avatarUrl || userData.avatarUrl
       }
     }
     

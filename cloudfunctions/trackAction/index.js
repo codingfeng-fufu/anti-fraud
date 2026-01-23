@@ -12,7 +12,7 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
   
-  const { action, increment = 1 } = event // action: 'sign', 'chat', 'read', 'learn'
+  const { action, increment = 1, signDays } = event
   const basePointsMap = {
     chat: 2,
     read: 5
@@ -20,7 +20,6 @@ exports.main = async (event, context) => {
   const basePoints = (basePointsMap[action] || 0) * increment
   
   try {
-    // 获取用户信息
     const userResult = await db.collection('users')
       .where({ _openid: openid })
       .get()
@@ -31,15 +30,12 @@ exports.main = async (event, context) => {
     
     const user = userResult.data[0]
     
-    // 根据不同行为类型更新用户数据
     let updateData = {}
     let countValue = 0
     
     switch (action) {
       case 'sign':
-        // 签到行为不需要额外更新用户数据，因为已经在userSignIn中处理
-        // 但我们仍需要检查是否有相关的成就
-        countValue = user.signDays || 0
+        countValue = signDays || 0
         break
       case 'chat':
         updateData = {
@@ -56,17 +52,14 @@ exports.main = async (event, context) => {
         countValue = (user.totalReadCount || 0) + increment
         break
       case 'learn':
-        // 检查是否是同一天学习
         const today = new Date().toISOString().split('T')[0]
         const lastLearnDate = user.lastLearnDate ? new Date(user.lastLearnDate).toISOString().split('T')[0] : null
         
         if (lastLearnDate === today) {
-          // 今天已经学习过，只增加计数，不增加连续天数
           updateData = {
             continuousLearnDays: user.continuousLearnDays || 0
           }
         } else {
-          // 新的一天学习，更新连续学习天数
           const expectedNextDay = lastLearnDate ? 
             new Date(new Date(lastLearnDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] : 
             null
@@ -87,18 +80,16 @@ exports.main = async (event, context) => {
         return { success: false, errMsg: '无效的行为类型' }
     }
     
-    // 如果需要更新用户数据，则执行更新
     if (Object.keys(updateData).length > 0) {
       await db.collection('users').doc(user._id).update({
         data: updateData
       })
     }
     
-    // 检查并授予成就
     const achievementsResult = await db.collection('achievements')
       .where({
         type: action,
-        target: _.lte(countValue), // 目标值小于等于当前值
+        target: _.lte(countValue),
         isActive: true
       })
       .get()
@@ -114,7 +105,6 @@ exports.main = async (event, context) => {
     for (const achievement of achievementsResult.data) {
       console.log('检查成就:', achievement.achievementId)
       
-      // 检查是否已获得
       const existed = await db.collection('user_achievements')
         .where({
           _openid: openid,
@@ -125,7 +115,6 @@ exports.main = async (event, context) => {
       console.log(`成就 ${achievement.achievementId} 已获得数量:`, existed.total)
       
       if (existed.total === 0) {
-        // 授予新成就
         console.log('授予新成就:', achievement.name, '积分:', achievement.points)
         
         await db.collection('user_achievements').add({
@@ -164,6 +153,22 @@ exports.main = async (event, context) => {
     if (totalRewardPoints > 0) {
       rewardUpdate.points = _.inc(totalRewardPoints)
       console.log('准备更新积分，增加:', totalRewardPoints)
+      
+      try {
+        await db.collection('points_records').add({
+          data: {
+            _openid: openid,
+            userId: user._id,
+            type: 'earn',
+            points: totalRewardPoints,
+            reason: action === 'sign' ? '签到成就' : action === 'chat' ? '对话' : action === 'read' ? '阅读' : '学习',
+            relatedId: action === 'sign' ? `achievement_sign_${newAchievementIds.join(',')}` : `${action}_${Date.now()}`,
+            createdAt: new Date()
+          }
+        })
+      } catch (err) {
+        console.log('保存积分记录失败（集合可能不存在）：', err.message)
+      }
     }
     if (newAchievementIds.length > 0) {
       rewardUpdate.achievements = _.push(newAchievementIds)

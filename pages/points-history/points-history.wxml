@@ -1,0 +1,51 @@
+<view class="container">
+  <view class="header">
+    <view class="points-info">
+      <text class="label">当前积分</text>
+      <text class="points-value">{{currentPoints}}</text>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view 
+      class="tab {{currentTab === 'all' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="all"
+    >
+      全部
+    </view>
+    <view 
+      class="tab {{currentTab === 'earn' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="earn"
+    >
+      获得
+    </view>
+    <view 
+      class="tab {{currentTab === 'spend' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="spend"
+    >
+      消费
+    </view>
+  </view>
+
+  <view class="records-list">
+    <view wx:if="{{records.length === 0}}" class="empty">
+      <text>暂无记录</text>
+    </view>
+    <view 
+      wx:for="{{records}}" 
+      wx:key="_id" 
+      class="record-item"
+    >
+      <view class="record-left">
+        <text class="record-reason">{{item.reason}}</text>
+        <text class="record-time">{{item.timeStr}}</text>
+      </view>
+      <view class="record-right {{item.type === 'earn' ? 'earn' : 'spend'}}">
+        <text>{{item.type === 'earn' ? '+' : ''}}{{item.points}}</text>
+      </view>
+    </view>
+  </view>
+</view>

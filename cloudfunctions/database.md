@@ -8,6 +8,7 @@
 {
   _id: "自动生成",
   _openid: "用户openid（自动生成）",
+  uid: "用户唯一标识",      // 9位数字UID
   nickName: "用户昵称",
   avatarUrl: "头像URL",
   
@@ -30,12 +31,17 @@
   isBound: false,           // 是否已绑定学号
   
   // 原有字段
-  signDays: 0,              // 连续签到天数
+  signDates: [],           // 签到日期数组（YYYY-MM-DD格式）
   points: 0,                // 积分
   achievements: [],         // 已获得成就ID数组
+  titles: [],               // 已获得称号ID数组
+  equippedTitles: [],       // 已装备称号ID数组
   totalReadCount: 0,        // 总阅读数
   totalChatCount: 0,        // 总对话数
-  lastSignDate: null,       // 最后签到日期
+  continuousLearnDays: 0,   // 连续学习天数
+  lastLearnDate: null,      // 最后学习日期
+  lastChatDate: null,       // 最后聊天日期
+  lastReadDate: null,       // 最后阅读日期
   createdAt: Date,          // 创建时间
   updatedAt: Date           // 更新时间
 }
@@ -111,7 +117,9 @@
   userId: "用户ID",
   achievementId: "成就ID",   // sign_7/read_10等
   achievementName: "成就名称",
-  earnedAt: Date            // 获得时间
+  earnedAt: Date,           // 获得时间
+  rewardTitleId: "奖励称号ID", // 可选
+  pointsEarned: 10          // 获得积分
 }
 ```
 
@@ -119,7 +127,27 @@
 - `_openid`
 - `achievementId`
 
-### 6. read_records - 阅读记录表
+### 6. points_records - 积分记录表
+
+```javascript
+{
+  _id: "自动生成",
+  _openid: "用户openid",
+  userId: "用户ID",
+  type: "earn",             // earn（获得）/ spend（消费）
+  points: 10,               // 积分数量
+  reason: "签到",           // 原因描述
+  relatedId: "sign_2026-01-23", // 关联ID（可选）
+  createdAt: Date           // 创建时间
+}
+```
+
+**索引：**
+- `_openid`
+- `createdAt` (降序)
+- `type`
+
+### 7. read_records - 阅读记录表
 
 ```javascript
 {
@@ -136,7 +164,7 @@
 - `articleId`
 - `readAt` (降序)
 
-### 7. schools - 学校表
+### 8. schools - 学校表
 
 ```javascript
 {
@@ -156,7 +184,7 @@
 **索引：**
 - `schoolId` (唯一)
 
-### 8. colleges - 院系表
+### 9. colleges - 院系表
 
 ```javascript
 {
@@ -174,7 +202,7 @@
 - `schoolId`
 - `collegeId`
 
-### 9. majors - 专业表
+### 10. majors - 专业表
 
 ```javascript
 {
@@ -217,7 +245,10 @@
 5. **user_achievements 集合**
    - 仅创建者可读
 
-6. **read_records 集合**
+6. **points_records 集合**
+   - 仅创建者可读写
+
+7. **read_records 集合**
    - 仅创建者可读写
 
 ---
@@ -289,7 +320,11 @@
 - chat_logs
 - sign_records
 - user_achievements
+- points_records
 - read_records
+- schools
+- colleges
+- majors
 
 ### 3. 上传并部署云函数
 
