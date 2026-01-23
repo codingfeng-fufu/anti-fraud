@@ -8,6 +8,10 @@ Page({
     this.loadUserTitles()
   },
 
+  onShow() {
+    this.loadUserTitles()
+  },
+
   // 加载用户称号数据
   async loadUserTitles() {
     wx.showLoading({

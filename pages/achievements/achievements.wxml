@@ -76,6 +76,9 @@
           <text wx:if="{{item.unlocked && item.points > 0}}" class="achievement-badge">+{{item.points}}</text>
         </view>
         <text class="achievement-description">{{item.desc}}</text>
+        <view wx:if="{{item.unlocked && item.earnedAtText}}" class="achievement-earned-at">
+          <text class="earned-label">达成时间 {{item.earnedAtText}}</text>
+        </view>
         <view wx:if="{{item.unlocked && item.rewardTitleName}}" class="achievement-reward">
           <text class="reward-label">🏆 {{item.rewardTitleName}}</text>
         </view>

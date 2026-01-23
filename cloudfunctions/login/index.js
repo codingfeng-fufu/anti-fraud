@@ -53,7 +53,10 @@ exports.main = async (event, context) => {
   
   try {
     const openid = wxContext.OPENID
-    const nickName = event.nickName ? sanitizeInput(event.nickName) : null
+    const rawNickname = typeof event.nickName === 'string'
+      ? event.nickName
+      : event.nickname
+    const nickname = rawNickname ? sanitizeInput(rawNickname) : null
     const avatarUrl = event.avatarUrl || ''
     
     const userResult = await db.collection('users').where({
@@ -64,10 +67,10 @@ exports.main = async (event, context) => {
     
     if (userResult.data.length === 0) {
       const uid = generateUID()
-      const defaultNickname = nickName || `反诈先锋${uid}`
+      const defaultNickname = nickname || `反诈先锋${uid}`
       
-      if (nickName) {
-        const exists = await checkNicknameExists(nickName)
+      if (nickname) {
+        const exists = await checkNicknameExists(nickname)
         if (exists) {
           return {
             success: false,
@@ -125,9 +128,9 @@ exports.main = async (event, context) => {
     } else {
       userData = userResult.data[0]
       
-      if (nickName || avatarUrl) {
-        if (nickName && nickName !== userData.nickName) {
-          const exists = await checkNicknameExists(nickName, openid)
+      if (nickname || avatarUrl) {
+        if (nickname && nickname !== userData.nickName) {
+          const exists = await checkNicknameExists(nickname, openid)
           if (exists) {
             return {
               success: false,
@@ -138,13 +141,13 @@ exports.main = async (event, context) => {
         
         await db.collection('users').doc(userData._id).update({
           data: {
-            nickName: nickName || userData.nickName,
+            nickName: nickname || userData.nickName,
             avatarUrl: avatarUrl || userData.avatarUrl,
             updatedAt: new Date()
           }
         })
         
-        userData.nickName = nickName || userData.nickName
+        userData.nickName = nickname || userData.nickName
         userData.avatarUrl = avatarUrl || userData.avatarUrl
       }
     }

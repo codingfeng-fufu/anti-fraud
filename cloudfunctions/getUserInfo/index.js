@@ -1,12 +1,7 @@
 /**
- * 获取用户信息云函数 - 用户数据管理模块
- * 
- * 上游依赖：微信云开发环境，users数据库集合
- * 入口：exports.main函数，获取用户完整信息
- * 主要功能：从云端数据库获取用户信息，包括积分、成就、称号等
- * 输出：用户完整信息
- * 
- * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+ * Cloud function: getUserInfo.
+ *
+ * Sync achievements based on user stats and return user profile data.
  */
 
 const cloud = require('wx-server-sdk')
@@ -16,72 +11,303 @@ cloud.init({
 })
 
 const db = cloud.database()
+const _ = db.command
+
+function calculateConsecutiveDays(signDates) {
+  if (!Array.isArray(signDates) || signDates.length === 0) return 0
+
+  const now = new Date()
+  const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
+  const today = beijingTime.toISOString().split('T')[0]
+  const sortedDates = [...signDates].sort()
+
+  if (!sortedDates.includes(today)) {
+    const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
+    const yesterday = yesterdayDate.toISOString().split('T')[0]
+    if (!sortedDates.includes(yesterday)) {
+      return 0
+    }
+  }
+
+  let consecutiveDays = 0
+  let checkDate = beijingTime
+
+  while (true) {
+    const dateStr = checkDate.toISOString().split('T')[0]
+    if (sortedDates.includes(dateStr)) {
+      consecutiveDays++
+      checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+    } else {
+      break
+    }
+  }
+
+  return consecutiveDays
+}
+
+async function getRewardTitleNameMap(achievements) {
+  const rewardTitleIds = [...new Set(
+    achievements
+      .map(item => item.rewardTitleId)
+      .filter(Boolean)
+  )]
+
+  if (rewardTitleIds.length === 0) {
+    return new Map()
+  }
+
+  const titlesResult = await db.collection('titles')
+    .where({ titleId: _.in(rewardTitleIds) })
+    .get()
+
+  return new Map((titlesResult.data || []).map(title => [title.titleId, title.name]))
+}
+
+async function syncAchievements(user, stats) {
+  const [achievementsResult, userAchievementsResult] = await Promise.all([
+    db.collection('achievements').where({ isActive: true }).get(),
+    db.collection('user_achievements').where({ userId: user._id }).get()
+  ])
+
+  const allAchievements = achievementsResult.data || []
+  const userAchievementRecords = userAchievementsResult.data || []
+  const earnedMap = new Map(userAchievementRecords.map(item => [item.achievementId, item]))
+  const userAchievementIds = Array.isArray(user.achievements) ? user.achievements : []
+  const earnedAchievementIds = userAchievementRecords.map(item => item.achievementId)
+
+  for (const achievementId of userAchievementIds) {
+    if (!earnedMap.has(achievementId)) {
+      earnedMap.set(achievementId, { achievementId, earnedAt: null })
+    }
+  }
+
+  const rewardTitleNameMap = await getRewardTitleNameMap(allAchievements)
+
+  const newAchievementIds = []
+  const newRewardTitleIds = []
+  const newAchievementRecords = []
+  let rewardPoints = 0
+  const basePoints = stats.points || 0
+
+  const processAchievements = async (items) => {
+    for (const achievement of items) {
+      const current = stats[achievement.type] || 0
+      const target = Number(achievement.target) || 0
+      const unlocked = current >= target
+
+      if (!unlocked) continue
+
+      const achievementId = achievement.achievementId
+      if (earnedMap.has(achievementId)) continue
+      const pointsValue = Number(achievement.points) || 0
+
+      const earnedAt = new Date()
+      const record = {
+        _openid: user._openid,
+        userId: user._id,
+        uid: user.uid,
+        nickName: user.nickName,
+        achievementId: achievementId,
+        achievementName: achievement.name,
+        earnedAt,
+        rewardTitleId: achievement.rewardTitleId || null,
+        pointsEarned: pointsValue
+      }
+
+      await db.collection('user_achievements').add({ data: record })
+
+      earnedMap.set(achievementId, record)
+      newAchievementRecords.push(record)
+      newAchievementIds.push(achievementId)
+
+      if (achievement.rewardTitleId) {
+        newRewardTitleIds.push(achievement.rewardTitleId)
+      }
+
+      rewardPoints += pointsValue
+    }
+  }
+
+  const pointsAchievements = []
+  const otherAchievements = []
+
+  for (const achievement of allAchievements) {
+    if (achievement.type === 'points') {
+      pointsAchievements.push(achievement)
+    } else {
+      otherAchievements.push(achievement)
+    }
+  }
+
+  await processAchievements(otherAchievements)
+  stats.points = basePoints + rewardPoints
+  await processAchievements(pointsAchievements)
+  stats.points = basePoints + rewardPoints
+
+  const updateData = {}
+  if (rewardPoints > 0) {
+    updateData.points = _.inc(rewardPoints)
+  }
+
+  const missingAchievementIds = earnedAchievementIds
+    .filter(id => !userAchievementIds.includes(id))
+  const achievementsToSync = [...new Set([...missingAchievementIds, ...newAchievementIds])]
+
+  if (achievementsToSync.length > 0) {
+    updateData.achievements = _.push(achievementsToSync)
+  }
+
+  const existingTitleIds = Array.isArray(user.titles) ? user.titles : []
+  const uniqueRewardTitleIds = [...new Set(newRewardTitleIds)]
+    .filter(id => !existingTitleIds.includes(id))
+
+  if (uniqueRewardTitleIds.length > 0) {
+    updateData.titles = _.push(uniqueRewardTitleIds)
+  }
+
+  if ((user.signDays || 0) !== stats.sign) {
+    updateData.signDays = stats.sign
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    updateData.updatedAt = new Date()
+    await db.collection('users').doc(user._id).update({ data: updateData })
+  }
+
+  if (rewardPoints > 0) {
+    try {
+      await db.collection('points_records').add({
+        data: {
+          _openid: user._openid,
+          userId: user._id,
+          uid: user.uid,
+          nickName: user.nickName,
+          type: 'earn',
+          points: rewardPoints,
+          reason: 'Achievement reward',
+          relatedId: `achievement_${newAchievementIds.join(',')}`,
+          createdAt: new Date()
+        }
+      })
+    } catch (err) {
+      console.log('Failed to write points record:', err.message)
+    }
+  }
+
+  const updatedUser = {
+    ...user,
+    points: basePoints + rewardPoints,
+    achievements: [...new Set([...userAchievementIds, ...earnedAchievementIds, ...newAchievementIds])],
+    titles: [...new Set([...existingTitleIds, ...uniqueRewardTitleIds])],
+    signDays: stats.sign
+  }
+
+  const achievementList = allAchievements.map(achievement => {
+    const current = stats[achievement.type] || 0
+    const target = Number(achievement.target) || 0
+    const pointsValue = Number(achievement.points) || 0
+    const achievementId = achievement.achievementId
+    const record = earnedMap.get(achievementId)
+    const earned = Boolean(record)
+    const unlocked = earned || current >= target
+    const earnedAt = record && record.earnedAt ? new Date(record.earnedAt).toISOString() : null
+
+    return {
+      id: achievementId,
+      title: achievement.name,
+      desc: achievement.desc,
+      icon: achievement.icon,
+      type: achievement.type,
+      target,
+      current,
+      points: pointsValue,
+      rewardTitleId: achievement.rewardTitleId || null,
+      rewardTitleName: achievement.rewardTitleId
+        ? (rewardTitleNameMap.get(achievement.rewardTitleId) || '')
+        : '',
+      unlocked,
+      earnedAt
+    }
+  })
+
+  return {
+    achievementList,
+    userAchievements: [...userAchievementRecords, ...newAchievementRecords],
+    updatedUser
+  }
+}
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
-  
+
   try {
-    // 获取用户信息
+    // Load user
     const userResult = await db.collection('users')
       .where({ _openid: openid })
       .get()
-    
+
     if (userResult.data.length === 0) {
       return {
         success: false,
-        errMsg: '用户不存在'
+        errMsg: 'User not found'
       }
     }
-    
+
     const user = userResult.data[0]
-    
-    // 获取用户获得的成就详情
-    const userAchievementsResult = await db.collection('user_achievements')
-      .where({ userId: user._id })
-      .get()
-    
-    // 获取用户拥有的称号
-    const userTitles = user.titles || []
-    
-    // 获取当前佩戴的称号
-    const equippedTitleId = user.equippedTitleId || null
-    
+    const signDates = Array.isArray(user.signDates) ? user.signDates : []
+    const signDays = calculateConsecutiveDays(signDates)
+
+    const stats = {
+      sign: signDays,
+      read: user.totalReadCount || 0,
+      chat: user.totalChatCount || 0,
+      learn: user.continuousLearnDays || 0,
+      points: user.points || 0
+    }
+
+    const achievementSyncResult = await syncAchievements(user, stats)
+    const syncedUser = achievementSyncResult.updatedUser
+    const userTitles = syncedUser.titles || []
+    const equippedTitleId = syncedUser.equippedTitleId || null
+
     return {
       success: true,
       data: {
         openid,
         userInfo: {
-          _id: user._id,
-          nickName: user.nickName || '未设置',
-          avatarUrl: user.avatarUrl || '',
-          studentId: user.studentId || '',
-          schoolName: user.schoolName || '',
-          collegeName: user.collegeName || '',
-          majorName: user.majorName || '',
-          grade: user.grade || '',
-          isBound: user.isBound || false,
-          points: user.points || 0,
-          signDays: user.signDays || 0,
-          totalChatCount: user.totalChatCount || 0,
-          totalReadCount: user.totalReadCount || 0,
-          continuousLearnDays: user.continuousLearnDays || 0,
-          achievements: user.achievements || [],
+          _id: syncedUser._id,
+          nickName: syncedUser.nickName || 'Unnamed',
+          avatarUrl: syncedUser.avatarUrl || '',
+          studentId: syncedUser.studentId || '',
+          schoolName: syncedUser.schoolName || '',
+          collegeName: syncedUser.collegeName || '',
+          majorName: syncedUser.majorName || '',
+          grade: syncedUser.grade || '',
+          isBound: syncedUser.isBound || false,
+          points: syncedUser.points || 0,
+          signDays: signDays,
+          signDates: signDates,
+          totalChatCount: syncedUser.totalChatCount || 0,
+          totalReadCount: syncedUser.totalReadCount || 0,
+          continuousLearnDays: syncedUser.continuousLearnDays || 0,
+          achievements: syncedUser.achievements || [],
           titles: userTitles,
           equippedTitleId: equippedTitleId,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
+          createdAt: syncedUser.createdAt,
+          updatedAt: syncedUser.updatedAt
         },
-        achievements: userAchievementsResult.data,
+        achievements: achievementSyncResult.userAchievements,
+        achievementList: achievementSyncResult.achievementList,
         titles: userTitles,
         equippedTitleId: equippedTitleId
       }
     }
   } catch (err) {
-    console.error('获取用户信息失败：', err)
+    console.error('getUserInfo failed:', err)
     return {
       success: false,
-      errMsg: err.message || '获取用户信息失败'
+      errMsg: err.message || 'Failed to get user info'
     }
   }
 }

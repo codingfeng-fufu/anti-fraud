@@ -89,20 +89,24 @@ exports.main = async (event, context) => {
     const achievementsResult = await db.collection('achievements')
       .where({
         type: action,
-        target: _.lte(countValue),
         isActive: true
       })
       .get()
+
+    const matchedAchievements = (achievementsResult.data || []).filter((achievement) => {
+      const target = Number(achievement.target)
+      return Number.isFinite(target) && target <= countValue
+    })
     
     console.log('查询成就条件:', { action, countValue })
-    console.log('找到符合条件的成就数量:', achievementsResult.data.length)
+    console.log('找到符合条件的成就数量:', matchedAchievements.length)
     
     const newAchievements = []
     const newAchievementIds = []
     const rewardTitleIds = []
     let achievementPoints = 0
     
-    for (const achievement of achievementsResult.data) {
+    for (const achievement of matchedAchievements) {
       console.log('检查成就:', achievement.achievementId)
       
       const existed = await db.collection('user_achievements')
@@ -117,6 +121,8 @@ exports.main = async (event, context) => {
       if (existed.total === 0) {
         console.log('授予新成就:', achievement.name, '积分:', achievement.points)
         
+        const achievementPointsValue = Number(achievement.points) || 0
+
         await db.collection('user_achievements').add({
           data: {
             _openid: openid,
@@ -125,13 +131,13 @@ exports.main = async (event, context) => {
             achievementName: achievement.name,
             earnedAt: new Date(),
             rewardTitleId: achievement.rewardTitleId,
-            pointsEarned: achievement.points
+            pointsEarned: achievementPointsValue
           }
         })
         
         newAchievements.push(achievement)
         newAchievementIds.push(achievement.achievementId)
-        achievementPoints += achievement.points || 0
+        achievementPoints += achievementPointsValue
         
         console.log('当前成就积分累计:', achievementPoints)
         

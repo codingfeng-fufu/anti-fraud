@@ -64,17 +64,25 @@ Page({
       })
 
       if (result.result.success) {
-        const userInfo = result.result.data.userInfo || {}
+        const response = result.result.data || {}
+        const userInfo = response.userInfo || {}
         const signDates = Array.isArray(userInfo.signDates)
           ? userInfo.signDates
           : (wx.getStorageSync('signDates') || [])
-        const signDays = this.calculateConsecutiveDays(signDates)
+        const signDays = typeof userInfo.signDays === 'number'
+          ? userInfo.signDays
+          : this.calculateConsecutiveDays(signDates)
         const points = typeof userInfo.points === 'number'
           ? userInfo.points
           : (wx.getStorageSync('points') || 0)
-        const achievements = Array.isArray(userInfo.achievements)
-          ? userInfo.achievements.length
-          : (wx.getStorageSync('achievements') || 0)
+        const achievementList = Array.isArray(response.achievementList)
+          ? response.achievementList
+          : null
+        const achievements = achievementList
+          ? achievementList.filter(item => item.unlocked).length
+          : (Array.isArray(userInfo.achievements)
+            ? userInfo.achievements.length
+            : (wx.getStorageSync('achievements') || 0))
 
         this.setData({
           userInfo,
@@ -97,6 +105,7 @@ Page({
       this.loadUserData()
     }
   },
+
 
   getBeijingDate() {
     const now = new Date()

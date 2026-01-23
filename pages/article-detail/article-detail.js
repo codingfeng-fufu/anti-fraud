@@ -62,6 +62,7 @@ Page({
         }
         
         this.syncActionData(data.actionData, 'readArticles')
+        this.syncUserInfoFromCloud()
         wx.hideLoading()
         
         // 检查点赞、收藏状态
@@ -277,6 +278,48 @@ syncActionData(actionData, countKey) {
     }
   },
   
+  async syncUserInfoFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+
+      if (result.result && result.result.success) {
+        const data = result.result.data || {}
+        const userInfo = data.userInfo || {}
+
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          wx.setStorageSync('userInfo', userInfo)
+        }
+
+        if (typeof userInfo.points === 'number') {
+          wx.setStorageSync('points', userInfo.points)
+        }
+        if (typeof userInfo.totalReadCount === 'number') {
+          wx.setStorageSync('readArticles', userInfo.totalReadCount)
+        }
+        if (typeof userInfo.totalChatCount === 'number') {
+          wx.setStorageSync('chatTimes', userInfo.totalChatCount)
+        }
+        if (typeof userInfo.signDays === 'number') {
+          wx.setStorageSync('signDays', userInfo.signDays)
+        }
+
+        const achievementList = Array.isArray(data.achievementList)
+          ? data.achievementList
+          : null
+        if (achievementList) {
+          wx.setStorageSync('achievements', achievementList.filter(item => item.unlocked).length)
+        } else if (Array.isArray(userInfo.achievements)) {
+          wx.setStorageSync('achievements', userInfo.achievements.length)
+        }
+      }
+    } catch (err) {
+      console.error('syncUserInfoFromCloud failed:', err)
+    }
+  },
+
   // 加载相关文章
   loadRelatedArticles() {
     const related = [

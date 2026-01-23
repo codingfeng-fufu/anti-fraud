@@ -199,11 +199,11 @@ Page({
     }
   },
 
-onLoad() {
-    console.log('成就页面onLoad触发')
-    this.loadUserDataFromCloud()
-    this.checkAchievements()
+  onLoad() {
+    console.log('achievements onLoad')
+    this.refreshAchievementData()
   },
+
 
   // 从云端加载用户数据
   async loadUserDataFromCloud() {
@@ -212,44 +212,76 @@ onLoad() {
         name: 'getUserInfo',
         data: {}
       })
-      
+
       if (result.result.success) {
-        const data = result.result.data.userInfo
-        const signDays = data.signDays || 0
-        const points = data.points || 0
-        const readArticles = data.totalReadCount || 0
-        const chatTimes = data.totalChatCount || 0
-        
-        console.log('从云端加载用户数据:', { signDays, points, readArticles, chatTimes })
-        
-        this.setData({
+        const response = result.result.data || {}
+        const userInfo = response.userInfo || {}
+        const signDays = userInfo.signDays || 0
+        const points = userInfo.points || 0
+        const readArticles = userInfo.totalReadCount || 0
+        const chatTimes = userInfo.totalChatCount || 0
+        const achievementList = this.normalizeAchievementList(response.achievementList || [])
+
+        console.log('Loaded stats from cloud:', { signDays, points, readArticles, chatTimes })
+
+        const nextData = {
           signDays,
           totalPoints: points,
           readArticles,
           chatTimes
-        })
-        
-        // 更新本地存储
+        }
+
+        if (achievementList.length > 0) {
+          nextData.achievements = achievementList
+        }
+
+        this.setData(nextData)
+
+        if (achievementList.length > 0) {
+          this.updateAchievementStats(achievementList)
+        } else {
+          this.checkAchievements()
+        }
+
+        // Sync local cache
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          wx.setStorageSync('userInfo', userInfo)
+        }
+        if (Array.isArray(userInfo.signDates)) {
+          wx.setStorageSync('signDates', userInfo.signDates)
+        }
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', points)
         wx.setStorageSync('readArticles', readArticles)
         wx.setStorageSync('chatTimes', chatTimes)
+        if (achievementList.length > 0) {
+          wx.setStorageSync('achievements', achievementList.filter(item => item.unlocked).length)
+        }
+
+        return true
       }
     } catch (err) {
-      console.error('从云端加载用户数据失败：', err)
-      // 降级到本地存储
-      this.loadUserData()
+      console.error('loadUserDataFromCloud failed:', err)
     }
+
+    this.loadUserData()
+    this.checkAchievements()
+    return false
   },
 
-onShow() {
-    console.log('成就页面onShow触发')
-    this.loadUserDataFromCloud()
-    this.checkAchievements()
+
+  onShow() {
+    console.log('achievements onShow')
+    this.refreshAchievementData()
   },
+
+  refreshAchievementData() {
+    this.loadUserDataFromCloud()
+  },
+
 
   // 加载用户数据
-loadUserData() {
+  loadUserData() {
     try {
       const signDays = wx.getStorageSync('signDays') || 0
       const points = wx.getStorageSync('points') || 0
@@ -268,9 +300,68 @@ loadUserData() {
       console.error('加载用户数据失败：', e)
     }
   },
+  formatAchievementTime(value) {
+    if (!value) return ''
+
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ''
+
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hour = String(date.getHours()).padStart(2, '0')
+    const minute = String(date.getMinutes()).padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  },
+
+  normalizeAchievementList(list) {
+    if (!Array.isArray(list)) return []
+
+    const normalized = list.map(item => {
+      const target = Number(item.target) || 0
+      const current = Number(item.current) || 0
+      const unlocked = typeof item.unlocked === 'boolean'
+        ? item.unlocked
+        : current >= target
+      const earnedAtText = item.earnedAt
+        ? this.formatAchievementTime(item.earnedAt)
+        : ''
+
+      return {
+        ...item,
+        target,
+        current,
+        unlocked,
+        earnedAtText
+      }
+    })
+
+    normalized.sort((a, b) => {
+      if (a.unlocked && !b.unlocked) return -1
+      if (!a.unlocked && b.unlocked) return 1
+      return 0
+    })
+
+    return normalized
+  },
+
+  updateAchievementStats(achievements) {
+    const unlocked = achievements.filter(item => item.unlocked).length
+    const total = achievements.length
+    const progress = total > 0 ? Math.round((unlocked / total) * 100) : 0
+
+    this.setData({
+      'stats.unlocked': unlocked,
+      'stats.total': total,
+      'stats.progress': progress
+    })
+  },
+
+
 
   // 检查成就解锁状态
-checkAchievements() {
+  checkAchievements() {
     const { signDays, totalPoints, readArticles, chatTimes } = this.data
     console.log('检查成就状态:', { signDays, totalPoints, readArticles, chatTimes })
     
@@ -315,7 +406,7 @@ checkAchievements() {
     // 计算统计数据
     const unlocked = achievements.filter(item => item.unlocked).length
     const total = achievements.length
-    const progress = Math.round((unlocked / total) * 100)
+    const progress = total > 0 ? Math.round((unlocked / total) * 100) : 0
     
     console.log('成就统计:', { unlocked, total, progress })
     
