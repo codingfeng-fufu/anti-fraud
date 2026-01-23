@@ -84,14 +84,21 @@
   font-weight: 700;
 }
 
-.user-name-input {
-  font-size: 38rpx;
-  margin-bottom: 12rpx;
-  font-weight: 700;
-  color: white;
-  background: transparent;
-  border-bottom: 2rpx solid rgba(255, 255, 255, 0.5);
-  padding-bottom: 8rpx;
+.user-name-container {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.go-profile-icon {
+  font-size: 36rpx;
+  opacity: 0.7;
+}
+
+.user-uid {
+  font-size: 22rpx;
+  opacity: 0.8;
+  margin-bottom: 8rpx;
 }
 
 .user-status {

@@ -87,6 +87,43 @@
   margin-bottom: 8rpx;
 }
 
+.nickname-edit {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-name-input {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1e293b;
+  background: transparent;
+  border-bottom: 2rpx solid #e2e8f0;
+  padding-bottom: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.uid-hint {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.profile-name-container {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.edit-nickname-btn {
+  font-size: 28rpx;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.uid-text {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
 .profile-sub {
   font-size: 24rpx;
   color: #64748b;

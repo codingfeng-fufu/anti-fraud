@@ -12,8 +12,7 @@
 <view class="user-container">
   <!-- 用户信息头部 -->
   <view class="user-header">
-    <view class="user-info">
-      <!-- 使用微信官方头像选择器 -->
+<view class="user-info">
       <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
         <view class="user-avatar">
           <text wx:if="{{!userInfo.avatarUrl}}">👤</text>
@@ -21,26 +20,22 @@
         </view>
       </button>
       <view class="user-details">
-        <!-- 使用微信官方昵称输入框 -->
-        <input 
-          wx:if="{{!userInfo.nickName}}"
-          class="user-name-input"
-          type="nickname" 
-          placeholder="输入昵称"
-          bindchange="onNicknameChange"
-        />
-        <view wx:else class="user-name" bindtap="openMyProfile">{{userInfo.nickName}}</view>
+        <view class="user-name-container" bindtap="openMyProfile">
+          <view class="user-name">{{userInfo.nickName || '未设置昵称'}}</view>
+          <text class="go-profile-icon">›</text>
+        </view>
+        <view class="user-uid" wx:if="{{userInfo.uid}}">UID: {{userInfo.uid}}</view>
          <view class="user-status">{{userInfo.nickName ? '开启反诈学习之旅 ✨' : '完善信息开启反诈学习之旅 ✨'}}</view>
-         <!-- 称号展示区域 -->
-         <view class="title-display-inline" bindtap="showTitleManagement">
-           <text class="title-label-inline">当前称号:</text>
-           <view class="current-titles-inline">
-             <text wx:for="{{equippedTitles}}" wx:key="id" class="title-tag-inline">{{item.name}}</text>
-             <text wx:if="{{equippedTitles.length === 0}}" class="no-title-inline">暂无称号</text>
-           </view>
-         </view>
-       </view>
-     </view>
+          <!-- 称号展示区域 -->
+          <view class="title-display-inline" bindtap="showTitleManagement">
+            <text class="title-label-inline">当前称号:</text>
+            <view class="current-titles-inline">
+              <text wx:for="{{equippedTitles}}" wx:key="id" class="title-tag-inline">{{item.name}}</text>
+              <text wx:if="{{equippedTitles.length === 0}}" class="no-title-inline">暂无称号</text>
+            </view>
+          </view>
+        </view>
+      </view>
 
      <!-- 数据统计卡片 -->
      <view class="user-stats">

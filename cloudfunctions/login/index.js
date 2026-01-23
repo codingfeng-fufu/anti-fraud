@@ -32,17 +32,15 @@ function sanitizeInput(input) {
 
 async function checkNicknameExists(nickname, excludeOpenid = null) {
   try {
-    const query = db.collection('users').where({
+    const whereCondition = {
       nickName: nickname
-    })
-    
-    if (excludeOpenid) {
-      query.where({
-        _openid: db.command.neq(excludeOpenid)
-      })
     }
     
-    const result = await query.count()
+    if (excludeOpenid) {
+      whereCondition._openid = db.command.neq(excludeOpenid)
+    }
+    
+    const result = await db.collection('users').where(whereCondition).count()
     return result.total > 0
   } catch (err) {
     console.error('检查昵称重复失败：', err)
@@ -69,7 +67,7 @@ exports.main = async (event, context) => {
       const defaultNickname = nickName || `反诈先锋${uid}`
       
       if (nickName) {
-        const exists = await checkNicknameExists(nickname)
+        const exists = await checkNicknameExists(nickName)
         if (exists) {
           return {
             success: false,
@@ -84,6 +82,23 @@ exports.main = async (event, context) => {
         uid: uid,
         nickName: defaultNickname,
         avatarUrl: avatarUrl,
+        
+        studentId: '',
+        realName: '',
+        schoolId: '',
+        schoolName: '',
+        collegeId: '',
+        collegeName: '',
+        majorId: '',
+        majorName: '',
+        grade: '',
+        className: '',
+        phone: '',
+        
+        isVerified: false,
+        verifiedAt: null,
+        isBound: false,
+        
         signDates: [],
         points: 0,
         achievements: [],

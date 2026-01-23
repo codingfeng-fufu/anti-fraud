@@ -12,6 +12,7 @@
     "pages/points-history/points-history",
     "pages/learning/learning",
     "pages/settings/settings",
+    "pages/account/account",
     "pages/feedback/feedback",
     "pages/about/about"
   ],

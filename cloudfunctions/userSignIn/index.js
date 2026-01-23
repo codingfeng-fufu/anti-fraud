@@ -91,6 +91,8 @@ exports.main = async (event, context) => {
         data: {
           _openid: openid,
           userId: user._id,
+          uid: user.uid,
+          nickName: user.nickName,
           signDate: new Date(),
           points: earnedPoints,
           signDays: consecutiveDays
@@ -105,6 +107,8 @@ exports.main = async (event, context) => {
         data: {
           _openid: openid,
           userId: user._id,
+          uid: user.uid,
+          nickName: user.nickName,
           type: 'earn',
           points: earnedPoints,
           reason: '签到',
@@ -118,7 +122,7 @@ exports.main = async (event, context) => {
     
     let achievementRewardPoints = 0
     try {
-      const achievementResult = await checkAchievements(openid, user._id, {
+      const achievementResult = await checkAchievements(openid, user._id, user, {
         signDays: consecutiveDays,
         points: newPoints
       })
@@ -174,11 +178,10 @@ exports.main = async (event, context) => {
 }
 
 // 检查并授予成就
-async function checkAchievements(openid, userId, stats) {
+async function checkAchievements(openid, userId, user, stats) {
   try {
     const achievements = []
     
-    // 签到相关成就
     if (stats.signDays >= 1) {
       achievements.push({ id: 'sign_1', name: '初来乍到', points: 10 })
     }
@@ -199,28 +202,26 @@ async function checkAchievements(openid, userId, stats) {
     const newAchievements = []
     let rewardPoints = 0
     
-    // 授予成就
     for (const achievement of achievements) {
       try {
-        // 检查是否已获得
         const existResult = await db.collection('user_achievements').where({
           _openid: openid,
           achievementId: achievement.id
         }).get()
         
         if (existResult.data.length === 0) {
-          // 未获得，添加成就记录
           await db.collection('user_achievements').add({
             data: {
               _openid: openid,
               userId,
+              uid: user.uid,
+              nickName: user.nickName,
               achievementId: achievement.id,
               achievementName: achievement.name,
               earnedAt: new Date()
             }
           })
           
-          // 增加用户积分
           await db.collection('users').doc(userId).update({
             data: {
               points: _.inc(achievement.points),
@@ -234,14 +235,12 @@ async function checkAchievements(openid, userId, stats) {
         }
       } catch (err) {
         console.error('授予成就失败：', err.message)
-        // 继续处理下一个成就
       }
     }
     
     return { rewardPoints, newAchievements }
   } catch (err) {
     console.error('检查成就失败：', err.message)
-    // 不抛出错误，避免影响签到功能
     return { rewardPoints: 0, newAchievements: [] }
   }
 }

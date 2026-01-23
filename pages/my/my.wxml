@@ -27,7 +27,22 @@
         <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
       </view>
       <view class="profile-info">
-        <view class="profile-name">{{userInfo.nickName || '未设置昵称'}}</view>
+        <view wx:if="{{isEditingNickname || !userInfo.nickName || userInfo.nickName.startsWith('反诈先锋')}}" class="nickname-edit">
+          <input 
+            class="profile-name-input"
+            type="text" 
+            placeholder="输入昵称"
+            bindblur="onNicknameBlur"
+            bindconfirm="onNicknameConfirm"
+            value="{{tempNickname}}"
+          />
+          <text class="uid-hint" wx:if="{{userInfo.uid}}">UID: {{userInfo.uid}}</text>
+        </view>
+        <view wx:else class="profile-name-container">
+          <view class="profile-name">{{userInfo.nickName}}</view>
+          <text class="edit-nickname-btn" bindtap="startEditNickname">✏️</text>
+          <text class="uid-text" wx:if="{{userInfo.uid}}">UID: {{userInfo.uid}}</text>
+        </view>
         <view class="profile-sub">{{userInfo.nickName ? '反诈学习者' : '完善昵称后展示'}}</view>
       </view>
     </view>

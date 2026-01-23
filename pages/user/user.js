@@ -66,7 +66,6 @@ Page({
         if (signDates.length > 0) {
           wx.setStorageSync('signDates', signDates)
           wx.setStorageSync('lastSignDate', signDates[signDates.length - 1])
-          console.log('从云端同步签到日期:', signDates)
         }
         
         const todaySigned = this.checkTodaySigned(signDates)
@@ -85,8 +84,6 @@ Page({
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
-        
-        console.log('自动登录成功，签到状态:', todaySigned ? '已签到' : '未签到')
       }
     } catch (err) {
       console.error('自动登录失败：', err)
@@ -126,12 +123,6 @@ Page({
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
-        
-        console.log('从云端加载用户数据成功:', { 
-          points: data.userInfo.points, 
-          signDays,
-          todaySigned
-        })
       }
     } catch (err) {
       console.error('从云端加载用户数据失败：', err)
@@ -201,7 +192,6 @@ Page({
 
   async onChooseAvatar(e) {
     const { avatarUrl } = e.detail
-    console.log('选择头像：', avatarUrl)
     
     wx.showLoading({ title: '更新中...' })
     
@@ -217,7 +207,7 @@ Page({
       const result = await wx.cloud.callFunction({
         name: 'login',
         data: {
-          nickName: this.data.userInfo.nickName || '反诈用户',
+          nickName: this.data.userInfo.nickName,
           avatarUrl: cloudAvatarUrl
         }
       })
@@ -242,49 +232,9 @@ Page({
       wx.hideLoading()
     }
   },
-  
-  async onNicknameChange(e) {
-    const nickName = e.detail.value.trim()
-    if (!nickName) return
-    
-    console.log('输入昵称：', nickName)
-    
-    wx.showLoading({ title: '更新中...' })
-    
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'login',
-        data: {
-          nickName,
-          avatarUrl: this.data.userInfo.avatarUrl || ''
-        }
-      })
-      
-      if (result.result.success) {
-        this.setData({
-          'userInfo.nickName': nickName
-        })
-        wx.setStorageSync('userInfo', this.data.userInfo)
-        wx.showToast({
-          title: '昵称更新成功',
-          icon: 'success'
-        })
-      }
-    } catch (err) {
-      console.error('更新昵称失败：', err)
-      wx.showToast({
-        title: '更新失败',
-        icon: 'none'
-      })
-    } finally {
-      wx.hideLoading()
-    }
-  },
 
   async handleSignIn() {
     const todaySigned = this.checkTodaySigned()
-    
-    console.log('点击签到 - 检查状态:', todaySigned ? '已签到' : '未签到')
     
     if (todaySigned) {
       this.setData({ todaySigned: true })
@@ -322,8 +272,6 @@ Page({
           wx.setStorageSync('lastSignDate', data.lastSignDate)
         }
         
-        console.log('签到成功，保存日期:', data.lastSignDate)
-        
         wx.showModal({
           title: '签到成功 ✨',
           content: result.result.message || `恭喜你！连续签到${data.signDays}天，获得${data.earnedPoints}积分！`,
@@ -332,8 +280,6 @@ Page({
         })
       } else {
         const errMsg = result.result.errMsg || '签到失败'
-        
-        console.log('签到失败:', errMsg)
         
         if (errMsg.includes('已经签到') || errMsg.includes('已签到')) {
           this.autoLogin()

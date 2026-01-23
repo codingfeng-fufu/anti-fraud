@@ -24,7 +24,7 @@ Page({
   },
 
   // 切换开关
-  toggleSwitch(e) {
+toggleSwitch(e) {
     const key = e.currentTarget.dataset.key
     const value = e.detail.value
     
@@ -32,7 +32,6 @@ Page({
       [`settings.${key}`]: value
     })
     
-    // 保存设置
     try {
       wx.setStorageSync('appSettings', this.data.settings)
       wx.showToast({
@@ -45,7 +44,13 @@ Page({
     }
   },
 
-// 清除缓存
+  navigateTo(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    
+    wx.navigateTo({ url })
+  },
+
   clearCache() {
     wx.showModal({
       title: '确认清除',
