@@ -29,23 +29,31 @@ exports.main = async (event, context) => {
     // 获取用户拥有的称号详情
     let userTitles = []
     if (userTitleIds.length > 0) {
-      const userTitlesResult = await db.collection('titles')
-        .where({
-          titleId: _.in(userTitleIds)
-        })
-        .get()
-      userTitles = userTitlesResult.data
+      try {
+        const userTitlesResult = await db.collection('titles')
+          .where({
+            titleId: _.in(userTitleIds)
+          })
+          .get()
+        userTitles = userTitlesResult.data
+      } catch (err) {
+        console.error('查询用户称号失败:', err.message)
+      }
     }
     
     // 获取用户佩戴的称号详情
     let equippedTitles = []
     if (equippedTitleIds.length > 0) {
-      const equippedTitlesResult = await db.collection('titles')
-        .where({
-          titleId: _.in(equippedTitleIds)
-        })
-        .get()
-      equippedTitles = equippedTitlesResult.data
+      try {
+        const equippedTitlesResult = await db.collection('titles')
+          .where({
+            titleId: _.in(equippedTitleIds)
+          })
+          .get()
+        equippedTitles = equippedTitlesResult.data
+      } catch (err) {
+        console.error('查询佩戴称号失败:', err.message)
+      }
     }
     
     return {

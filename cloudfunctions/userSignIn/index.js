@@ -20,6 +20,24 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function ensureCollection(collectionName) {
+  try {
+    await db.collection(collectionName).limit(1).get()
+  } catch (err) {
+    if (err.errCode === -502005) {
+      console.log(`集合 ${collectionName} 不存在，尝试创建...`)
+      try {
+        await db.createCollection(collectionName)
+        console.log(`集合 ${collectionName} 创建成功`)
+      } catch (createErr) {
+        console.error(`创建集合 ${collectionName} 失败:`, createErr.message)
+      }
+    } else {
+      console.error(`检查集合 ${collectionName} 失败:`, err.message)
+    }
+  }
+}
+
 const formatDateLocal = (date) => {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
   const year = date.getFullYear()
@@ -44,7 +62,11 @@ exports.main = async (event, context) => {
       }
     }
     
-    const user = userResult.data[0]
+const user = userResult.data[0]
+    
+    await ensureCollection('sign_records')
+    await ensureCollection('points_records')
+    await ensureCollection('user_achievements')
     
     const now = new Date()
     const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
@@ -139,11 +161,12 @@ exports.main = async (event, context) => {
       console.log('检查成就失败（集合可能不存在）：', err.message)
     }
     
-    let trackActionPoints = 0
+let trackActionPoints = 0
     try {
       const trackActionResult = await cloud.callFunction({
         name: 'trackAction',
         data: {
+          openid: openid,
           action: 'sign',
           increment: 1,
           signDays: consecutiveDays

@@ -13,6 +13,48 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function ensureCollection(collectionName) {
+  try {
+    await db.collection(collectionName).limit(1).get()
+  } catch (err) {
+    if (err.errCode === -502005) {
+      console.log(`集合 ${collectionName} 不存在，尝试创建...`)
+      try {
+        await db.createCollection(collectionName)
+        console.log(`集合 ${collectionName} 创建成功`)
+      } catch (createErr) {
+        console.error(`创建集合 ${collectionName} 失败:`, createErr.message)
+      }
+    } else {
+      console.error(`检查集合 ${collectionName} 失败:`, err.message)
+    }
+  }
+}
+
+async function ensureAchievementsData() {
+  try {
+    const result = await db.collection('achievements').limit(1).get()
+    if (result.data.length === 0) {
+      console.log('achievements 集合为空，尝试初始化...')
+      try {
+        const initResult = await cloud.callFunction({
+          name: 'initAchievements',
+          data: {}
+        })
+        if (initResult.result && initResult.result.success) {
+          console.log('achievements 集合初始化成功:', initResult.result.message)
+        } else {
+          console.warn('achievements 集合初始化失败:', initResult.result?.message || initResult.result?.errMsg)
+        }
+      } catch (err) {
+        console.error('调用 initAchievements 云函数失败:', err.message)
+      }
+    }
+  } catch (err) {
+    console.error('检查 achievements 集合失败:', err.message)
+  }
+}
+
 const formatDateLocal = (date) => {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
   const year = date.getFullYear()
@@ -64,14 +106,23 @@ async function getRewardTitleNameMap(achievements) {
     return new Map()
   }
 
+  console.log('查询称号:', rewardTitleIds)
+
   const titlesResult = await db.collection('titles')
     .where({ titleId: _.in(rewardTitleIds) })
     .get()
+
+  console.log('查询到称号数量:', titlesResult.data.length)
 
   return new Map((titlesResult.data || []).map(title => [title.titleId, title.name]))
 }
 
 async function syncAchievements(user, stats) {
+  await ensureCollection('achievements')
+  await ensureAchievementsData()
+  await ensureCollection('user_achievements')
+  await ensureCollection('points_records')
+  
   const [achievementsResult, userAchievementsResult] = await Promise.all([
     db.collection('achievements').where({ isActive: true }).get(),
     db.collection('user_achievements').where({ userId: user._id }).get()
@@ -109,7 +160,7 @@ async function syncAchievements(user, stats) {
       if (earnedMap.has(achievementId)) continue
       const pointsValue = Number(achievement.points) || 0
 
-      const earnedAt = new Date()
+const earnedAt = new Date()
       const record = {
         _openid: user._openid,
         userId: user._id,
@@ -122,7 +173,11 @@ async function syncAchievements(user, stats) {
         pointsEarned: pointsValue
       }
 
-      await db.collection('user_achievements').add({ data: record })
+      try {
+        await db.collection('user_achievements').add({ data: record })
+      } catch (err) {
+        console.error('添加 user_achievements 记录失败:', err.message)
+      }
 
       earnedMap.set(achievementId, record)
       newAchievementRecords.push(record)
@@ -157,12 +212,13 @@ async function syncAchievements(user, stats) {
     updateData.points = _.inc(rewardPoints)
   }
 
-  const missingAchievementIds = earnedAchievementIds
+const missingAchievementIds = earnedAchievementIds
     .filter(id => !userAchievementIds.includes(id))
   const achievementsToSync = [...new Set([...missingAchievementIds, ...newAchievementIds])]
 
   if (achievementsToSync.length > 0) {
-    updateData.achievements = _.push(achievementsToSync)
+    const mergedAchievements = [...new Set([...userAchievementIds, ...achievementsToSync])]
+    updateData.achievements = mergedAchievements
   }
 
   const existingTitleIds = Array.isArray(user.titles) ? user.titles : []
@@ -170,7 +226,8 @@ async function syncAchievements(user, stats) {
     .filter(id => !existingTitleIds.includes(id))
 
   if (uniqueRewardTitleIds.length > 0) {
-    updateData.titles = _.push(uniqueRewardTitleIds)
+    const mergedTitles = [...new Set([...existingTitleIds, ...uniqueRewardTitleIds])]
+    updateData.titles = mergedTitles
   }
 
   if ((user.signDays || 0) !== stats.sign) {

@@ -7,6 +7,24 @@ cloud.init({
 
 const db = cloud.database()
 
+async function ensureCollection(collectionName) {
+  try {
+    await db.collection(collectionName).limit(1).get()
+  } catch (err) {
+    if (err.errCode === -502005) {
+      console.log(`集合 ${collectionName} 不存在，尝试创建...`)
+      try {
+        await db.createCollection(collectionName)
+        console.log(`集合 ${collectionName} 创建成功`)
+      } catch (createErr) {
+        console.error(`创建集合 ${collectionName} 失败:`, createErr.message)
+      }
+    } else {
+      console.error(`检查集合 ${collectionName} 失败:`, err.message)
+    }
+  }
+}
+
 // 初始成就数据
 const achievementsData = [
   // 签到类成就
@@ -204,7 +222,9 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   
   try {
-    // 检查是否已有成就数据，避免重复初始化
+    await ensureCollection('achievements')
+    
+    // 检查是否已有成就数据
     const existingAchievements = await db.collection('achievements').limit(1).get()
     
     if (existingAchievements.data.length > 0) {
@@ -214,6 +234,8 @@ exports.main = async (event, context) => {
       }
     }
     
+    console.log('achievements 集合为空，开始初始化数据...')
+    
     // 批量添加成就数据
     for (const achievement of achievementsData) {
       await db.collection('achievements').add({
@@ -221,11 +243,14 @@ exports.main = async (event, context) => {
       })
     }
     
+    console.log(`成就数据初始化完成，共添加 ${achievementsData.length} 个成就`)
+    
     return {
       success: true,
       message: `成就数据初始化完成，共添加 ${achievementsData.length} 个成就`
     }
   } catch (err) {
+    console.error('初始化成就数据失败:', err)
     return {
       success: false,
       errMsg: err.message

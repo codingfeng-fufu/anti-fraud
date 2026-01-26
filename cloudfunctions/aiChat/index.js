@@ -75,23 +75,38 @@ exports.main = async (event, context) => {
     // 🔒 隐私保护：不再保存AI回复到数据库
     // await saveMessage(openid, 'bot', reply, '')  // 已移除
     
-     // 调用trackAction记录对话行为，以检查对话类成就并更新统计
+// 调用trackAction记录对话行为，以检查对话类成就并更新统计
      try {
+       console.log('准备调用 trackAction 云函数...')
+       console.log('aiChat 的 openid:', openid)
+       console.log('即将传递给 trackAction 的参数:', {
+         openid: openid,
+         action: 'chat',
+         increment: 1
+       })
+       
        const trackActionResult = await cloud.callFunction({
          name: 'trackAction',
          data: {
+           openid: openid,
            action: 'chat',
            increment: 1
          }
        })
        
+       console.log('trackAction 调用完成，结果:', trackActionResult)
+       
        if (trackActionResult.result && trackActionResult.result.success) {
          actionData = trackActionResult.result.data
+         console.log('trackAction 返回的 actionData:', actionData)
+       } else {
+         console.warn('trackAction 调用失败:', trackActionResult.result?.errMsg)
        }
        
        console.log('Track chat action result:', trackActionResult)
      } catch (err) {
-       console.log('Track chat action failed:', err.message)
+       console.error('Track chat action failed:', err.message)
+       console.error('错误详情:', err)
        // 不影响对话成功，继续执行
        
        // 保持原有的对话次数更新作为备用

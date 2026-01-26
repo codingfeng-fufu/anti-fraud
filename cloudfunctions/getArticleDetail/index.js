@@ -22,6 +22,7 @@ const _ = db.command
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
   
   try {
     const { articleId } = event
@@ -85,15 +86,16 @@ exports.main = async (event, context) => {
             }
           })
           
-           // 调用trackAction记录阅读行为，以检查阅读类成就并更新统计
-           try {
-             const trackActionResult = await cloud.callFunction({
-               name: 'trackAction',
-               data: {
-                 action: 'read',
-                 increment: 1
-               }
-             })
+// 调用trackAction记录阅读行为，以检查阅读类成就并更新统计
+            try {
+              const trackActionResult = await cloud.callFunction({
+                name: 'trackAction',
+                data: {
+                  openid: openid,
+                  action: 'read',
+                  increment: 1
+                }
+              })
              
              if (trackActionResult.result && trackActionResult.result.success) {
                actionData = trackActionResult.result.data
