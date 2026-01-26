@@ -205,20 +205,114 @@ Page({
   },
 
   uploadImage() {
-    // 直接提示功能开发中，不调用图片选择
-    wx.showModal({
-      title: '功能开发中',
-      content: '图片识别功能正在开发中，敬请期待！\n\n目前 AI 模型暂不支持图片解析，您可以通过文字描述可疑信息，我会帮您分析。',
-      showCancel: false,
-      confirmText: '知道了',
-      confirmColor: '#0ea5e9'
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFilePaths[0]
+
+        // 显示加载提示
+        wx.showLoading({
+          title: '正在识别图片...',
+          mask: true
+        })
+
+        // 将图片转为 base64
+        wx.getFileSystemManager().readFile({
+          filePath: tempFilePath,
+          encoding: 'base64',
+          success: async (fileRes) => {
+            const base64Image = fileRes.data
+
+            // 添加用户消息（显示图片）
+            const userMsg = {
+              id: Date.now(),
+              role: 'user',
+              content: '[图片]',
+              imageUrl: tempFilePath
+            }
+
+            this.setData({
+              messages: [...this.data.messages, userMsg],
+              loading: true,
+              scrollToView: `msg-${this.data.messages.length}`
+            })
+
+            try {
+              // 构建历史记录
+              const currentMessages = this.data.messages
+              const recentMessages = currentMessages.slice(-10)
+              const history = recentMessages.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.content
+              }))
+
+              // 调用云函数，传入 base64 图片
+              const result = await wx.cloud.callFunction({
+                name: 'aiChat',
+                data: {
+                  message: '请帮我分析这张图片是否存在诈骗风险',
+                  imageBase64: base64Image,
+                  history
+                }
+              })
+
+              wx.hideLoading()
+
+              if (result.result.success) {
+                const reply = result.result.data.reply
+                const botMsg = {
+                  id: Date.now() + 1,
+                  role: 'bot',
+                  content: reply
+                }
+
+                const newMessages = [...this.data.messages, botMsg]
+                this.setData({
+                  messages: newMessages,
+                  loading: false,
+                  scrollToView: `msg-${newMessages.length - 1}`
+                })
+
+                this.saveLocalMessages(newMessages)
+              } else {
+                throw new Error(result.result.errMsg || '识别失败')
+              }
+            } catch (err) {
+              console.error('图片识别失败：', err)
+              wx.hideLoading()
+
+              const botMsg = {
+                id: Date.now() + 1,
+                role: 'bot',
+                content: '抱歉，图片识别失败，请稍后再试或用文字描述图片内容。'
+              }
+
+              const newMessages = [...this.data.messages, botMsg]
+              this.setData({
+                messages: newMessages,
+                loading: false,
+                scrollToView: `msg-${newMessages.length - 1}`
+              })
+
+              this.saveLocalMessages(newMessages)
+            }
+          },
+          fail: (err) => {
+            console.error('读取图片失败：', err)
+            wx.hideLoading()
+            wx.showToast({
+              title: '读取图片失败',
+              icon: 'none'
+            })
+          }
+        })
+      },
+      fail: (err) => {
+        console.error('选择图片失败：', err)
+      }
     })
-    
-    // TODO: 未来可以集成 OCR 或多模态模型
-    // 实现思路：
-    // 1. 调用微信 OCR 接口识别图片中的文字
-    // 2. 或使用支持图片的多模态 AI 模型（如 Qwen-VL）
-    // 3. 将识别结果作为用户消息发送给 AI 分析
   }
 })
 
