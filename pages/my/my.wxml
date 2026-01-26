@@ -60,6 +60,10 @@
         <view class="stat-value">{{achievements}}</view>
         <view class="stat-label">成就数</view>
       </view>
+      <view class="stat-item">
+        <view class="stat-value">{{totalReadCount}}</view>
+        <view class="stat-label">阅读文章</view>
+      </view>
     </view>
   </view>
 
@@ -77,6 +81,18 @@
         </view>
         <view class="title-badge {{item.rarity}}">{{item.rarity}}</view>
       </view>
+    </view>
+  </view>
+
+  <!-- 学习记录入口 -->
+  <view class="menu-card" bindtap="navigateToLearningRecords">
+    <view class="menu-item">
+      <view class="menu-icon">📚</view>
+      <view class="menu-content">
+        <view class="menu-title">学习记录</view>
+        <view class="menu-desc">查看阅读历史和学习进度</view>
+      </view>
+      <view class="menu-arrow">›</view>
     </view>
   </view>
 </view>

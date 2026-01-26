@@ -131,10 +131,10 @@
 
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24rpx;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
   background: #f8fafc;
-  padding: 24rpx;
+  padding: 24rpx 16rpx;
   border-radius: 24rpx;
 }
 
@@ -143,10 +143,17 @@
 }
 
 .stat-value {
-  font-size: 38rpx;
+  font-size: 36rpx;
   font-weight: 700;
   color: #0ea5e9;
-  margin-bottom: 6rpx;
+  margin-bottom: 8rpx;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #64748b;
+  text-align: center;
 }
 
 .stat-label {
@@ -257,4 +264,56 @@
 .title-badge.epic {
   background: #fce7f3;
   color: #c026d3;
+}
+
+.title-badge.legendary {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+/* 学习记录入口 */
+.menu-card {
+  margin: 0 40rpx 20rpx;
+  background: white;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  gap: 24rpx;
+}
+
+.menu-icon {
+  font-size: 56rpx;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.menu-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+}
+
+.menu-desc {
+  font-size: 24rpx;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.menu-arrow {
+  font-size: 48rpx;
+  color: #94a3b8;
+  line-height: 1;
+  flex-shrink: 0;
 }

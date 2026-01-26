@@ -12,11 +12,12 @@
 const { formatDateLocal } = require('../../utils/util.js')
 
 Page({
-  data: {
+data: {
     userInfo: {},
     signDays: 0,
     points: 0,
     achievements: 0,
+    totalReadCount: 0,
     displayTitles: [],
     titleStats: {
       owned: 0,
@@ -41,19 +42,21 @@ Page({
     this.loadUserDataFromCloud()
   },
 
-  loadUserData() {
+loadUserData() {
     const userInfo = wx.getStorageSync('userInfo') || {}
     const signDays = wx.getStorageSync('signDays') || 0
     const points = wx.getStorageSync('points') || 0
     const achievements = userInfo.achievements
       ? userInfo.achievements.length
       : (wx.getStorageSync('achievements') || 0)
+    const totalReadCount = userInfo.totalReadCount || 0
 
     this.setData({
       userInfo,
       signDays,
       points,
       achievements,
+      totalReadCount,
       tempNickname: userInfo.nickName || ''
     })
   },
@@ -80,17 +83,19 @@ Page({
         const achievementList = Array.isArray(response.achievementList)
           ? response.achievementList
           : null
-        const achievements = achievementList
-          ? achievementList.filter(item => item.unlocked).length
-          : (Array.isArray(userInfo.achievements)
-            ? userInfo.achievements.length
-            : (wx.getStorageSync('achievements') || 0))
+const achievements = achievementList
+           ? achievementList.filter(item => item.unlocked).length
+           : (Array.isArray(userInfo.achievements)
+             ? userInfo.achievements.length
+             : (wx.getStorageSync('achievements') || 0))
+        const totalReadCount = userInfo.totalReadCount || 0
 
         this.setData({
           userInfo,
           signDays,
           points,
           achievements,
+          totalReadCount,
           tempNickname: userInfo.nickName || ''
         })
 
@@ -99,6 +104,7 @@ Page({
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', points)
         wx.setStorageSync('achievements', achievements)
+        wx.setStorageSync('totalReadCount', totalReadCount)
       } else {
         this.loadUserData()
       }
@@ -254,6 +260,12 @@ Page({
     } finally {
       wx.hideLoading()
     }
+},
+
+  navigateToLearningRecords() {
+    wx.navigateTo({
+      url: '/pages/learning-records/learning-records'
+    })
   },
 
   goBack() {

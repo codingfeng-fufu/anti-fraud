@@ -259,9 +259,12 @@ const missingAchievementIds = earnedAchievementIds
     }
   }
 
-  const updatedUser = {
+const updatedUser = {
     ...user,
     points: basePoints + rewardPoints,
+    totalReadCount: stats.read,
+    totalChatCount: stats.chat,
+    continuousLearnDays: stats.learn,
     achievements: [...new Set([...userAchievementIds, ...earnedAchievementIds, ...newAchievementIds])],
     titles: [...new Set([...existingTitleIds, ...uniqueRewardTitleIds])],
     signDays: stats.sign

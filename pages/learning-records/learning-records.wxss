@@ -1,0 +1,222 @@
+/**
+ * 学习记录页面 - 学习记录模块
+ * 
+ * 上游依赖：learning-records.wxml结构文件
+ * 入口：页面加载时自动应用样式
+ * 主要功能：定义学习记录界面的视觉样式
+ * 输出：渲染美观的学习记录界面样式
+ * 
+ * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+ */
+
+.learning-records-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding-bottom: 40rpx;
+}
+
+/* 顶部导航 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left,
+.header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 64rpx;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* 学习统计卡片 */
+.stats-card {
+  margin: 40rpx;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  border-radius: 32rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 16rpx 48rpx rgba(14, 165, 233, 0.3);
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12rpx;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 分类筛选 */
+.category-filter {
+  margin: 0 40rpx 24rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.category-scroll {
+  white-space: nowrap;
+}
+
+.category-list {
+  display: inline-flex;
+  gap: 16rpx;
+}
+
+.category-item {
+  padding: 16rpx 32rpx;
+  background: #f1f5f9;
+  border-radius: 48rpx;
+  transition: all 0.3s ease;
+}
+
+.category-item.active {
+  background: #0ea5e9;
+}
+
+.category-text {
+  font-size: 26rpx;
+  color: #64748b;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.category-item.active .category-text {
+  color: white;
+  font-weight: 500;
+}
+
+/* 学习记录列表 */
+.records-list {
+  margin: 0 40rpx;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.record-icon {
+  flex-shrink: 0;
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.record-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.record-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12rpx;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.record-category {
+  font-size: 22rpx;
+  color: #0ea5e9;
+  background: #f0f9ff;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  line-height: 1;
+}
+
+.record-time {
+  font-size: 22rpx;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.record-badge {
+  flex-shrink: 0;
+  padding: 8rpx 16rpx;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 16rpx;
+  font-size: 20rpx;
+  color: white;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  display: block;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #64748b;
+  margin-bottom: 16rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* 加载状态 */
+.loading-more,
+.no-more {
+  text-align: center;
+  padding: 40rpx;
+  font-size: 26rpx;
+  color: #94a3b8;
+}
