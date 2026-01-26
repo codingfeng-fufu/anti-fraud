@@ -9,6 +9,8 @@
  * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
  */
 // pages/user/user.js
+const { formatDateLocal } = require('../../utils/util.js')
+
 Page({
   data: {
     userInfo: {
@@ -153,24 +155,23 @@ Page({
   calculateConsecutiveDays(signDates) {
     if (!signDates || signDates.length === 0) return 0
     
-    const now = new Date()
-    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
-    const today = beijingTime.toISOString().split('T')[0]
+    const todayDate = new Date()
+    const today = formatDateLocal(todayDate)
     const sortedDates = [...signDates].sort()
     
     if (!sortedDates.includes(today)) {
-      const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
-      const yesterday = yesterdayDate.toISOString().split('T')[0]
+      const yesterdayDate = new Date(todayDate.getTime() - 24 * 60 * 60 * 1000)
+      const yesterday = formatDateLocal(yesterdayDate)
       if (!sortedDates.includes(yesterday)) {
         return 0
       }
     }
     
     let consecutiveDays = 0
-    let checkDate = beijingTime
+    let checkDate = todayDate
     
     while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0]
+      const dateStr = formatDateLocal(checkDate)
       if (sortedDates.includes(dateStr)) {
         consecutiveDays++
         checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
@@ -184,9 +185,7 @@ Page({
 
   checkTodaySigned(signDates) {
     const dates = signDates || this.data.signDates || wx.getStorageSync('signDates') || []
-    const now = new Date()
-    const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
-    const today = beijingTime.toISOString().split('T')[0]
+    const today = formatDateLocal(new Date())
     return dates.includes(today)
   },
 

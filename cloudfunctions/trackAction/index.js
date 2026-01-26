@@ -8,6 +8,14 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+const formatDateLocal = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -52,8 +60,8 @@ exports.main = async (event, context) => {
         countValue = (user.totalReadCount || 0) + increment
         break
       case 'learn':
-        const today = new Date().toISOString().split('T')[0]
-        const lastLearnDate = user.lastLearnDate ? new Date(user.lastLearnDate).toISOString().split('T')[0] : null
+        const today = formatDateLocal(new Date())
+        const lastLearnDate = user.lastLearnDate ? formatDateLocal(new Date(user.lastLearnDate)) : null
         
         if (lastLearnDate === today) {
           updateData = {
@@ -61,7 +69,7 @@ exports.main = async (event, context) => {
           }
         } else {
           const expectedNextDay = lastLearnDate ? 
-            new Date(new Date(lastLearnDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] : 
+            formatDateLocal(new Date(new Date(lastLearnDate).getTime() + 24 * 60 * 60 * 1000)) : 
             null
             
           const newContinuousDays = lastLearnDate && expectedNextDay === today ? 
@@ -176,13 +184,17 @@ exports.main = async (event, context) => {
         console.log('保存积分记录失败（集合可能不存在）：', err.message)
       }
     }
-    if (newAchievementIds.length > 0) {
-      rewardUpdate.achievements = _.push(newAchievementIds)
-      console.log('准备更新成就列表:', newAchievementIds)
+if (newAchievementIds.length > 0) {
+      const currentAchievements = Array.isArray(user.achievements) ? user.achievements : []
+      const mergedAchievements = [...new Set([...currentAchievements, ...newAchievementIds])]
+      rewardUpdate.achievements = mergedAchievements
+      console.log('准备更新成就列表:', newAchievementIds, '合并后:', mergedAchievements)
     }
     if (rewardTitleIds.length > 0) {
-      rewardUpdate.titles = _.push([...new Set(rewardTitleIds)])
-      console.log('准备更新称号列表:', rewardTitleIds)
+      const currentTitles = Array.isArray(user.titles) ? user.titles : []
+      const mergedTitles = [...new Set([...currentTitles, ...rewardTitleIds])]
+      rewardUpdate.titles = mergedTitles
+      console.log('准备更新称号列表:', rewardTitleIds, '合并后:', mergedTitles)
     }
     
     console.log('rewardUpdate对象:', rewardUpdate)

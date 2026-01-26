@@ -9,6 +9,8 @@
  * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
  */
 // pages/sign-in/sign-in.js
+const { formatDateLocal } = require('../../utils/util.js')
+
 Page({
   data: {
     signDays: 0,
@@ -82,22 +84,23 @@ Page({
   calculateConsecutiveDays(signDates) {
     if (!signDates || signDates.length === 0) return 0
     
-    const today = this.getBeijingDate().toISOString().split('T')[0]
+    const todayDate = this.getLocalDate()
+    const today = formatDateLocal(todayDate)
     const sortedDates = [...signDates].sort().reverse()
     
     if (!sortedDates.includes(today)) {
-      const yesterdayDate = new Date(this.getBeijingDate().getTime() - 24 * 60 * 60 * 1000)
-      const yesterday = yesterdayDate.toISOString().split('T')[0]
+      const yesterdayDate = new Date(todayDate.getTime() - 24 * 60 * 60 * 1000)
+      const yesterday = formatDateLocal(yesterdayDate)
       if (!sortedDates.includes(yesterday)) {
         return 0
       }
     }
     
     let consecutiveDays = 0
-    let checkDate = this.getBeijingDate()
+    let checkDate = todayDate
     
     while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0]
+      const dateStr = formatDateLocal(checkDate)
       if (sortedDates.includes(dateStr)) {
         consecutiveDays++
         checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
@@ -109,20 +112,18 @@ Page({
     return consecutiveDays
   },
 
-  getBeijingDate() {
-    const now = new Date()
-    return new Date(now.getTime() + (8 * 60 * 60 * 1000))
+  getLocalDate() {
+    return new Date()
   },
 
   checkTodaySigned(signDates) {
     const dates = signDates || this.data.signDates || wx.getStorageSync('signDates') || []
-    const beijingTime = this.getBeijingDate()
-    const today = beijingTime.toISOString().split('T')[0]
+    const today = formatDateLocal(this.getLocalDate())
     return dates.includes(today)
   },
 
   buildCalendar() {
-    const now = this.getBeijingDate()
+    const now = this.getLocalDate()
     const year = now.getFullYear()
     const month = now.getMonth()
     const firstDay = new Date(year, month, 1)
@@ -140,7 +141,7 @@ Page({
 
     for (let day = 1; day <= totalDays; day += 1) {
       const date = new Date(year, month, day)
-      const dateStr = date.toISOString().split('T')[0]
+      const dateStr = formatDateLocal(date)
       const isToday = date.getTime() === todayDate.getTime()
       const isSigned = signDates.includes(dateStr)
 

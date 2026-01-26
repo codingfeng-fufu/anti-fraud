@@ -9,6 +9,8 @@
  * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
  */
 // pages/points/points.js
+const { formatDateTimeLocal } = require('../../utils/util.js')
+
 Page({
   data: {
     // 用户积分
@@ -244,7 +246,7 @@ onShow() {
         productId: product.id,
         productName: product.name,
         points: product.points,
-        time: new Date().toISOString(),
+        time: formatDateTimeLocal(new Date()),
         status: 'pending' // pending: 待发货, completed: 已完成
       }
       

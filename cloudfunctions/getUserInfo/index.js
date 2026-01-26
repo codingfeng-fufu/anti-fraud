@@ -13,17 +13,25 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+const formatDateLocal = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function calculateConsecutiveDays(signDates) {
   if (!Array.isArray(signDates) || signDates.length === 0) return 0
 
   const now = new Date()
   const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
-  const today = beijingTime.toISOString().split('T')[0]
+  const today = formatDateLocal(beijingTime)
   const sortedDates = [...signDates].sort()
 
   if (!sortedDates.includes(today)) {
     const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
-    const yesterday = yesterdayDate.toISOString().split('T')[0]
+    const yesterday = formatDateLocal(yesterdayDate)
     if (!sortedDates.includes(yesterday)) {
       return 0
     }
@@ -33,7 +41,7 @@ function calculateConsecutiveDays(signDates) {
   let checkDate = beijingTime
 
   while (true) {
-    const dateStr = checkDate.toISOString().split('T')[0]
+    const dateStr = formatDateLocal(checkDate)
     if (sortedDates.includes(dateStr)) {
       consecutiveDays++
       checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
@@ -210,7 +218,7 @@ async function syncAchievements(user, stats) {
     const record = earnedMap.get(achievementId)
     const earned = Boolean(record)
     const unlocked = earned || current >= target
-    const earnedAt = record && record.earnedAt ? new Date(record.earnedAt).toISOString() : null
+    const earnedAt = record && record.earnedAt ? new Date(record.earnedAt).getTime() : null
 
     return {
       id: achievementId,

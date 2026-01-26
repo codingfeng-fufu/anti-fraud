@@ -20,6 +20,14 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+const formatDateLocal = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -40,7 +48,7 @@ exports.main = async (event, context) => {
     
     const now = new Date()
     const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
-    const today = beijingTime.toISOString().split('T')[0]
+    const today = formatDateLocal(beijingTime)
     
     const signDates = user.signDates || []
     
@@ -52,7 +60,7 @@ exports.main = async (event, context) => {
     }
     
     const yesterdayDate = new Date(beijingTime.getTime() - 24 * 60 * 60 * 1000)
-    const yesterday = yesterdayDate.toISOString().split('T')[0]
+    const yesterday = formatDateLocal(yesterdayDate)
     
     let consecutiveDays = 1
     if (signDates.length > 0 && signDates[signDates.length - 1] === yesterday) {
@@ -61,7 +69,7 @@ exports.main = async (event, context) => {
       
       while (true) {
         checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
-        const checkDateStr = checkDate.toISOString().split('T')[0]
+        const checkDateStr = formatDateLocal(checkDate)
         
         if (signDates.includes(checkDateStr)) {
           consecutiveDays++
