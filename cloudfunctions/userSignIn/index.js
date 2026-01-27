@@ -101,62 +101,7 @@ async function consumeCard(openid, cardId, itemType) {
         itemType: itemType
       })
       .get()
-    
-    if (result.data.length > 0) {
-      await db.collection('user_backpack').doc(result.data[0]._id).update({
-        data: {
-          status: 'used',
-          usedAt: new Date()
-        }
-      })
-      return true
-    }
-    return false
-  } catch (err) {
-    console.error('消费卡片失败:', err.message)
-    return false
-  }
-}
 
-// 检查是否有生效的双倍积分卡
-async function getActiveDoublePointsCard(openid) {
-  try {
-    const now = new Date()
-    const result = await db.collection('user_backpack')
-      .where({
-        _openid: openid,
-        itemType: 'double_points',
-        status: 'unused'
-      })
-      .get()
-    
-    const cards = result.data || []
-    for (const card of cards) {
-      if (!card.expireAt) continue
-      
-      const expireDate = new Date(card.expireAt)
-      if (now <= expireDate) {
-        return card
-      }
-    }
-    return null
-  } catch (err) {
-    console.error('检查双倍积分卡失败:', err.message)
-    return null
-  }
-}
-
-// 消费卡片（用于补签卡）
-async function consumeCard(openid, cardId, itemType) {
-  try {
-    const result = await db.collection('user_backpack')
-      .where({
-        _openid: openid,
-        _id: cardId,
-        itemType: itemType
-      })
-      .get()
-    
     if (result.data.length > 0) {
       await db.collection('user_backpack').doc(result.data[0]._id).update({
         data: {
