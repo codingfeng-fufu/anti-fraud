@@ -31,7 +31,7 @@ const QWEN_API_KEY = 'sk-5fb6a8c8d48e45f193447ba71264c771'  // ⚠️ 请替换�
 
 // 通义千问 API 配置
 const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
-const QWEN_MODEL = 'qwen-turbo'  // 先用 qwen-turbo 确保稳定
+const QWEN_MODEL = 'qwen3-vl-plus'  // 先用 qwen-turbo 确保稳定
 
 // 是否启用 AI 服务（如果未配置 API Key，将使用本地关键词回复）
 const AI_ENABLED = QWEN_API_KEY !== 'YOUR_API_KEY_HERE' && QWEN_API_KEY !== ''

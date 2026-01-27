@@ -112,16 +112,44 @@ onShow() {
   },
 
   // 加载兑换记录
-  loadExchangeRecords() {
+  async loadExchangeRecords() {
     try {
-      const records = wx.getStorageSync('exchangeRecords') || []
+      const result = await wx.cloud.callFunction({
+        name: 'getExchangeRecords',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        this.setData({
+          exchangeRecords: result.result.data.records
+        })
+        console.log('从云端加载兑换记录成功:', result.result.data.records.length)
+      }
+    } catch (err) {
+      console.error('从云端加载兑换记录失败：', err)
+      // 降级到本地存储
+      try {
+        const records = wx.getStorageSync('exchangeRecords') || []
+        this.setData({
+          exchangeRecords: records
+        })
+      } catch (e) {
+        console.error('从本地加载兑换记录失败：', e)
+      }
+    }
+  },
+
+  // 加载用户积分
+  loadUserPoints() {
+    try {
+      const points = wx.getStorageSync('points') || 0
       this.setData({
-        exchangeRecords: records
+        userPoints: points
       })
     } catch (e) {
-      console.error('加载兑换记录失败：', e)
+      console.error('加载积分失败：', e)
     }
-},
+  },
 
   // 筛选分类
   filterCategory(e) {
@@ -152,46 +180,33 @@ onShow() {
     })
   },
 
-  // 加载称号产品
-  async loadUserBackpack() {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'getUserBackpack',
-        data: {}
+  // 兑换商品
+  async exchangeProduct(e) {
+    const productId = e.currentTarget.dataset.id
+    const product = this.data.products.find(item => item.id === productId)
+
+    if (!product) {
+      wx.showToast({
+        title: '商品不存在',
+        icon: 'none'
       })
-      
-      if (result.result.success) {
-        this.setData({
-          backpack: result.result.data.backpack
-        })
-        console.log('从云端加载背包成功:', result.result.data)
-      }
-    } catch (err) {
-      console.error('从云端加载背包失败：', err)
+      return
     }
-  },
-
-  // 兑换称号
-  async exchangeTitle(e) {
-    const titleId = e.currentTarget.dataset.id
-    const title = this.data.titleProducts.find(item => item.titleId === titleId)
-
-    if (!title) return
 
     // 检查积分是否足够
-    if (this.data.userPoints < title.points) {
+    if (this.data.userPoints < product.points) {
       wx.showModal({
         title: '积分不足',
-        content: `兑换${title.name}需要${title.points}积分，当前积分${this.data.userPoints}`,
+        content: `兑换${product.name}需要${product.points}积分，当前积分${this.data.userPoints}`,
         showCancel: false
       })
       return
     }
 
-    // 检查是否已拥有此称号
-    if (title.owned) {
+    // 检查库存
+    if (product.stock <= 0) {
       wx.showToast({
-        title: '称号已拥有',
+        title: '库存不足',
         icon: 'none'
       })
       return
@@ -200,26 +215,26 @@ onShow() {
     // 确认兑换
     wx.showModal({
       title: '确认兑换',
-      content: `确定用${title.points}积分兑换称号"${title.name}"吗？`,
+      content: `确定用${product.points}积分兑换"${product.name}"吗？`,
       success: (res) => {
         if (res.confirm) {
-          this.doExchangeTitle(title)
+          this.doExchangeProduct(product)
         }
       }
     })
   },
 
-  // 执行称号兑换
-  async doExchangeTitle(title) {
+  // 执行商品兑换
+  async doExchangeProduct(product) {
     wx.showLoading({
       title: '兑换中...'
     })
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'redeemTitle',
+        name: 'redeemProduct',
         data: {
-          titleId: title.titleId
+          productId: product.id
         }
       })
 
@@ -227,15 +242,17 @@ onShow() {
         wx.hideLoading()
         
         // 更新本地积分
-        const newPoints = this.data.userPoints - title.points
+        const newPoints = this.data.userPoints - product.points
         wx.setStorageSync('points', newPoints)
         
-        // 重新加载称号产品和用户积分
+        // 更新本地数据
         this.setData({
           userPoints: newPoints
         })
         
-        this.loadTitleProducts()
+        // 重新加载商品和积分
+        this.loadProducts()
+        this.loadUserPointsFromCloud()
         
         wx.showToast({
           title: '兑换成功！',
@@ -250,7 +267,7 @@ onShow() {
       }
     } catch (err) {
       wx.hideLoading()
-      console.error('兑换称号失败：', err)
+      console.error('兑换商品失败：', err)
       wx.showToast({
         title: '兑换失败',
         icon: 'none'
