@@ -21,19 +21,19 @@
     </view>
   </view>
 
-  <!-- 积分卡片 -->
-  <view class="points-card">
-    <view class="points-content">
-      <view class="points-icon">⭐</view>
-      <view class="points-info">
-        <view class="points-label">我的积分</view>
-        <view class="points-value">{{userPoints}}</view>
-      </view>
-      <button class="get-points-btn" bindtap="getMorePoints">
-        获取积分
-      </button>
-    </view>
-  </view>
+   <!-- 积分卡片 -->
+   <view class="points-card">
+     <view class="points-content">
+       <view class="points-icon">⭐</view>
+       <view class="points-info">
+         <view class="points-label">我的积分</view>
+         <view class="points-value">{{userPoints}}</view>
+       </view>
+       <button class="view-backpack-btn" bindtap="viewBackpack">
+         查看背包
+       </button>
+     </view>
+   </view>
 
   <!-- 分类筛选 -->
   <view class="category-filter">
@@ -54,30 +54,9 @@
       实体商品
     </view>
   </view>
-
-   <!-- 称号兑换专区 -->
-   <view class="title-exchange-section" wx:if="{{titleProducts && titleProducts.length > 0}}">
-     <view class="section-title">称号兑换</view>
-     <view class="title-products">
-       <view wx:for="{{titleProducts}}" wx:key="id" class="title-product-item">
-         <view class="title-icon">{{item.icon}}</view>
-         <view class="title-content">
-           <view class="title-name">{{item.name}}</view>
-           <view class="title-desc">{{item.desc}}</view>
-           <view class="title-rarity {{item.rarity}}">{{item.rarity}}</view>
-         </view>
-         <button class="exchange-btn {{userPoints < item.points || item.owned ? 'disabled' : ''}}"
-                 bindtap="exchangeTitle"
-                 data-id="{{item.titleId}}"
-                 disabled="{{userPoints < item.points || item.owned}}">
-           {{item.owned ? '已获得' : userPoints < item.points ? '积分不足' : '兑换'}}
-         </button>
-       </view>
-     </view>
-   </view>
-
-   <!-- 商品列表 -->
-   <view class="products-list">
+ 
+  <!-- 商品列表 -->
+  <view class="products-list">
      <view wx:for="{{products}}" wx:key="id" 
            wx:if="{{currentCategory === 'all' || item.category === currentCategory}}"
            class="product-item">

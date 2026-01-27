@@ -268,6 +268,12 @@ const achievements = achievementList
     })
   },
 
+  navigateToBackpack() {
+    wx.navigateTo({
+      url: '/pages/backpack/backpack'
+    })
+  },
+
   goBack() {
     wx.navigateBack()
   }

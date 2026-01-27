@@ -38,6 +38,141 @@ async function ensureCollection(collectionName) {
   }
 }
 
+// 检查是否有生效的双倍积分卡
+async function getActiveDoublePointsCard(openid) {
+  try {
+    const now = new Date()
+    const result = await db.collection('user_backpack')
+      .where({
+        _openid: openid,
+        itemType: 'double_points',
+        status: 'active'
+      })
+      .get()
+    
+    const cards = result.data || []
+    for (const card of cards) {
+      if (!card.expireAt) continue
+      
+      const expireDate = new Date(card.expireAt)
+      if (now > expireDate) {
+        // 卡已过期，更新状态
+        await db.collection('user_backpack').doc(card._id).update({
+          data: {
+            status: 'expired'
+          }
+        })
+      } else {
+        return card
+      }
+    }
+    return null
+  } catch (err) {
+    console.error('检查双倍积分卡失败:', err.message)
+    return null
+  }
+}
+
+// 检查是否有生效的补签卡
+async function getActiveCheckinCard(openid) {
+  try {
+    const result = await db.collection('user_backpack')
+      .where({
+        _openid: openid,
+        itemType: 'checkin_card',
+        status: 'unused'
+      })
+      .get()
+    
+    return result.data.length > 0 ? result.data[0] : null
+  } catch (err) {
+    console.error('检查补签卡失败:', err.message)
+    return null
+  }
+}
+
+// 消费卡片（用于补签卡）
+async function consumeCard(openid, cardId, itemType) {
+  try {
+    const result = await db.collection('user_backpack')
+      .where({
+        _openid: openid,
+        _id: cardId,
+        itemType: itemType
+      })
+      .get()
+    
+    if (result.data.length > 0) {
+      await db.collection('user_backpack').doc(result.data[0]._id).update({
+        data: {
+          status: 'used',
+          usedAt: new Date()
+        }
+      })
+      return true
+    }
+    return false
+  } catch (err) {
+    console.error('消费卡片失败:', err.message)
+    return false
+  }
+}
+
+// 检查是否有生效的双倍积分卡
+async function getActiveDoublePointsCard(openid) {
+  try {
+    const now = new Date()
+    const result = await db.collection('user_backpack')
+      .where({
+        _openid: openid,
+        itemType: 'double_points',
+        status: 'unused'
+      })
+      .get()
+    
+    const cards = result.data || []
+    for (const card of cards) {
+      if (!card.expireAt) continue
+      
+      const expireDate = new Date(card.expireAt)
+      if (now <= expireDate) {
+        return card
+      }
+    }
+    return null
+  } catch (err) {
+    console.error('检查双倍积分卡失败:', err.message)
+    return null
+  }
+}
+
+// 消费卡片（用于补签卡）
+async function consumeCard(openid, cardId, itemType) {
+  try {
+    const result = await db.collection('user_backpack')
+      .where({
+        _openid: openid,
+        _id: cardId,
+        itemType: itemType
+      })
+      .get()
+    
+    if (result.data.length > 0) {
+      await db.collection('user_backpack').doc(result.data[0]._id).update({
+        data: {
+          status: 'used',
+          usedAt: new Date()
+        }
+      })
+      return true
+    }
+    return false
+  } catch (err) {
+    console.error('消费卡片失败:', err.message)
+    return false
+  }
+}
+
 const formatDateLocal = (date) => {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
   const year = date.getFullYear()
@@ -51,6 +186,8 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   
   try {
+    const { force = false } = event
+    
     const userResult = await db.collection('users').where({
       _openid: openid
     }).get()
@@ -62,11 +199,12 @@ exports.main = async (event, context) => {
       }
     }
     
-const user = userResult.data[0]
+    const user = userResult.data[0]
     
     await ensureCollection('sign_records')
     await ensureCollection('points_records')
     await ensureCollection('user_achievements')
+    await ensureCollection('user_backpack')
     
     const now = new Date()
     const beijingTime = new Date(now.getTime() + (8 * 60 * 60 * 1000))
@@ -74,7 +212,7 @@ const user = userResult.data[0]
     
     const signDates = user.signDates || []
     
-    if (signDates.includes(today)) {
+    if (!force && signDates.includes(today)) {
       return {
         success: false,
         errMsg: '今天已经签到过了'
@@ -85,28 +223,54 @@ const user = userResult.data[0]
     const yesterday = formatDateLocal(yesterdayDate)
     
     let consecutiveDays = 1
-    if (signDates.length > 0 && signDates[signDates.length - 1] === yesterday) {
-      let checkDate = new Date(yesterday)
-      consecutiveDays = 1
-      
-      while (true) {
-        checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
-        const checkDateStr = formatDateLocal(checkDate)
+    if (signDates.length > 0 && (!force || signDates.length > 0)) {
+      if (signDates[signDates.length - 1] === yesterday) {
+        let checkDate = new Date(yesterday)
+        consecutiveDays = 1
         
-        if (signDates.includes(checkDateStr)) {
-          consecutiveDays++
-        } else {
-          break
+        while (true) {
+          checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+          const checkDateStr = formatDateLocal(checkDate)
+          
+          if (signDates.includes(checkDateStr)) {
+            consecutiveDays++
+          } else {
+            break
+          }
         }
       }
     }
     
-    const basePoints = 10
-    const bonusPoints = Math.floor(consecutiveDays / 7) * 5
+    // 如果是补签，检查是否有补签卡
+    if (force && signDates.length > 0 && !signDates.includes(today)) {
+      const checkinCard = await getActiveCheckinCard(openid)
+      if (checkinCard) {
+        const consumed = await consumeCard(openid, checkinCard._id, 'checkin_card')
+        if (consumed) {
+          console.log('使用补签卡成功')
+        } else {
+          return {
+            success: false,
+            errMsg: '补签卡使用失败'
+          }
+        }
+      }
+    }
+    
+    // 检查是否有生效的双倍积分卡
+    let doubleMultiplier = 1
+    const doubleCard = await getActiveDoublePointsCard(openid)
+    if (doubleCard) {
+      doubleMultiplier = 2
+      console.log('使用双倍积分卡:', doubleCard.itemName)
+    }
+    
+    const basePoints = 10 * doubleMultiplier
+    const bonusPoints = Math.floor(consecutiveDays / 7) * 5 * doubleMultiplier
     const earnedPoints = basePoints + bonusPoints
     const newPoints = (user.points || 0) + earnedPoints
     
-    const newSignDates = [...signDates, today]
+const newSignDates = [...signDates, today]
     
     await db.collection('users').doc(user._id).update({
       data: {
@@ -115,6 +279,16 @@ const user = userResult.data[0]
         updatedAt: new Date()
       }
     })
+    
+    // 如果使用了双倍积分卡，更新卡片使用时间
+    if (doubleMultiplier > 1 && doubleCard) {
+      await db.collection('user_backpack').doc(doubleCard._id).update({
+        data: {
+          status: 'used',
+          usedAt: new Date()
+        }
+      })
+    }
     
     try {
       await db.collection('sign_records').add({
@@ -125,14 +299,15 @@ const user = userResult.data[0]
           nickName: user.nickName,
           signDate: new Date(),
           points: earnedPoints,
-          signDays: consecutiveDays
+          signDays: consecutiveDays,
+          doubleUsed: doubleMultiplier > 1
         }
       })
     } catch (err) {
       console.log('保存签到记录失败（集合可能不存在）：', err.message)
     }
     
-    try {
+try {
       await db.collection('points_records').add({
         data: {
           _openid: openid,
@@ -141,7 +316,7 @@ const user = userResult.data[0]
           nickName: user.nickName,
           type: 'earn',
           points: earnedPoints,
-          reason: '签到',
+          reason: doubleMultiplier > 1 ? `签到（双倍卡x${doubleMultiplier})` : '签到',
           relatedId: `sign_${today}`,
           createdAt: new Date()
         }

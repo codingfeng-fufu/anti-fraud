@@ -1,0 +1,100 @@
+<!--
+用户背包页面 - 背包系统模块
+
+上游依赖：backpack.js页面逻辑，backpack.wxss样式文件
+入口：通过"积分商城"页面跳转至/pages/backpack/backpack
+主要功能：展示用户背包中的虚拟商品、道具卡、实体商品，显示生效中的卡片
+输出：渲染背包界面，触发事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="backpack-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">我的背包</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value">{{stats.total}}</view>
+        <view class="stat-label">背包物品</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.unused}}</view>
+        <view class="stat-label">未使用</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.active}}</view>
+        <view class="stat-label">生效中</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生效中的双倍积分卡 -->
+  <view wx:if="{{activeCards.length > 0}}" class="active-cards-section">
+    <view class="section-title">生效中（{{activeCards.length}}）</view>
+    <view class="active-cards-list">
+      <view wx:for="{{activeCards}}" wx:key="_id" class="active-card">
+        <view class="card-icon">✨</view>
+        <view class="card-info">
+          <view class="card-name">{{item.itemName}}</view>
+          <view class="card-expire">有效期至{{item.expireAt}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="category-filter">
+    <scroll-view scroll-x class="category-scroll">
+      <view class="category-list">
+        <view 
+          wx:for="{{categories}}" 
+          wx:key="*this"
+          class="category-item {{currentCategory === item ? 'active' : ''}}"
+          bindtap="switchCategory"
+          data-category="{{item}}"
+        >
+          <text class="category-text">{{item === 'all' ? '全部' : item === 'virtual' ? '虚拟商品' : item === 'tool' ? '道具卡' : '实体商品'}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 背包列表 -->
+  <view class="backpack-list">
+    <view wx:if="{{backpack.length === 0 && !loading}}" class="empty-state">
+      <text class="empty-icon">🎒</text>
+      <view class="empty-text">背包是空的</view>
+      <view class="empty-hint">去积分商城兑换商品吧！</view>
+    </view>
+
+    <view wx:for="{{backpack}}" wx:key="_id" class="backpack-item">
+      <view class="item-icon">{{getItemIcon(item.itemType)}}</view>
+      <view class="item-content">
+        <view class="item-name">{{item.itemName}}</view>
+        <view class="item-meta">
+          <text class="item-category">{{getCategoryText(item.itemCategory)}}</text>
+          <text class="item-status">{{getStatusText(item.status)}}</text>
+        </view>
+        <view wx:if="{{item.expireAt}}" class="item-expire">
+          <text>有效期至：{{item.expireAt}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.itemCategory === 'virtual' && item.status === 'unused'}}" class="item-action">
+        <button class="use-btn" bindtap="useItem" data-id="{{item._id}}">使用</button>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="loading-more">
+      <text>加载中...</text>
+    </view>
+  </view>
+</view>

@@ -95,4 +95,16 @@
       <view class="menu-arrow">›</view>
     </view>
   </view>
+
+  <!-- 我的背包入口 -->
+  <view class="menu-card" bindtap="navigateToBackpack">
+    <view class="menu-item">
+      <view class="menu-icon">🎒</view>
+      <view class="menu-content">
+        <view class="menu-title">我的背包</view>
+        <view class="menu-desc">查看已兑换的商品</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
 </view>
