@@ -6,7 +6,7 @@ Page({
     loading: false,
     scrollToView: '',
     // 欢迎消息
-    welcomeMessage: '你好！我是反诈AI助手，可以帮你：\n\n• 解答反诈骗问题\n• 识别可疑信息\n• 提供防骗建议\n• 分析上传的截图\n\n💡 我会记住最近5轮对话，所以您可以追问"那怎么办"、"还有呢"等问题，我会基于之前的对话内容回答。\n\n有什么可以帮你的吗？',
+    welcomeMessage: '你好！我是反诈AI助手，可以帮你：\n\n• 解答反诈骗问题\n• 识别可疑信息\n• 提供防骗建议\n• 分析上传的截图\n\n💡 我会记住最近10轮对话，所以您可以追问"那怎么办"、"还有呢"等问题，我会基于之前的对话内容回答。\n\n有什么可以帮你的吗？',
     privacyText: '🔒 隐私保护：对话记录仅保存在您的手机本地，不会上传到服务器。'
   },
 
@@ -153,9 +153,9 @@ Page({
 
     try {
       // 🔒 隐私保护：构建历史记录（仅保存在内存中）
-      // 获取最近5轮对话（10条消息），保持上下文连贯性
+      // 获取最近10轮对话（20条消息），保持上下文连贯性
       const currentMessages = this.data.messages
-      const recentMessages = currentMessages.slice(-10)
+      const recentMessages = currentMessages.slice(-20)
       const history = recentMessages.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'assistant',
         content: msg.content
@@ -166,7 +166,8 @@ Page({
         name: 'aiChat',
         data: {
           message,
-          history  // 传递最近5轮对话历史，让AI记住上下文
+          history,  // 传递最近10轮对话历史，让AI记住上下文
+          stream: true  // 启用流式处理
         }
       })
 
@@ -317,9 +318,9 @@ Page({
             })
 
             try {
-              // 构建历史记录
+              // 构建历史记录（最近10轮对话，20条消息）
               const currentMessages = this.data.messages
-              const recentMessages = currentMessages.slice(-10)
+              const recentMessages = currentMessages.slice(-20)
               const history = recentMessages.map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'assistant',
                 content: msg.content
@@ -331,7 +332,8 @@ Page({
                 data: {
                   message: '请帮我分析这张图片是否存在诈骗风险',
                   imageBase64: base64Image,
-                  history
+                  history,
+                  stream: true  // 启用流式处理
                 }
               })
 
@@ -339,6 +341,39 @@ Page({
 
               if (result.result.success) {
                 const reply = result.result.data.reply
+                const actionData = result.result.data.actionData
+
+                // 处理 actionData
+                if (actionData) {
+                  if (typeof actionData.updatedCount === 'number') {
+                    wx.setStorageSync('chatTimes', actionData.updatedCount)
+                  }
+                  if (typeof actionData.userPoints === 'number') {
+                    wx.setStorageSync('points', actionData.userPoints)
+                  } else if (actionData.totalPoints) {
+                    const points = wx.getStorageSync('points') || 0
+                    const newPoints = points + actionData.totalPoints
+                    wx.setStorageSync('points', newPoints)
+                  }
+                  if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
+                    const achievementIds = actionData.newAchievements
+                      .map(item => item.achievementId)
+                      .filter(Boolean)
+                    const userInfo = wx.getStorageSync('userInfo') || {}
+
+                    if (Array.isArray(userInfo.achievements) && achievementIds.length > 0) {
+                      const merged = Array.from(new Set([...userInfo.achievements, ...achievementIds]))
+                      userInfo.achievements = merged
+                      wx.setStorageSync('userInfo', userInfo)
+                      wx.setStorageSync('achievements', merged.length)
+                    } else {
+                      const achievements = wx.getStorageSync('achievements') || 0
+                      const newAchievementsCount = achievements + actionData.newAchievements.length
+                      wx.setStorageSync('achievements', newAchievementsCount)
+                    }
+                  }
+                }
+
                 const botMsg = {
                   id: Date.now() + 1,
                   role: 'bot',
@@ -353,6 +388,7 @@ Page({
                 })
 
                 this.saveLocalMessages(newMessages)
+                this.syncUserInfoFromCloud()
               } else {
                 throw new Error(result.result.errMsg || '识别失败')
               }

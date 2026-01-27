@@ -3,8 +3,8 @@ Page({
   data: {
     appInfo: {
       name: '反诈卫士',
-      version: '1.0.0',
-      releaseDate: '2026-01-13',
+      version: '1.2',
+      releaseDate: '2026-01-27',
       description: '面向大学生的反诈骗宣传教育小程序'
     },
     
@@ -23,7 +23,7 @@ Page({
     ],
     
     contact: {
-      email: 'contact@antiscam.edu.cn',
+      email: 'plk161211@163.com',
       wechat: 'antiscam_helper',
       hotline: '96110'
     }
