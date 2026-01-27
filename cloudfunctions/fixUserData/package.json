@@ -1,0 +1,9 @@
+{
+  "name": "fixUserData",
+  "version": "1.0.0",
+  "description": "用户数据修复云函数 - 检查并修复缺失字段",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

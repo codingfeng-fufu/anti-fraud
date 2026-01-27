@@ -1,3 +1,13 @@
+/*
+成就页面 - 成就系统模块
+
+上游依赖：achievements.wxml结构文件
+入口：页面加载时自动应用样式
+主要功能：定义成就界面的视觉样式，包括统计卡片、成就列表、进度条等组件
+输出：渲染美观的成就界面样式
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+*/
 /* pages/achievements/achievements.wxss */
 .achievements-container {
   min-height: 100vh;
@@ -152,13 +162,222 @@
 
 .achievement-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 24rpx;
   background: white;
+  border-radius: 32rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.achievement-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+
+.achievement-item.unlocked {
+  background: white;
+}
+
+.achievement-item.locked {
+  opacity: 0.5;
+}
+
+/* 图标区域 */
+.achievement-icon-wrapper {
+  flex-shrink: 0;
+  width: 96rpx;
+  height: 96rpx;
   border-radius: 24rpx;
-  padding: 32rpx;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.achievement-emoji {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.achievement-checkmark {
+  position: absolute;
+  right: -4rpx;
+  bottom: -4rpx;
+  width: 36rpx;
+  height: 36rpx;
+  background: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4rpx solid white;
+  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.2);
+}
+
+.checkmark-icon {
+  color: white;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 内容区域 */
+.achievement-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.achievement-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.achievement-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.achievement-badge {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: #f59e0b;
+  background: #fef3c7;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.achievement-description {
+  font-size: 24rpx;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 8rpx;
+  word-break: break-word;
+}
+
+.achievement-earned-at {
+  margin-bottom: 8rpx;
+}
+
+.earned-label {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.achievement-reward {
+  display: inline-flex;
+  align-items: center;
+}
+
+.reward-label {
+  font-size: 22rpx;
+  color: #059669;
+  font-weight: 500;
+  background: #ecfdf5;
+  padding: 6rpx 14rpx;
+  border-radius: 16rpx;
+  line-height: 1;
+}
+
+/* 操作区域 */
+.achievement-action {
+  flex-shrink: 0;
+}
+
+.action-btn {
+  padding: 16rpx 32rpx;
+  background: #eff6ff;
+  border: 1rpx solid #dbeafe;
+  border-radius: 48rpx;
+  transition: all 0.2s ease;
+}
+
+.action-btn:active {
+  background: #dbeafe;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 进度区域 */
+.achievement-progress {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 80rpx;
+}
+
+.progress-container {
+  width: 60rpx;
+  height: 6rpx;
+  background: #f1f5f9;
+  border-radius: 6rpx;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #e2e8f0;
+  border-radius: 6rpx;
+}
+
+.progress-value {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: 20rpx;
+  color: #94a3b8;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 24rpx;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: white;
+  border-radius: 24rpx;
+  padding: 24rpx 32rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid #e0e7ff;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
@@ -166,21 +385,71 @@
   border: 3rpx solid #10b981;
 }
 
+.achievement-item.unlocked::before {
+  content: '已完成';
+  position: absolute;
+  right: -20rpx;
+  bottom: -20rpx;
+  font-size: 120rpx;
+  color: rgba(16, 185, 129, 0.05);
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .achievement-item.locked {
   opacity: 0.6;
+}
+
+.achievement-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.achievement-middle {
+  flex: 1;
+  min-width: 0;
+  padding-right: 16rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.achievement-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+  min-width: 100rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.progress-mini {
+  font-size: 22rpx;
+  color: #0ea5e9;
+  font-weight: 500;
 }
 
 /* 成就图标 */
 .achievement-icon {
   width: 96rpx;
   height: 96rpx;
-  border-radius: 24rpx;
+  border-radius: 20rpx;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  flex-shrink: 0;
 }
 
 .icon-emoji {
@@ -191,7 +460,7 @@
 .unlock-badge {
   position: absolute;
   right: -8rpx;
-  top: -8rpx;
+  bottom: -8rpx;
   width: 40rpx;
   height: 40rpx;
   background: #10b981;
@@ -204,95 +473,94 @@
   border: 4rpx solid white;
 }
 
-/* 成就内容 */
-.achievement-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.achievement-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8rpx;
-  gap: 16rpx;
-}
 
 .achievement-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  color: #1e293b;
-  flex: 1;
+  color: #333;
+  line-height: 1.4;
 }
 
 .achievement-points {
-  font-size: 24rpx;
-  color: #f59e0b;
+  font-size: 22rpx;
+  color: #fa8c16;
   font-weight: 500;
-  background: #fef3c7;
+  background: #fff7e6;
   padding: 4rpx 12rpx;
-  border-radius: 12rpx;
+  border-radius: 20rpx;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .achievement-desc {
-  font-size: 26rpx;
-  color: #64748b;
-  margin-bottom: 16rpx;
-  line-height: 1.5;
-}
-
-.achievement-progress {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.progress-text {
   font-size: 24rpx;
-  color: #0ea5e9;
-  font-weight: 500;
-  min-width: 100rpx;
+  color: #8c8c8c;
+  margin-bottom: 8rpx;
+  line-height: 1.6;
+  word-break: break-word;
 }
+
+.title-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  background: #f0fdf4;
+  border: 2rpx solid #bbf7d0;
+  padding: 8rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+}
+
+.reward-icon {
+  font-size: 24rpx;
+  color: #10b981;
+}
+
+.reward-text {
+  color: #065f46;
+  font-weight: 500;
+}
+
 
 .progress-bar-mini {
-  flex: 1;
-  height: 8rpx;
+  width: 100rpx;
+  height: 4rpx;
   background: #e0f2fe;
-  border-radius: 8rpx;
+  border-radius: 4rpx;
   overflow: hidden;
 }
 
 .progress-fill-mini {
   height: 100%;
   background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
-  border-radius: 8rpx;
+  border-radius: 4rpx;
   transition: width 0.3s ease;
 }
 
-/* 成就操作 */
-.achievement-action {
-  display: flex;
-  align-items: center;
-}
-
 .share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12rpx 24rpx;
   font-size: 24rpx;
   color: #0ea5e9;
   background: #f0f9ff;
   border: 2rpx solid #bae6fd;
-  border-radius: 16rpx;
+  border-radius: 48rpx;
   line-height: 1;
+  min-width: 100rpx;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.achievement-item.unlocked .share-btn {
+  color: #94a3b8;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 .share-btn::after {
   border: none;
-}
-
-.lock-icon {
-  font-size: 40rpx;
-  opacity: 0.5;
 }
 
 /* 空状态 */

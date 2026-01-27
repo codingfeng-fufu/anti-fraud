@@ -1,0 +1,110 @@
+.account-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.header-left,
+.header-right {
+  width: 80rpx;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: #333;
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.account-section {
+  background: white;
+  margin: 20rpx 40rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.account-section.danger {
+  margin-top: 40rpx;
+}
+
+.section-title {
+  padding: 30rpx 40rpx 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 40rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.account-item:last-child {
+  border-bottom: none;
+}
+
+.account-item:active {
+  background: #f9f9f9;
+}
+
+.account-item.danger:active {
+  background: #fff5f5;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.item-icon {
+  font-size: 36rpx;
+  margin-right: 20rpx;
+}
+
+.item-label {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.item-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.item-value {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.item-value.bound {
+  color: #52c41a;
+}
+
+.avatar-preview {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+}
+
+.item-arrow {
+  font-size: 32rpx;
+  color: #ccc;
+}

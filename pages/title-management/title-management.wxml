@@ -1,0 +1,60 @@
+<view class="title-management-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">称号管理</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 当前佩戴称号 -->
+  <view class="current-titles-section">
+    <view class="section-title">当前佩戴称号</view>
+    <view class="equipped-titles">
+      <view wx:for="{{equippedTitles}}" wx:key="id" class="title-item equipped">
+        <text class="title-icon">{{item.icon}}</text>
+        <text class="title-name">{{item.name}}</text>
+        <button class="unequip-btn" bindtap="unequipTitle" data-id="{{item.titleId}}">
+          卸下
+        </button>
+      </view>
+      <view wx:if="{{equippedTitles.length === 0}}" class="no-equipped">
+        暂未佩戴任何称号
+      </view>
+    </view>
+  </view>
+
+  <!-- 可佩戴称号 -->
+  <view class="available-titles-section">
+    <view class="section-title">可佩戴称号 (最多3个)</view>
+    <view class="available-titles">
+      <view wx:for="{{ownedTitles}}" wx:key="id" class="title-item available">
+        <text class="title-icon">{{item.icon}}</text>
+        <text class="title-name">{{item.name}}</text>
+        <text class="title-rarity {{item.rarity}}">{{item.rarity}}</text>
+        <button wx:if="{{!isEquipped(item.titleId)}}"
+                class="equip-btn"
+                bindtap="equipTitle"
+                data-id="{{item.titleId}}"
+                disabled="{{equippedTitles.length >= 3}}">
+          佩戴
+        </button>
+        <button wx:else class="equipped-btn" disabled>已佩戴</button>
+        <button class="delete-btn" bindtap="deleteTitle" data-id="{{item.titleId}}">×</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 已获得称号统计 -->
+  <view class="title-stats">
+    <view class="stat-item">
+      <text class="stat-number">{{ownedTitles.length}}</text>
+      <text class="stat-label">已获得</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{equippedTitles.length}}</text>
+      <text class="stat-label">已佩戴</text>
+    </view>
+  </view>
+</view>

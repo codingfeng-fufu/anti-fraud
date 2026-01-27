@@ -142,8 +142,19 @@ Page({
       
       wx.hideLoading()
       
-      if (result.result.success) {
+if (result.result.success) {
         const data = result.result.data
+        
+        // 更新本地存储的积分
+        if (data.userInfo && typeof data.userInfo.points === 'number') {
+          wx.setStorageSync('points', data.userInfo.points)
+          console.log('绑定成功，更新积分:', data.userInfo.points)
+        }
+        
+        // 更新本地存储的用户信息
+        if (data.userInfo) {
+          wx.setStorageSync('userInfo', data.userInfo)
+        }
         
         // 显示成功提示
         let content = result.result.message || '绑定成功！'

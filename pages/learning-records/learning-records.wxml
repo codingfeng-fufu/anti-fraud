@@ -1,0 +1,85 @@
+<!--
+学习记录页面 - 学习记录模块
+
+上游依赖：learning-records.js页面逻辑，learning-records.wxss样式文件
+入口：通过"我的"页面跳转至/pages/learning-records/learning-records
+主要功能：展示用户阅读历史、学习统计、阅读进度
+输出：渲染学习记录界面，触发事件处理器
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="learning-records-container">
+  <!-- 顶部导航 -->
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="header-title">学习记录</view>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 学习统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value">{{stats.totalReadCount}}</view>
+        <view class="stat-label">总阅读</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.recentReadCount}}</view>
+        <view class="stat-label">近7天</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.consecutiveDays}}</view>
+        <view class="stat-label">连续天数</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="category-filter">
+    <scroll-view scroll-x class="category-scroll">
+      <view class="category-list">
+        <view 
+          wx:for="{{categories}}" 
+          wx:key="*this"
+          class="category-item {{currentCategory === item ? 'active' : ''}}"
+          bindtap="switchCategory"
+          data-category="{{item}}"
+        >
+          <text class="category-text">{{item === 'all' ? '全部' : item}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 学习记录列表 -->
+  <view class="records-list">
+    <view wx:if="{{records.length === 0 && !loading}}" class="empty-state">
+      <text class="empty-icon">📖</text>
+      <view class="empty-text">还没有学习记录</view>
+      <view class="empty-hint">去阅读反诈文章吧！</view>
+    </view>
+
+    <view wx:for="{{records}}" wx:key="_id" class="record-item">
+      <view class="record-icon">📚</view>
+      <view class="record-content">
+        <view class="record-title">{{item.articleTitle}}</view>
+        <view class="record-meta">
+          <text class="record-category">{{item.articleCategory}}</text>
+          <text class="record-time">{{item.readAt}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.isFirstRead}}" class="record-badge">首次</view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading}}" class="loading-more">
+      <text>加载中...</text>
+    </view>
+    
+    <view wx:if="{{!hasMore && records.length > 0}}" class="no-more">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

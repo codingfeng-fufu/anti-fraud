@@ -20,8 +20,49 @@ Page({
     this.loadLearningData()
   },
 
-  onShow() {
-    this.loadLearningData()
+onShow() {
+    this.loadLearningDataFromCloud()
+  },
+
+  // 从云端加载学习数据
+  async loadLearningDataFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+      
+      if (result.result.success) {
+        const data = result.result.data.userInfo
+        
+        // 加载阅读历史（本地存储）
+        const readHistory = wx.getStorageSync('readHistory') || []
+        
+        // 计算统计数据
+        const totalArticles = readHistory.length
+        const totalTime = readHistory.reduce((sum, item) => sum + (item.readTime || 0), 0)
+        const totalChats = data.totalChatCount || 0
+        const signDays = data.signDays || 0
+        
+        console.log('从云端加载学习数据:', { totalArticles, totalTime, totalChats, signDays })
+        
+        this.setData({
+          readHistory: readHistory.slice(0, 50),
+          'stats.totalArticles': totalArticles,
+          'stats.totalTime': totalTime,
+          'stats.totalChats': totalChats,
+          'stats.continuousDays': signDays
+        })
+        
+        // 更新本地存储
+        wx.setStorageSync('chatTimes', totalChats)
+        wx.setStorageSync('signDays', signDays)
+      }
+    } catch (err) {
+      console.error('从云端加载学习数据失败：', err)
+      // 降级到本地存储
+      this.loadLearningData()
+    }
   },
 
   // 加载学习数据
@@ -36,10 +77,17 @@ Page({
       // 加载签到天数
       const signDays = wx.getStorageSync('signDays') || 0
       
+      // 加载对话次数 (从云函数更新的chatTimes)
+      const chatTimes = wx.getStorageSync('chatTimes') || 0
+      
       // 计算统计数据
       const totalArticles = readHistory.length
       const totalTime = readHistory.reduce((sum, item) => sum + (item.readTime || 0), 0)
-      const totalChats = Math.floor(chatMessages.length / 2) // 用户消息数量
+      
+      // 优先使用chatTimes，如果没有则从消息计算
+      const totalChats = chatTimes > 0 ? chatTimes : Math.floor(chatMessages.length / 2)
+      
+      console.log('学习数据:', { totalArticles, totalTime, totalChats, signDays, chatTimes, chatMessagesLength: chatMessages.length })
       
       this.setData({
         readHistory: readHistory.slice(0, 50), // 最多显示50条

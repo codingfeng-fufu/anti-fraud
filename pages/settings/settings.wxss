@@ -53,6 +53,14 @@
   border-bottom: none;
 }
 
+.settings-item.danger {
+  background: #fef2f2;
+}
+
+.settings-item.danger .item-label {
+  color: #ef4444;
+}
+
 .item-left {
   display: flex;
   align-items: center;

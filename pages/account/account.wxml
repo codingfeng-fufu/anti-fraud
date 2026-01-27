@@ -1,0 +1,90 @@
+<view class="account-container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="header-title">账号管理</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="account-section">
+    <view class="section-title">基本信息</view>
+    <view class="account-item">
+      <view class="item-left">
+        <text class="item-label">UID</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">{{userInfo.uid}}</text>
+      </view>
+    </view>
+    <view class="account-item" bindtap="editNickname">
+      <view class="item-left">
+        <text class="item-label">昵称</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">{{userInfo.nickName || '未设置'}}</text>
+        <text class="item-arrow">›</text>
+      </view>
+    </view>
+    <view class="account-item" bindtap="chooseAvatar">
+      <view class="item-left">
+        <text class="item-label">头像</text>
+      </view>
+      <view class="item-right">
+        <image wx:if="{{userInfo.avatarUrl}}" class="avatar-preview" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <text wx:else class="item-value">未设置</text>
+        <text class="item-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="account-section">
+    <view class="section-title">学生信息</view>
+    <view class="account-item" bindtap="bindStudent">
+      <view class="item-left">
+        <text class="item-label">学号绑定</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value {{userInfo.isBound ? 'bound' : ''}}">
+          {{userInfo.isBound ? '已绑定' : '未绑定'}}
+        </text>
+        <text class="item-arrow">›</text>
+      </view>
+    </view>
+    <view wx:if="{{userInfo.isBound}}" class="account-item">
+      <view class="item-left">
+        <text class="item-label">学号</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">{{userInfo.studentId}}</text>
+      </view>
+    </view>
+    <view wx:if="{{userInfo.isBound}}" class="account-item">
+      <view class="item-left">
+        <text class="item-label">学校</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">{{userInfo.schoolName}}</text>
+      </view>
+    </view>
+    <view wx:if="{{userInfo.isBound}}" class="account-item">
+      <view class="item-left">
+        <text class="item-label">专业</text>
+      </view>
+      <view class="item-right">
+        <text class="item-value">{{userInfo.majorName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="account-section danger">
+    <view class="section-title">危险操作</view>
+    <view class="account-item danger" bindtap="unbindStudent" wx:if="{{userInfo.isBound}}">
+      <view class="item-left">
+        <text class="item-icon">🔓</text>
+        <text class="item-label">解绑学号</text>
+      </view>
+      <text class="item-arrow">›</text>
+    </view>
+  </view>
+</view>

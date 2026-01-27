@@ -1,14 +1,20 @@
 {
-  "pages": [
+"pages": [
     "pages/index/index",
     "pages/chat/chat",
     "pages/user/user",
+    "pages/sign-in/sign-in",
+    "pages/my/my",
     "pages/article-detail/article-detail",
     "pages/bind-student/bind-student",
     "pages/achievements/achievements",
-    "pages/points/points",
+    "points",
+    "pages/points-history/points-history",
     "pages/learning/learning",
+    "pages/learning-records/learning-records",
+    "pages/backpack/backpack",
     "pages/settings/settings",
+    "pages/account/account",
     "pages/feedback/feedback",
     "pages/about/about"
   ],

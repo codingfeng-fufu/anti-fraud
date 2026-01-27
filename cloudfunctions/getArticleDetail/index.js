@@ -1,3 +1,14 @@
+/**
+ * 获取文章详情云函数 - 内容管理模块
+ * 
+ * 上游依赖：微信云开发环境，articles, users, read_records数据库集合
+ * 入口：exports.main函数，处理文章详情请求
+ * 主要功能：获取文章详情、增加浏览量、记录用户阅读历史、更新阅读统计
+ * 输出：文章详情数据和相关文章列表
+ * 
+ * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+ */
+
 // 云函数：getArticleDetail
 // 获取文章详情，并增加浏览量
 const cloud = require('wx-server-sdk')
@@ -9,8 +20,30 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 
+async function ensureCollection(collectionName) {
+  try {
+    await db.collection(collectionName).limit(1).get()
+  } catch (err) {
+    if (err.errCode === -502005) {
+      console.log(`集合 ${collectionName} 不存在，尝试创建...`)
+      try {
+        await db.createCollection(collectionName)
+        console.log(`集合 ${collectionName} 创建成功`)
+      } catch (createErr) {
+        console.error(`创建集合 ${collectionName} 失败:`, createErr.message)
+      }
+    } else {
+      console.error(`检查集合 ${collectionName} 失败:`, err.message)
+    }
+  }
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  
+  console.log('getArticleDetail 收到的参数:', event)
+  console.log('openid:', openid)
   
   try {
     const { articleId } = event
@@ -21,6 +54,10 @@ exports.main = async (event, context) => {
         errMsg: '文章ID不能为空'
       }
     }
+    
+    // 确保必要的集合存在
+    await ensureCollection('read_records')
+    await ensureCollection('points_records')
     
     // 获取文章详情
     const result = await db.collection('articles')
@@ -34,15 +71,25 @@ exports.main = async (event, context) => {
       }
     }
     
+    const currentViews = result.data.views ?? result.data.viewCount ?? 0
+    const viewUpdate = {}
+    if (Object.prototype.hasOwnProperty.call(result.data, 'views')) {
+      viewUpdate.views = _.inc(1)
+    }
+    if (Object.prototype.hasOwnProperty.call(result.data, 'viewCount')) {
+      viewUpdate.viewCount = _.inc(1)
+    }
+    if (Object.keys(viewUpdate).length === 0) {
+      viewUpdate.views = _.inc(1)
+    }
+    
     // 增加浏览量
     await db.collection('articles').doc(articleId).update({
-      data: {
-        viewCount: _.inc(1)
-      }
+      data: viewUpdate
     })
     
     // 记录用户阅读历史
-    const openid = wxContext.OPENID
+    let actionData = null
     if (openid) {
       try {
         // 查找用户ID
@@ -53,22 +100,67 @@ exports.main = async (event, context) => {
         if (userResult.data.length > 0) {
           const userId = userResult.data[0]._id
           
+          // 检查是否首次阅读该文章
+          const existingRead = await db.collection('read_records')
+            .where({
+              _openid: openid,
+              articleId: articleId
+            })
+            .count()
+          
+          const isFirstRead = existingRead.total === 0
+          console.log('是否首次阅读该文章:', isFirstRead)
+          
           // 保存阅读记录
           await db.collection('read_records').add({
             data: {
               _openid: openid,
               userId,
               articleId,
+              articleTitle: result.data.title,
+              articleCategory: result.data.category,
+              isFirstRead,
               readAt: new Date()
             }
           })
           
-          // 更新用户阅读总数
-          await db.collection('users').doc(userId).update({
-            data: {
-              totalReadCount: _.inc(1)
-            }
-          })
+          // 调用trackAction记录阅读行为，以检查阅读类成就并更新统计
+          try {
+            console.log('准备调用 trackAction 云函数...')
+            console.log('传递的参数:', {
+              openid: openid,
+              action: 'read',
+              increment: 1
+            })
+            
+            const trackActionResult = await cloud.callFunction({
+              name: 'trackAction',
+              data: {
+                openid: openid,
+                action: 'read',
+                increment: 1
+              }
+            })
+           
+           if (trackActionResult.result && trackActionResult.result.success) {
+             actionData = trackActionResult.result.data
+             console.log('trackAction 返回的数据:', actionData)
+           } else {
+             console.warn('trackAction 调用失败:', trackActionResult.result?.errMsg)
+           }
+           
+           console.log('Track read action result:', trackActionResult)
+         } catch (trackErr) {
+           console.error('Track read action failed:', trackErr.message)
+           // 不影响获取文章详情成功，继续执行
+           
+           // 保持原有的阅读次数更新作为备用
+           await db.collection('users').doc(userId).update({
+             data: {
+               totalReadCount: _.inc(1)
+             }
+           })
+         }
         }
       } catch (err) {
         console.error('记录阅读历史失败：', err)
@@ -87,8 +179,12 @@ exports.main = async (event, context) => {
     return {
       success: true,
       data: {
-        article: result.data,
-        relatedArticles: relatedResult.data
+        article: {
+          ...result.data,
+          views: currentViews + 1
+        },
+        relatedArticles: relatedResult.data,
+        actionData
       }
     }
   } catch (err) {

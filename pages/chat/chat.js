@@ -51,8 +51,49 @@ Page({
       console.error('保存本地消息失败：', err)
     }
   },
+  // Sync user info from cloud
+  async syncUserInfoFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
 
-  // 清除本地历史记录
+      if (result.result && result.result.success) {
+        const data = result.result.data || {}
+        const userInfo = data.userInfo || {}
+
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          wx.setStorageSync('userInfo', userInfo)
+        }
+
+        if (typeof userInfo.points === 'number') {
+          wx.setStorageSync('points', userInfo.points)
+        }
+        if (typeof userInfo.totalChatCount === 'number') {
+          wx.setStorageSync('chatTimes', userInfo.totalChatCount)
+        }
+        if (typeof userInfo.totalReadCount === 'number') {
+          wx.setStorageSync('readArticles', userInfo.totalReadCount)
+        }
+        if (typeof userInfo.signDays === 'number') {
+          wx.setStorageSync('signDays', userInfo.signDays)
+        }
+
+        const achievementList = Array.isArray(data.achievementList)
+          ? data.achievementList
+          : null
+        if (achievementList) {
+          wx.setStorageSync('achievements', achievementList.filter(item => item.unlocked).length)
+        } else if (Array.isArray(userInfo.achievements)) {
+          wx.setStorageSync('achievements', userInfo.achievements.length)
+        }
+      }
+    } catch (err) {
+      console.error('syncUserInfoFromCloud failed:', err)
+    }
+  },
+  // Clear local messages
   clearLocalMessages() {
     wx.showModal({
       title: '清除历史记录',
@@ -131,6 +172,74 @@ Page({
 
       if (result.result.success) {
         const reply = result.result.data.reply
+        const actionData = result.result.data.actionData
+        console.log('AI对话成功，actionData:', actionData)
+        console.log('当前本地积分:', wx.getStorageSync('points') || 0)
+        
+        if (actionData) {
+          console.log('处理actionData数据')
+          
+          if (typeof actionData.updatedCount === 'number') {
+            console.log('更新对话次数:', actionData.updatedCount)
+            wx.setStorageSync('chatTimes', actionData.updatedCount)
+          } else {
+            console.warn('actionData.updatedCount不是数字:', actionData.updatedCount)
+            // 备用：从本地消息计算并更新
+            const currentChatTimes = wx.getStorageSync('chatTimes') || 0
+            const newChatTimes = currentChatTimes + 1
+            console.log('备用更新对话次数:', currentChatTimes, '+', 1, '=', newChatTimes)
+            wx.setStorageSync('chatTimes', newChatTimes)
+          }
+          
+          if (typeof actionData.userPoints === 'number') {
+            console.log('更新用户积分:', actionData.userPoints)
+            wx.setStorageSync('points', actionData.userPoints)
+            console.log('积分已更新，新积分:', actionData.userPoints)
+          } else if (actionData.totalPoints) {
+            const points = wx.getStorageSync('points') || 0
+            const newPoints = points + actionData.totalPoints
+            console.log('增加积分:', points, '+', actionData.totalPoints, '=', newPoints)
+            wx.setStorageSync('points', newPoints)
+            console.log('积分已更新，新积分:', newPoints)
+          } else {
+            console.warn('actionData中没有积分信息:', { userPoints: actionData.userPoints, totalPoints: actionData.totalPoints })
+          }
+          
+          if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
+            console.log('获得新成就:', actionData.newAchievements)
+            const achievementIds = actionData.newAchievements
+              .map(item => item.achievementId)
+              .filter(Boolean)
+            const userInfo = wx.getStorageSync('userInfo') || {}
+            
+            if (Array.isArray(userInfo.achievements) && achievementIds.length > 0) {
+              const merged = Array.from(new Set([...userInfo.achievements, ...achievementIds]))
+              userInfo.achievements = merged
+              wx.setStorageSync('userInfo', userInfo)
+              wx.setStorageSync('achievements', merged.length)
+              console.log('更新用户成就列表:', merged)
+            } else {
+              const achievements = wx.getStorageSync('achievements') || 0
+              const newAchievementsCount = achievements + actionData.newAchievements.length
+              wx.setStorageSync('achievements', newAchievementsCount)
+              console.log('更新成就数量:', achievements, '+', actionData.newAchievements.length, '=', newAchievementsCount)
+            }
+          } else {
+            console.log('没有新成就获得')
+          }
+        } else {
+          console.warn('actionData为空，使用备用逻辑')
+          // 备用：手动更新本地计数
+          const currentChatTimes = wx.getStorageSync('chatTimes') || 0
+          const newChatTimes = currentChatTimes + 1
+          const points = wx.getStorageSync('points') || 0
+          const newPoints = points + 2 // 基础积分
+          
+          console.log('备用更新数据:', { chatTimes: newChatTimes, points: newPoints })
+          wx.setStorageSync('chatTimes', newChatTimes)
+          wx.setStorageSync('points', newPoints)
+          console.log('积分已更新，新积分:', newPoints)
+        }
         const botMsg = {
           id: Date.now() + 1,
           role: 'bot',
@@ -146,6 +255,7 @@ Page({
 
         // 🔒 保存到本地存储
         this.saveLocalMessages(newMessages)
+        this.syncUserInfoFromCloud()
       } else {
         // 失败时使用本地回复
         const reply = this.generateReply(message)

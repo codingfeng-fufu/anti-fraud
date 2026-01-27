@@ -27,6 +27,55 @@ Page({
     wx.showLoading({ title: '加载中...' })
     
     try {
+      const cloudResult = await wx.cloud.callFunction({
+        name: 'getArticleDetail',
+        data: { articleId: id }
+      })
+      
+      if (cloudResult.result && cloudResult.result.success) {
+        const data = cloudResult.result.data || {}
+        const articleData = data.article || {}
+        const viewCount = articleData.views ?? articleData.viewCount ?? 0
+        const article = {
+          id: articleData._id || id,
+          tag: articleData.tag || '知识科普',
+          tagType: articleData.tagType || 'info',
+          title: articleData.title,
+          time: this.formatTime(articleData.timestamp),
+          views: this.formatViews(viewCount),
+          likes: articleData.likes || 0,
+          content: articleData.content || '',
+          coverImage: articleData.coverImage || '',
+          author: articleData.author || '反诈小助手'
+        }
+        
+        this.setData({ article })
+        
+        if (Array.isArray(data.relatedArticles) && data.relatedArticles.length > 0) {
+          const relatedArticles = data.relatedArticles.map(item => ({
+            id: item._id,
+            title: item.title,
+            time: this.formatTime(item.timestamp),
+            views: this.formatViews(item.views ?? item.viewCount ?? 0)
+          }))
+          this.setData({ relatedArticles })
+        }
+        
+        this.syncActionData(data.actionData, 'readArticles')
+        this.syncUserInfoFromCloud()
+        wx.hideLoading()
+        
+        // 检查点赞、收藏状态
+        this.checkLikeStatus(id)
+        this.checkCollectStatus(id)
+        
+        return
+      }
+    } catch (err) {
+      console.error('从云函数加载失败：', err)
+    }
+
+    try {
       // 先尝试从云数据库加载
       const db = wx.cloud.database()
       const result = await db.collection('articles').doc(id).get()
@@ -39,7 +88,7 @@ Page({
           tagType: result.data.tagType || 'info',
           title: result.data.title,
           time: this.formatTime(result.data.timestamp),
-          views: this.formatViews(result.data.views || 0),
+          views: this.formatViews(result.data.views || result.data.viewCount || 0),
           likes: result.data.likes || 0,
           content: result.data.content || '',
           coverImage: result.data.coverImage || '',
@@ -184,6 +233,90 @@ Page({
       console.log('浏览量已更新')
     } catch (err) {
       console.error('更新浏览量失败：', err)
+    }
+  },
+
+syncActionData(actionData, countKey) {
+    if (!actionData) return
+
+    console.log('同步actionData:', actionData)
+    console.log('当前本地积分:', wx.getStorageSync('points') || 0)
+
+    if (typeof actionData.updatedCount === 'number') {
+      wx.setStorageSync(countKey, actionData.updatedCount)
+      console.log(`更新${countKey}:`, actionData.updatedCount)
+    }
+    if (typeof actionData.userPoints === 'number') {
+      wx.setStorageSync('points', actionData.userPoints)
+      console.log('更新用户积分:', actionData.userPoints)
+    } else if (actionData.totalPoints) {
+      const points = wx.getStorageSync('points') || 0
+      const newPoints = points + actionData.totalPoints
+      wx.setStorageSync('points', newPoints)
+      console.log('增加积分:', points, '+', actionData.totalPoints, '=', newPoints)
+    } else {
+      console.warn('actionData中没有积分信息:', { userPoints: actionData.userPoints, totalPoints: actionData.totalPoints })
+    }
+    if (Array.isArray(actionData.newAchievements) && actionData.newAchievements.length > 0) {
+      const achievementIds = actionData.newAchievements
+        .map(item => item.achievementId)
+        .filter(Boolean)
+      const userInfo = wx.getStorageSync('userInfo') || {}
+      
+      if (Array.isArray(userInfo.achievements) && achievementIds.length > 0) {
+        const merged = Array.from(new Set([...userInfo.achievements, ...achievementIds]))
+        userInfo.achievements = merged
+        wx.setStorageSync('userInfo', userInfo)
+        wx.setStorageSync('achievements', merged.length)
+        console.log('更新用户成就列表:', merged)
+      } else {
+        const achievements = wx.getStorageSync('achievements') || 0
+        const newAchievementsCount = achievements + actionData.newAchievements.length
+        wx.setStorageSync('achievements', newAchievementsCount)
+        console.log('更新成就数量:', achievements, '+', actionData.newAchievements.length, '=', newAchievementsCount)
+      }
+    }
+  },
+  
+  async syncUserInfoFromCloud() {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'getUserInfo',
+        data: {}
+      })
+
+      if (result.result && result.result.success) {
+        const data = result.result.data || {}
+        const userInfo = data.userInfo || {}
+
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          wx.setStorageSync('userInfo', userInfo)
+        }
+
+        if (typeof userInfo.points === 'number') {
+          wx.setStorageSync('points', userInfo.points)
+        }
+        if (typeof userInfo.totalReadCount === 'number') {
+          wx.setStorageSync('readArticles', userInfo.totalReadCount)
+        }
+        if (typeof userInfo.totalChatCount === 'number') {
+          wx.setStorageSync('chatTimes', userInfo.totalChatCount)
+        }
+        if (typeof userInfo.signDays === 'number') {
+          wx.setStorageSync('signDays', userInfo.signDays)
+        }
+
+        const achievementList = Array.isArray(data.achievementList)
+          ? data.achievementList
+          : null
+        if (achievementList) {
+          wx.setStorageSync('achievements', achievementList.filter(item => item.unlocked).length)
+        } else if (Array.isArray(userInfo.achievements)) {
+          wx.setStorageSync('achievements', userInfo.achievements.length)
+        }
+      }
+    } catch (err) {
+      console.error('syncUserInfoFromCloud failed:', err)
     }
   },
 
