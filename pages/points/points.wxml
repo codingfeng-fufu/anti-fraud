@@ -29,9 +29,9 @@
          <view class="points-label">我的积分</view>
          <view class="points-value">{{userPoints}}</view>
        </view>
-       <button class="view-backpack-btn" bindtap="viewBackpack">
-         查看背包
-       </button>
+        <button class="view-backpack-btn" bindtap="navigateToBackpack">
+          查看背包
+        </button>
      </view>
    </view>
 

@@ -1,16 +1,17 @@
 /**
  * AI对话云函数 - 智能问答模块
- * 
- * 上游依赖：微信云开发环境，通义千问API
- * 入口：exports.main函数，接收用户消息和历史记录
- * 主要功能：AI对话处理、对话次数统计、本地关键词回复
- * 输出：AI回复内容，更新用户对话次数
- * 
+ *
+ * 上游依赖：微信云开发环境，通义千问多模态API，trackAction云函数
+ * 入口：exports.main函数，接收用户消息、历史记录和图片
+ * 主要功能：AI对话处理、对话次数统计、图片分析、积分和成就解锁
+ * 输出：AI回复内容，更新用户对话次数、积分和成就
+ *
  * 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
  */
 
 // 云函数：aiChat
-// AI对话功能，集成通义千问3 API
+// AI对话功能，集成通义千问多模态模型（qwen-vl-plus）
+// 支持文本对话和图片分析，全部请求使用多模态模型
 const cloud = require('wx-server-sdk')
 const axios = require('axios')
 
@@ -30,11 +31,8 @@ const _ = db.command
 const QWEN_API_KEY = 'sk-5fb6a8c8d48e45f193447ba71264c771'  // ⚠️ 请替换为您的真实 API Key
 
 // 通义千问 API 配置
-const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
-const QWEN_MODEL = 'qwen-turbo'  // 先用 qwen-turbo 确保稳定
-
-// 是否启用 AI 服务（如果未配置 API Key，将使用本地关键词回复）
-const AI_ENABLED = QWEN_API_KEY !== 'YOUR_API_KEY_HERE' && QWEN_API_KEY !== ''
+const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation'
+const QWEN_MODEL = 'qwen-vl-plus'  // 多模态模型
 // ==================================================
 
 exports.main = async (event, context) => {
@@ -51,40 +49,32 @@ exports.main = async (event, context) => {
       }
     }
 
-    // 生成AI回复
-    let reply = ''
+    // 生成AI回复（全部使用多模态模型）
+    const reply = await generateReplyWithVision(message, imageBase64, history)
 
-    if (imageBase64) {
-      // 如果有图片，调用多模态模型
-      if (AI_ENABLED) {
-        reply = await generateReplyWithVision(message, imageBase64, history)
-      } else {
-        reply = '图片识别功能需要配置 API Key。\n\n您可以描述图片内容，我会帮您分析是否存在诈骗风险。'
-      }
-    } else {
-      // 文字消息，生成回复
-      if (AI_ENABLED) {
-        reply = await generateReplyWithAI(message, history)
-      } else {
-        reply = await generateReplyLocal(message)
-      }
-    }
-
-    // 更新用户对话次数（仅统计数量，不存内容）
+    // 调用 trackAction 云函数来记录用户行为和获取积分/成就
+    let actionData = null
     try {
-      const userResult = await db.collection('users').where({
-        _openid: openid
-      }).get()
-
-      if (userResult.data.length > 0) {
-        await db.collection('users').doc(userResult.data[0]._id).update({
-          data: {
-            totalChatCount: _.inc(1)
+      const trackResult = await cloud.callFunction({
+        name: 'trackAction',
+        data: {
+          openid,
+          action: 'chat',
+          details: {
+            hasImage: !!imageBase64,
+            messageLength: message?.length || 0
           }
-        })
+        }
+      })
+
+      if (trackResult.result && trackResult.result.success) {
+        actionData = trackResult.result.data
+        console.log('trackAction 调用成功:', actionData)
+      } else {
+        console.warn('trackAction 调用失败:', trackResult.result?.errMsg)
       }
-    } catch (e) {
-      console.warn('更新对话次数失败：', e)
+    } catch (trackErr) {
+      console.warn('trackAction 调用异常:', trackErr)
     }
 
     return {
@@ -100,7 +90,8 @@ exports.main = async (event, context) => {
       success: false,
       errMsg: err.message,
       data: {
-        reply: '抱歉，服务暂时不可用，请稍后再试。'
+        reply: '抱歉，服务暂时不可用，请稍后再试。',
+        actionData: null
       }
     }
   }
@@ -117,39 +108,107 @@ exports.main = async (event, context) => {
 //   // 已移除数据库查询
 // }
 
-// 使用通义千问 API 生成回复
-async function generateReplyWithAI(message, history = []) {
+// 使用多模态模型直接处理文本和图片
+async function generateReplyWithVision(message, imageBase64, history = []) {
   try {
+    console.log('调用多模态模型，base64 长度：', imageBase64 ? imageBase64.length : 0)
+
     // 构建系统提示词
-    const systemPrompt = `你是一个专业的反诈骗AI助手，为大学生提供反诈骗咨询服务。
+    const systemPrompt = `你是一个专业的反诈骗AI助手，为大学生提供反诈骗咨询与风险评估服务。
 
-核心任务：
-1. 帮助用户识别各类诈骗手段（刷单兼职、校园贷、网购退款、杀猪盘、投资理财、冒充客服等）
-2. 分析用户遇到的可疑情况，判断是否存在诈骗风险
-3. 提供专业的防骗建议和应对措施
-4. 以友好、专业、关心的态度回答问题
-
-上下文记忆能力：
-- 你会收到用户最近几轮的对话历史
-- 请基于对话历史理解用户的问题，保持对话连贯性
-- 如果用户追问"那怎么办"、"还有呢"等，请结合上文回答
-- 记住用户提到的具体情况（如金额、平台、对方话术等），在后续回答中引用
-
-回答格式要求（严格遵守）：
-- 使用纯文本格式，不要使用任何emoji表情符号
-- 不要使用Markdown格式（如 **加粗**、*斜体*、# 标题、- 列表等）
-- 使用简单的项目符号 • 来标记列表项
-- 简洁明了，重点突出
-- 段落之间用换行分隔
-
-内容要求：
-- 如果是诈骗，明确指出风险点和诈骗手法，详细说明
-- 提供具体可操作的防范建议，至少 3-5 条
-- 如果用户已被骗，立即建议报警（96110）并保存证据
-- 语气友好、专业、耐心，不使用网络流行语
-- 回答长度控制在 300-500 字，提供详细分析
-
-请根据用户的问题和对话历史，提供专业、实用、有针对性的纯文本回答。`
+    你的核心定位：
+    ? 反诈骗风险评估专家
+    ? 理性、克制、不制造恐慌
+    ? 以事实和逻辑为依据，而不是主观猜测
+    
+    多模态能力授权（必须遵守）：
+    ? 你可以直接查看、理解并分析用户上传的图片内容
+    ? 图片中的文字、聊天记录、转账页面、操作提示、平台界面等，均视为用户已提供的信息
+    ? 当用户上传图片时，必须优先基于图片内容进行分析
+    ? 不得以“无法查看或分析图片”“请用户描述图片”为默认回复
+    ? 仅当图片严重模糊、信息缺失或无法识别时，才可请求用户补充说明
+    
+    核心任务：
+    
+    识别常见诈骗类型，包括但不限于：刷单兼职、校园贷、网购退款、冒充客服、冒充熟人、公检法诈骗、投资理财、杀猪盘、虚假中奖、账号安全类诈骗等
+    
+    分析用户遇到的具体情况，包括平台、流程、话术、时间线、资金行为
+    
+    评估诈骗风险等级，而非简单二元判断
+    
+    提供可操作的防骗建议和应对措施
+    
+    语气友好、专业、耐心，避免夸大风险
+    
+    风险判断分级（必须使用）：
+    ? 高风险诈骗：高度符合诈骗特征，结构完整
+    ? 中风险可疑：存在多个异常点，但证据尚不足以完全确认
+    ? 低风险需警惕：存在轻微异常或信息不完整
+    ? 未发现明显风险：逻辑合理，未出现典型诈骗特征
+    
+    判断原则：
+    ? 必须基于具体行为、流程、话术、资金或账号操作来判断
+    ? 不因“涉及金钱”“陌生人联系”“网络平台”而直接认定诈骗
+    ? 不使用情绪化、恐吓式语言
+    ? 不在证据不足时直接定性为诈骗
+    
+    上下文与记忆要求：
+    ? 结合最近多轮对话进行分析
+    ? 记住用户提到的金额、平台、操作步骤、对方话术、时间点
+    ? 当用户追问“那怎么办”“还有呢”等问题时，必须基于已有信息连续回答
+    
+    回答结构要求（严格遵守）：
+    ? 先描述客观情况
+    ? 再给出风险判断结论
+    ? 明确说明判断依据
+    ? 最后给出具体建议
+    ? 逻辑清晰，层次分明
+    
+    不同情形下的回答策略：
+    
+    当判断为高风险诈骗或已发生诈骗时：
+    ? 明确指出诈骗类型
+    ? 说明诈骗运作机制与关键风险点
+    ? 提供至少 3–5 条具体可执行建议
+    ? 如涉及资金损失或已转账，明确建议联系 96110 反诈中心并保存证据
+    
+    当判断为中风险或低风险可疑时：
+    ? 明确说明目前证据不足以完全确认诈骗
+    ? 指出可疑或异常之处
+    ? 给出核实方法与风险防范建议
+    ? 建议谨慎操作而非立即恐慌
+    
+    当未发现明显风险时（必须允许此结论）：
+    ? 明确说明当前描述未发现明显诈骗风险
+    ? 简要说明判断依据
+    ? 提醒基础安全原则
+    ? 若用户仍有担忧，建议咨询官方渠道（如 96110、学校保卫处或平台官方客服）
+    ? 不暗示“很可能是诈骗”
+    
+    输出格式要求（严格遵守）：
+    ? 使用纯文本
+    ? 不使用任何 emoji
+    ? 不使用 Markdown 语法
+    ? 不使用 #、**、- 等格式
+    ? 使用项目符号 ?
+    ? 段落之间换行
+    ? 语言克制、专业、清晰
+    
+    内容约束：
+    ? 不绝对化判断
+    ? 不夸大风险
+    ? 不制造焦虑
+    ? 不进行道德评判
+    ? 不指责用户
+    ? 回答长度控制在 300–500 字左右
+    
+    兜底机制：
+    ? 若信息不足，优先请求补充关键信息，而不是直接定性
+    ? 若判断存在不确定性，采用“风险评估 + 核实建议”模式
+    ? 允许输出“当前无法判断为诈骗”或“未发现明显风险”的结论
+    
+    最终目标：
+    提供低误判率、高可信度、可落地、可解释的反诈骗风险评估，而不是简单的“判案式”回答。`
 
     // 构建消息列表
     const messages = [
@@ -158,22 +217,44 @@ async function generateReplyWithAI(message, history = []) {
 
     // 添加历史对话（前端传来的最近5轮对话）
     if (history && history.length > 0) {
-      // 使用前端传来的全部历史记录（已经过滤为最近10条）
       messages.push(...history)
       console.log(`包含 ${history.length} 条历史消息`)
     }
 
     // 添加当前用户消息
-    messages.push({ role: 'user', content: message })
+    const userMessage = {
+      role: 'user',
+      content: []
+    }
 
-    console.log('调用通义千问 API...', {
+    // 添加图片（如果有）- 使用 qwen-vl 格式
+    if (imageBase64) {
+      userMessage.content.push({
+        type: 'image',
+        image: `data:image/jpeg;base64,${imageBase64}`
+      })
+    }
+
+    // 添加文本内容
+    if (message) {
+      userMessage.content.push({ type: 'text', text: message })
+    } else if (imageBase64) {
+      // 如果只有图片没有文本，添加默认提示
+      userMessage.content.push({
+        type: 'text',
+        text: '请帮我分析这张图片是否存在诈骗风险'
+      })
+    }
+
+    messages.push(userMessage)
+
+    console.log('调用多模态模型 API...', {
       totalMessages: messages.length,
-      historyCount: history?.length || 0,
-      systemPrompt: '已加载',
-      contextEnabled: '上下文记忆已启用'
+      hasImage: !!imageBase64,
+      historyCount: history?.length || 0
     })
 
-    // 调用通义千问 API
+    // 调用通义千问多模态 API（原生 Dashscope 格式）
     const response = await axios.post(
       QWEN_API_URL,
       {
@@ -182,7 +263,7 @@ async function generateReplyWithAI(message, history = []) {
           messages: messages
         },
         parameters: {
-          max_tokens: 1000,  // 增加到 1000，允许更详细的回答
+          max_tokens: 1000,
           temperature: 0.7,
           top_p: 0.8,
           result_format: 'message'
@@ -193,95 +274,55 @@ async function generateReplyWithAI(message, history = []) {
           'Authorization': `Bearer ${QWEN_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        timeout: 18000  // 18秒超时（云函数20秒，留2秒缓冲）
+        timeout: 18000
       }
     )
 
-    // 解析响应
+    // 解析响应（原生 Dashscope 格式）
+    console.log('========== AI 原始响应 ==========')
+    console.log(JSON.stringify(response.data, null, 2))
+    console.log('==================================')
+
     if (response.data && response.data.output && response.data.output.choices) {
-      const aiReply = response.data.output.choices[0].message.content
-      console.log('通义千问回复成功')
-      // 清理文本：去掉 Markdown 符号和 emoji
-      return cleanText(aiReply)
+      const choice = response.data.output.choices[0]
+      console.log('choices[0]:', JSON.stringify(choice))
+
+      if (choice.message && choice.message.content) {
+        const aiReply = choice.message.content
+        console.log('AI 回复内容类型:', typeof aiReply)
+        console.log('AI 回复内容:', aiReply)
+
+        // 处理多模态响应（content 可能是数组）
+        let finalContent = aiReply
+        if (Array.isArray(aiReply)) {
+          finalContent = aiReply
+            .map(item => {
+              // 兼容两种格式：{type: 'text', text: '...'} 或 {text: '...'}
+              if (item.text) return item.text
+              return ''
+            })
+            .filter(text => text.length > 0)
+            .join('\n')
+        }
+
+        console.log('处理后的内容:', finalContent)
+        console.log('多模态模型回复成功')
+        return cleanText(finalContent)
+      } else {
+        console.error('消息格式异常:', choice.message)
+        throw new Error('消息格式异常')
+      }
     } else {
-      console.error('通义千问响应格式异常：', response.data)
-      return cleanText(generateReplyLocal(message))  // 降级到本地回复
+      console.error('多模态模型响应格式异常：', response.data)
+      throw new Error('模型响应格式异常')
     }
 
   } catch (err) {
-    console.error('通义千问 API 调用失败：', err.message)
+    console.error('多模态模型调用失败：', err.message)
     if (err.response) {
       console.error('API 错误响应：', err.response.data)
     }
-    // API 调用失败，降级到本地关键词回复
-    return cleanText(generateReplyLocal(message))
-  }
-}
-
-// 使用 OCR 提取图片文字 + 文本模型分析（免费方案）
-async function generateReplyWithVision(message, imageBase64, history = []) {
-  try {
-    console.log('开始处理图片，base64 长度：', imageBase64 ? imageBase64.length : 0)
-
-    if (!imageBase64 || imageBase64.length === 0) {
-      return '图片数据为空，请重新上传图片。'
-    }
-
-    // 步骤1：使用微信云开发的 OCR 识别图片中的文字
-    console.log('调用微信 OCR 识别图片文字...')
-    let ocrText = ''
-
-    try {
-      // 调用微信云开发的通用文字识别
-      const ocrResult = await cloud.openapi.ocr.generalBasic({
-        imgData: imageBase64
-      })
-
-      console.log('OCR 识别结果：', JSON.stringify(ocrResult))
-
-      if (ocrResult && ocrResult.items && ocrResult.items.length > 0) {
-        // 提取所有识别到的文字
-        ocrText = ocrResult.items.map(item => item.text).join('\n')
-        console.log('识别到的文字：', ocrText)
-      } else {
-        console.warn('OCR 未识别到文字')
-        return '图片中没有识别到文字内容。\n\n💡 提示：\n• 请确保图片清晰\n• 或者直接用文字描述图片内容\n• 我会帮您分析是否存在诈骗风险'
-      }
-    } catch (ocrErr) {
-      console.error('OCR 识别失败：', ocrErr)
-      return '图片文字识别失败。\n\n💡 您可以：\n• 直接输入图片中的关键信息（如对话内容、金额、平台名称）\n• 我会根据您的描述进行诈骗风险分析'
-    }
-
-    // 步骤2：使用普通文本模型分析 OCR 提取的文字
-    console.log('使用文本模型分析提取的内容...')
-
-    const analysisPrompt = `以下是从一张图片中识别出的文字内容，请作为反诈骗专家分析是否存在诈骗风险：
-
-【图片文字内容】
-${ocrText}
-
-【用户问题】
-${message || '请帮我分析这些内容是否存在诈骗风险'}
-
-请按以下格式回答：
-1. 内容概述（简要）
-2. 可疑点分析
-3. 风险评估（高/中/低风险）
-4. 防范建议
-
-要求：
-- 使用纯文本格式，不要使用emoji和Markdown
-- 使用 • 标记列表项
-- 简洁明了，重点突出`
-
-    // 调用普通文本模型（免费额度内）
-    const reply = await generateReplyWithAI(analysisPrompt, [])
-
-    return reply
-
-  } catch (err) {
-    console.error('图片分析失败：', err.message)
-    return '图片分析失败，请稍后再试。\n\n💡 您可以直接描述图片中的关键信息，我会帮您分析。'
+    throw err
   }
 }
 
@@ -306,15 +347,6 @@ function cleanText(text) {
   cleaned = cleaned.replace(/^[\*\-]\s+/gm, '• ')
 
   // 5. 去掉所有 emoji（Unicode 范围）
-  // Emoji 主要在以下 Unicode 范围：
-  // U+1F600-U+1F64F (表情符号)
-  // U+1F300-U+1F5FF (杂项符号和象形文字)
-  // U+1F680-U+1F6FF (交通和地图符号)
-  // U+2600-U+26FF (杂项符号)
-  // U+2700-U+27BF (装饰符号)
-  // U+FE00-U+FE0F (变体选择器)
-  // U+1F900-U+1F9FF (补充符号和象形文字)
-  // U+1F1E0-U+1F1FF (区域指示符号)
   cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}]/gu, '')
 
   // 6. 去掉常见的文本 emoji (如 :smile:, :heart: 等)
@@ -327,53 +359,5 @@ function cleanText(text) {
   cleaned = cleaned.trim()
 
   return cleaned
-}
-
-// 生成本地回复（基于关键词匹配）
-async function generateReplyLocal(message) {
-  const msg = message.toLowerCase()
-
-  // 诈骗相关
-  if (msg.includes('诈骗') || msg.includes('骗子') || msg.includes('骗')) {
-    return '根据您的描述，这确实存在诈骗风险。常见的诈骗特征包括：\n\n1. 要求转账或提供银行卡信息\n2. 承诺高额回报\n3. 催促您快速决定\n4. 要求添加私人联系方式\n\n建议您：\n✓ 立即停止与对方联系\n✓ 不要转账或提供个人信息\n✓ 如有损失请及时报警（96110）'
-  }
-
-  // 投资理财
-  if (msg.includes('投资') || msg.includes('理财') || msg.includes('炒股') || msg.includes('基金')) {
-    return '投资理财类诈骗是当前最常见的诈骗类型之一！\n\n⚠️ 警惕信号：\n• "保本高收益"的承诺\n• 要求先交会费或保证金\n• 催促立即投资\n• 群里都是"赚钱"的托\n\n✓ 防范建议：\n• 在正规金融平台投资\n• 不轻信陌生人推荐\n• 投资前做好背景调查\n• 警惕超高收益诱惑\n\n需要我详细介绍某种投资骗局吗？'
-  }
-
-  // 刷单兼职
-  if (msg.includes('刷单') || msg.includes('兼职') || msg.includes('日赚') || msg.includes('轻松赚钱')) {
-    return '刷单兼职诈骗是针对大学生的常见骗局！\n\n🎯 骗局流程：\n1. 发布高薪招聘（日赚300-500）\n2. 小额返利建立信任\n3. 诱导大额垫付\n4. 失联跑路\n\n⚠️ 识别要点：\n• 要求垫付本金\n• 承诺高额佣金\n• 在非正规平台操作\n• 要求下载陌生APP\n\n✓ 记住：正规企业不会让员工垫付资金！\n\n如果已经被骗，请立即报警！'
-  }
-
-  // 贷款相关
-  if (msg.includes('贷款') || msg.includes('校园贷') || msg.includes('培训贷') || msg.includes('借钱')) {
-    return '校园贷、培训贷是大学生需要警惕的陷阱！\n\n⚠️ 常见套路：\n• 低门槛，无需抵押\n• 利息极高，滚雪球式增长\n• "零利息"实际收取各种费用\n• 暴力催收\n\n✓ 正确做法：\n• 通过正规银行办理贷款\n• 仔细阅读合同条款\n• 不要在多个平台借贷\n• 量力而行，理性消费\n\n💡 如遇到贷款问题，可联系学校或家长寻求帮助。'
-  }
-
-  // 网购退款
-  if (msg.includes('退款') || msg.includes('客服') || msg.includes('订单') || msg.includes('快递')) {
-    return '网购退款诈骗要警惕！\n\n🎭 常见手法：\n• 自称官方客服，准确说出订单信息\n• 称商品有问题需要退款\n• 要求添加QQ/微信操作\n• 诱导下载陌生APP\n• 骗取银行卡信息和验证码\n\n✓ 防范要点：\n• 正规退款在购物平台操作\n• 不要点击陌生链接\n• 不要透露验证码\n• 接到可疑电话，挂断后通过官方渠道核实\n\n记住：客服不会让你下载APP或要验证码！'
-  }
-
-  // 杀猪盘
-  if (msg.includes('交友') || msg.includes('恋爱') || msg.includes('杀猪盘') || msg.includes('网恋')) {
-    return '杀猪盘是情感类诈骗，要格外警惕！\n\n🎯 骗局特点：\n• 网上搭讪，快速建立"恋爱"关系\n• 包装高富帅/白富美人设\n• 诱导投资、赌博、刷单等\n• 骗取钱财后消失\n\n⚠️ 识别信号：\n• 从未见面但快速表白\n• 炫富、晒收益截图\n• 以各种理由要钱\n• 拒绝视频或见面\n\n✓ 防范建议：\n• 网络交友要谨慎\n• 不要轻信网络恋人\n• 涉及金钱立即警惕\n• 未见面不转账\n\n💔 感情可以慢慢培养，钱一旦转出很难追回！'
-  }
-
-  // 问候语
-  if (msg.includes('你好') || msg.includes('您好') || msg.includes('hi') || msg.includes('hello')) {
-    return '你好！很高兴为您服务😊\n\n我是反诈AI助手，可以帮助您：\n• 识别各类诈骗手段\n• 解答防骗相关问题\n• 分析可疑信息\n• 提供安全建议\n\n💡 您可以：\n1. 描述遇到的可疑情况\n2. 询问某种诈骗类型\n3. 上传可疑信息截图\n\n请告诉我您遇到的具体情况吧！'
-  }
-
-  // 帮助信息
-  if (msg.includes('帮助') || msg.includes('功能') || msg.includes('能做什么')) {
-    return '🤖 我的功能介绍：\n\n📚 诈骗识别\n• 刷单兼职骗局\n• 投资理财陷阱\n• 校园贷、培训贷\n• 网购退款诈骗\n• 杀猪盘（情感诈骗）\n• 电信诈骗\n\n💡 我可以：\n✓ 分析您遇到的可疑情况\n✓ 提供防骗建议\n✓ 解答防诈骗问题\n✓ 识别诈骗信息（开发中）\n\n🆘 紧急求助：\n如果您已经被骗或正在被骗，请立即拨打反诈专线：96110\n\n有什么可以帮到您？'
-  }
-
-  // 默认回复
-  return `感谢您的提问！我会尽力帮您解答。\n\n您可以：\n1. 描述遇到的具体情况，我会帮您分析风险\n2. 询问某种诈骗类型，如"刷单骗局"、"校园贷"\n3. 上传可疑信息截图（功能开发中）\n\n💡 常见问题：\n• 如何识别刷单骗局？\n• 校园贷有哪些风险？\n• 网购退款诈骗怎么防范？\n• 如何识别杀猪盘？\n\n🆘 如需紧急帮助，请拨打反诈专线：96110${!AI_ENABLED ? '\n\n⚠️ 提示：当前使用本地关键词回复，配置 API Key 后可使用 AI 智能回复' : ''}`
 }
 

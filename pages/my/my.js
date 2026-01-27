@@ -274,6 +274,12 @@ const achievements = achievementList
     })
   },
 
+  navigateToPoints() {
+    wx.navigateTo({
+      url: '/pages/points/points'
+    })
+  },
+
   goBack() {
     wx.navigateBack()
   }

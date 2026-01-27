@@ -8,7 +8,7 @@
     "pages/article-detail/article-detail",
     "pages/bind-student/bind-student",
     "pages/achievements/achievements",
-    "points",
+    "pages/points/points",
     "pages/points-history/points-history",
     "pages/learning/learning",
     "pages/learning-records/learning-records",
