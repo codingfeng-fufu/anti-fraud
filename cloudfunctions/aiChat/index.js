@@ -10,7 +10,7 @@
  */
 
 // 云函数：aiChat
-// AI对话功能，集成通义千问多模态模型（qwen3-vl-plus）
+// AI对话功能，集成通义千问多模态模型（qwen-vl-plus）
 // 支持文本对话和图片分析，全部请求使用多模态模型
 const cloud = require('wx-server-sdk')
 const axios = require('axios')
@@ -31,8 +31,8 @@ const _ = db.command
 const QWEN_API_KEY = 'sk-5fb6a8c8d48e45f193447ba71264c771'  // ⚠️ 请替换为您的真实 API Key
 
 // 通义千问 API 配置
-const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
-const QWEN_MODEL = 'qwen3-vl-plus'  // 多模态模型
+const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation'
+const QWEN_MODEL = 'qwen-vl-plus'  // 多模态模型
 // ==================================================
 
 exports.main = async (event, context) => {
@@ -90,7 +90,8 @@ exports.main = async (event, context) => {
       success: false,
       errMsg: err.message,
       data: {
-        reply: '抱歉，服务暂时不可用，请稍后再试。'
+        reply: '抱歉，服务暂时不可用，请稍后再试。',
+        actionData: null
       }
     }
   }
@@ -160,12 +161,7 @@ async function generateReplyWithVision(message, imageBase64, history = []) {
       content: []
     }
 
-    // 添加文本内容
-    if (message) {
-      userMessage.content.push({ type: 'text', text: message })
-    }
-
-    // 添加图片（如果有）
+    // 添加图片（如果有）- 使用 qwen-vl 格式
     if (imageBase64) {
       userMessage.content.push({
         type: 'image',
@@ -173,8 +169,11 @@ async function generateReplyWithVision(message, imageBase64, history = []) {
       })
     }
 
-    // 如果只有图片没有文本，添加默认提示
-    if (!message && imageBase64) {
+    // 添加文本内容
+    if (message) {
+      userMessage.content.push({ type: 'text', text: message })
+    } else if (imageBase64) {
+      // 如果只有图片没有文本，添加默认提示
       userMessage.content.push({
         type: 'text',
         text: '请帮我分析这张图片是否存在诈骗风险'
@@ -189,7 +188,7 @@ async function generateReplyWithVision(message, imageBase64, history = []) {
       historyCount: history?.length || 0
     })
 
-    // 调用通义千问多模态 API
+    // 调用通义千问多模态 API（原生 Dashscope 格式）
     const response = await axios.post(
       QWEN_API_URL,
       {
@@ -213,11 +212,40 @@ async function generateReplyWithVision(message, imageBase64, history = []) {
       }
     )
 
-    // 解析响应
+    // 解析响应（原生 Dashscope 格式）
+    console.log('========== AI 原始响应 ==========')
+    console.log(JSON.stringify(response.data, null, 2))
+    console.log('==================================')
+
     if (response.data && response.data.output && response.data.output.choices) {
-      const aiReply = response.data.output.choices[0].message.content
-      console.log('多模态模型回复成功')
-      return cleanText(aiReply)
+      const choice = response.data.output.choices[0]
+      console.log('choices[0]:', JSON.stringify(choice))
+
+      if (choice.message && choice.message.content) {
+        const aiReply = choice.message.content
+        console.log('AI 回复内容类型:', typeof aiReply)
+        console.log('AI 回复内容:', aiReply)
+
+        // 处理多模态响应（content 可能是数组）
+        let finalContent = aiReply
+        if (Array.isArray(aiReply)) {
+          finalContent = aiReply
+            .map(item => {
+              // 兼容两种格式：{type: 'text', text: '...'} 或 {text: '...'}
+              if (item.text) return item.text
+              return ''
+            })
+            .filter(text => text.length > 0)
+            .join('\n')
+        }
+
+        console.log('处理后的内容:', finalContent)
+        console.log('多模态模型回复成功')
+        return cleanText(finalContent)
+      } else {
+        console.error('消息格式异常:', choice.message)
+        throw new Error('消息格式异常')
+      }
     } else {
       console.error('多模态模型响应格式异常：', response.data)
       throw new Error('模型响应格式异常')
