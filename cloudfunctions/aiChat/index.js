@@ -40,7 +40,7 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
 
   try {
-    const { message, imageBase64 = '', history = [] } = event  // 接收 base64 图片
+    const { message, imageBase64 = '', history = [], stream = false } = event  // 接收参数
 
     if (!message && !imageBase64) {
       return {
