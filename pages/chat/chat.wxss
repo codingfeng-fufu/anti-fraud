@@ -112,6 +112,14 @@
   display: block;
 }
 
+/* 消息中的图片 */
+.message-image {
+  max-width: 100%;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
 .message.bot .message-content {
   background: white;
   color: #1e293b;

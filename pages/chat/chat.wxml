@@ -21,6 +21,7 @@
     <view wx:for="{{messages}}" wx:key="id" class="message {{item.role}}" id="msg-{{index}}">
       <view class="message-avatar">{{item.role === 'user' ? '👤' : '🤖'}}</view>
       <view class="message-content">
+        <image wx:if="{{item.imageUrl}}" class="message-image" src="{{item.imageUrl}}" mode="widthFix" />
         <text>{{item.content}}</text>
       </view>
     </view>
