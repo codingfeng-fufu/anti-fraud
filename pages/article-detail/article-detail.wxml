@@ -16,6 +16,32 @@
     <rich-text nodes="{{article.content}}"></rich-text>
   </view>
 
+  <!-- v3 评论区 -->
+  <view class="comments-section">
+    <view class="section-title">💬 评论区 ({{comments.length}})</view>
+
+    <view wx:if="{{comments.length === 0}}" class="empty-comment">暂无评论，来抢沙发吧</view>
+
+    <view wx:for="{{comments}}" wx:key="_id" class="comment-item {{item.parentId ? 'reply' : ''}}">
+      <image class="comment-avatar" wx:if="{{item.authorAvatarUrl}}" src="{{item.authorAvatarUrl}}" mode="aspectFill"
+        bindtap="goProfile" data-uid="{{item.authorUid}}"></image>
+      <view class="comment-avatar placeholder" wx:else bindtap="goProfile" data-uid="{{item.authorUid}}">👤</view>
+      <view class="comment-body">
+        <view class="comment-top">
+          <text class="comment-name">{{item.authorNickName || '未设置昵称'}}</text>
+          <text class="comment-time">{{item.createdAtText}}</text>
+        </view>
+        <view class="comment-content">
+          <text wx:if="{{item.replyToNickName}}" class="reply-to">回复 {{item.replyToNickName}}：</text>
+          {{item.content}}
+        </view>
+        <view class="comment-actions">
+          <text class="reply-btn" bindtap="startReply" data-id="{{item._id}}" data-uid="{{item.authorUid}}" data-name="{{item.authorNickName}}">回复</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 相关文章推荐 -->
   <view class="related-section" wx:if="{{relatedArticles.length > 0}}">
     <view class="section-title">📚 相关推荐</view>
@@ -49,5 +75,10 @@
       <text class="action-text">分享</text>
     </button>
   </view>
-</view>
 
+  <!-- v3 评论输入栏 -->
+  <view class="comment-input-bar">
+    <input class="comment-input" placeholder="{{replyPlaceholder}}" value="{{inputText}}" bindinput="onCommentInput" confirm-type="send" bindconfirm="submitComment" />
+    <button class="comment-send" bindtap="submitComment">发送</button>
+  </view>
+</view>

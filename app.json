@@ -1,11 +1,21 @@
 {
 "pages": [
     "pages/index/index",
+    "pages/community/community",
     "pages/chat/chat",
     "pages/user/user",
     "pages/sign-in/sign-in",
     "pages/my/my",
     "pages/article-detail/article-detail",
+    "pages/search/search",
+    "pages/profile/profile",
+    "pages/messages/messages",
+    "pages/quiz/quiz",
+    "pages/quiz-leaderboard/quiz-leaderboard",
+    "pages/community-post-create/community-post-create",
+    "pages/community-post-detail/community-post-detail",
+    "pages/scam-report/scam-report",
+    "pages/redeem-info/redeem-info",
     "pages/bind-student/bind-student",
     "pages/achievements/achievements",
     "pages/points/points",
@@ -35,6 +45,12 @@
         "text": "首页",
         "iconPath": "images/反诈骗.png",
         "selectedIconPath": "images/反诈骗 (1).png"
+      },
+      {
+        "pagePath": "pages/community/community",
+        "text": "社区",
+        "iconPath": "images/社区.png",
+        "selectedIconPath": "images/社区 (1).png"
       },
       {
         "pagePath": "pages/chat/chat",

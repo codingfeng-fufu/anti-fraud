@@ -88,6 +88,9 @@
         <view class="action-btn" bindtap="shareAchievement" data-id="{{item.id}}">
           <text class="action-text">分享</text>
         </view>
+        <view class="action-btn display-btn {{item.isDisplayed ? 'active' : ''}}" bindtap="toggleDisplayAchievement" data-id="{{item.id}}">
+          <text class="action-text">{{item.isDisplayed ? '取消展示' : '设为展示'}}</text>
+        </view>
       </view>
 
       <view class="achievement-progress" wx:if="{{!item.unlocked}}">

@@ -48,6 +48,55 @@ async function checkNicknameExists(nickname, excludeOpenid = null) {
   }
 }
 
+async function ensureCollection(collectionName) {
+  try {
+    await db.collection(collectionName).limit(1).get()
+  } catch (err) {
+    if (err.errCode === -502005) {
+      try {
+        await db.createCollection(collectionName)
+      } catch (createErr) {
+        console.error(`创建集合 ${collectionName} 失败:`, createErr.message)
+      }
+    } else {
+      console.error(`检查集合 ${collectionName} 失败:`, err.message)
+    }
+  }
+}
+
+async function syncPublicProfile(userData) {
+  if (!userData || !userData.uid) return
+  await ensureCollection('public_profiles')
+  const docId = userData.uid
+  const now = new Date()
+
+  let existing = null
+  try {
+    const res = await db.collection('public_profiles').doc(docId).get()
+    existing = res.data
+  } catch (err) {}
+
+  const payload = {
+    _id: docId,
+    uid: docId,
+    nickName: userData.nickName || '',
+    avatarUrl: userData.avatarUrl || '',
+    equippedTitleIds: Array.isArray(userData.equippedTitles) ? userData.equippedTitles : [],
+    displayAchievementIds: Array.isArray(userData.displayAchievementIds) ? userData.displayAchievementIds : [],
+    quizPoints: userData.quizPoints || 0,
+    quizTotalAttempts: userData.quizTotalAttempts || 0,
+    quizTotalCorrect: userData.quizTotalCorrect || 0,
+    quizMaxCorrect: userData.quizMaxCorrect || 0,
+    lastQuizAt: userData.lastQuizAt || null,
+    followerCount: existing?.followerCount || 0,
+    followingCount: existing?.followingCount || 0,
+    createdAt: existing?.createdAt || now,
+    updatedAt: now
+  }
+
+  await db.collection('public_profiles').doc(docId).set({ data: payload })
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   
@@ -107,6 +156,15 @@ exports.main = async (event, context) => {
         achievements: [],
         titles: [],
         equippedTitles: [],
+        displayAchievementIds: [],
+        // 趣味答题（v3新增，答题排行榜与每日奖励）
+        quizRewardDailyDate: '',
+        quizRewardDailyAwarded: 0,
+        quizPoints: 0,
+        quizTotalAttempts: 0,
+        quizTotalCorrect: 0,
+        quizMaxCorrect: 0,
+        lastQuizAt: null,
         continuousLearnDays: 0,
         lastLearnDate: null,
         totalReadCount: 0,
@@ -150,6 +208,30 @@ exports.main = async (event, context) => {
         userData.nickName = nickname || userData.nickName
         userData.avatarUrl = avatarUrl || userData.avatarUrl
       }
+
+      // v3字段兜底：老用户缺字段时补齐（不破坏已有数据）
+      const patch = {}
+      if (!Array.isArray(userData.displayAchievementIds)) patch.displayAchievementIds = []
+      if (typeof userData.quizRewardDailyDate !== 'string') patch.quizRewardDailyDate = ''
+      if (typeof userData.quizRewardDailyAwarded !== 'number') patch.quizRewardDailyAwarded = 0
+      if (typeof userData.quizPoints !== 'number') patch.quizPoints = 0
+      if (typeof userData.quizTotalAttempts !== 'number') patch.quizTotalAttempts = 0
+      if (typeof userData.quizTotalCorrect !== 'number') patch.quizTotalCorrect = 0
+      if (typeof userData.quizMaxCorrect !== 'number') patch.quizMaxCorrect = 0
+      if (!Object.prototype.hasOwnProperty.call(userData, 'lastQuizAt')) patch.lastQuizAt = null
+      if (Object.keys(patch).length > 0) {
+        await db.collection('users').doc(userData._id).update({
+          data: { ...patch, updatedAt: new Date() }
+        })
+        Object.assign(userData, patch)
+      }
+    }
+
+    // 同步公共资料（昵称/头像/称号展示/答题积分等）
+    try {
+      await syncPublicProfile(userData)
+    } catch (err) {
+      console.warn('syncPublicProfile failed:', err.message)
     }
     
     return {
@@ -167,4 +249,3 @@ exports.main = async (event, context) => {
     }
   }
 }
-

@@ -1,0 +1,32 @@
+.container{min-height:100vh;background:#f0f9ff;padding-bottom:30rpx;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
+.back-icon{font-size:44rpx;}
+.header-title{font-size:34rpx;font-weight:700;}
+.rank-btn{font-size:28rpx;}
+.loading{text-align:center;color:#64748b;font-size:28rpx;padding:80rpx 20rpx;}
+.card{margin:20rpx;background:#fff;border-radius:20rpx;padding:22rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.progress{color:#64748b;font-size:26rpx;}
+.question{margin-top:14rpx;font-size:32rpx;font-weight:700;color:#0f172a;line-height:1.5;}
+.options{margin-top:18rpx;}
+.option{display:flex;gap:14rpx;align-items:flex-start;padding:18rpx;border-radius:16rpx;background:#f1f5f9;margin-bottom:12rpx;}
+.option.selected{background:#dbeafe;border:2rpx solid #0ea5e9;}
+.opt-key{width:40rpx;height:40rpx;border-radius:20rpx;background:#0ea5e9;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.opt-text{flex:1;font-size:28rpx;color:#0f172a;line-height:1.5;}
+.actions{display:flex;gap:14rpx;margin-top:18rpx;}
+.btn{flex:1;background:#0ea5e9;color:#fff;border-radius:14rpx;font-size:30rpx;}
+.btn.secondary{background:#e2e8f0;color:#0f172a;}
+.result{padding:0 20rpx;}
+.result-card{margin-top:20rpx;background:#fff;border-radius:20rpx;padding:22rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.score{font-size:36rpx;font-weight:800;color:#0f172a;}
+.gain{margin-top:10rpx;color:#334155;font-size:28rpx;line-height:1.6;}
+.result-actions{display:flex;gap:14rpx;margin-top:16rpx;}
+.analysis-card{margin-top:18rpx;background:#fff;border-radius:20rpx;padding:18rpx 20rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.analysis-title{font-size:30rpx;font-weight:700;color:#0f172a;margin-bottom:12rpx;}
+.analysis-item{padding:14rpx 0;border-top:1rpx solid #f1f5f9;}
+.analysis-item:first-child{border-top:none;}
+.analysis-q{display:flex;align-items:center;gap:10rpx;color:#64748b;font-size:24rpx;}
+.tag{padding:4rpx 12rpx;border-radius:999rpx;font-size:22rpx;}
+.tag.ok{background:#dcfce7;color:#166534;}
+.tag.bad{background:#fee2e2;color:#991b1b;}
+.analysis-exp{margin-top:8rpx;color:#334155;font-size:26rpx;line-height:1.5;}
+

@@ -1,0 +1,62 @@
+<!--
+帖子详情页面 - 社区模块 (v3)
+
+上游依赖：云函数(getPostDetail/getComments/createComment)
+入口：/pages/community-post-detail/community-post-detail?id=xxx
+主要功能：展示帖子详情与评论区，支持评论与回复
+输出：帖子内容与评论列表渲染
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">帖子详情</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="post-card" wx:if="{{post}}">
+    <view class="post-header">
+      <image class="avatar" wx:if="{{post.authorAvatarUrl}}" src="{{post.authorAvatarUrl}}" mode="aspectFill" bindtap="goProfile" data-uid="{{post.authorUid}}"></image>
+      <view class="avatar placeholder" wx:else bindtap="goProfile" data-uid="{{post.authorUid}}">👤</view>
+      <view class="meta">
+        <view class="name">{{post.authorNickName || '未设置昵称'}}</view>
+        <view class="time">{{post.createdAtText}}</view>
+      </view>
+    </view>
+    <view class="content" wx:if="{{post.content}}">{{post.content}}</view>
+    <view class="images" wx:if="{{post.images && post.images.length > 0}}">
+      <image wx:for="{{post.images}}" wx:key="*this" class="img" src="{{item}}" mode="aspectFill"></image>
+    </view>
+  </view>
+
+  <view class="comments-card">
+    <view class="comments-title">评论 ({{comments.length}})</view>
+
+    <view wx:if="{{comments.length === 0}}" class="empty">暂无评论，来抢沙发吧</view>
+
+    <view wx:for="{{comments}}" wx:key="_id" class="comment-item {{item.parentId ? 'reply' : ''}}">
+      <image class="c-avatar" wx:if="{{item.authorAvatarUrl}}" src="{{item.authorAvatarUrl}}" mode="aspectFill" bindtap="goProfile" data-uid="{{item.authorUid}}"></image>
+      <view class="c-avatar placeholder" wx:else bindtap="goProfile" data-uid="{{item.authorUid}}">👤</view>
+      <view class="c-body">
+        <view class="c-top">
+          <text class="c-name">{{item.authorNickName || '未设置昵称'}}</text>
+          <text class="c-time">{{item.createdAtText}}</text>
+        </view>
+        <view class="c-content">
+          <text wx:if="{{item.replyToNickName}}" class="reply-to">回复 {{item.replyToNickName}}：</text>
+          {{item.content}}
+        </view>
+        <view class="c-actions">
+          <text class="c-reply" bindtap="startReply" data-id="{{item._id}}" data-uid="{{item.authorUid}}" data-name="{{item.authorNickName}}">回复</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="input-bar">
+    <input class="input" placeholder="{{replyPlaceholder}}" value="{{inputText}}" bindinput="onInput" confirm-type="send" bindconfirm="submitComment" />
+    <button class="send" bindtap="submitComment">发送</button>
+  </view>
+</view>
+

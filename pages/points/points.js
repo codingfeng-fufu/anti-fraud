@@ -218,6 +218,13 @@ onShow() {
       content: `确定用${product.points}积分兑换"${product.name}"吗？`,
       success: (res) => {
         if (res.confirm) {
+          // v3：需要填写兑换信息（话费/流量等人工发放）
+          if (product.requireRedeemInfo) {
+            wx.navigateTo({
+              url: `/pages/redeem-info/redeem-info?productId=${product.id}&name=${encodeURIComponent(product.name)}&points=${product.points}`
+            })
+            return
+          }
           this.doExchangeProduct(product)
         }
       }
@@ -241,14 +248,12 @@ onShow() {
       if (result.result.success) {
         wx.hideLoading()
         
-        // 更新本地积分
-        const newPoints = this.data.userPoints - product.points
+        // 更新本地积分（以服务端返回为准）
+        const newPoints = typeof result.result.data?.newPoints === 'number'
+          ? result.result.data.newPoints
+          : (this.data.userPoints - product.points)
         wx.setStorageSync('points', newPoints)
-        
-        // 更新本地数据
-        this.setData({
-          userPoints: newPoints
-        })
+        this.setData({ userPoints: newPoints })
         
         // 重新加载商品和积分
         this.loadProducts()

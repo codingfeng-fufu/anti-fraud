@@ -1,0 +1,25 @@
+<!--
+发帖页面 - 社区模块 (v3)
+
+上游依赖：community-post-create.js页面逻辑
+入口：/pages/community-post-create/community-post-create
+主要功能：发布帖子
+输出：发布成功返回社区列表
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">发布帖子</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="card">
+    <textarea class="textarea" placeholder="分享你的反诈见闻、经验或疑问..." maxlength="1000"
+      value="{{content}}" bindinput="onInput" />
+    <view class="hint">{{content.length}}/1000</view>
+    <button class="submit" bindtap="submit" disabled="{{submitting}}">{{submitting ? '发布中...' : '发布'}}</button>
+  </view>
+</view>
+

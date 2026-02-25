@@ -13,13 +13,20 @@ Page({
     },
     relatedArticles: [],
     liked: false,
-    collected: false
+    collected: false,
+
+    // v3 评论区
+    comments: [],
+    inputText: '',
+    replyTo: null,
+    replyPlaceholder: '发表评论...'
   },
 
   onLoad(options) {
     const id = options.id || 1
     this.loadArticle(id)
     this.loadRelatedArticles()
+    this.loadComments(id)
   },
 
   // 加载文章详情
@@ -339,6 +346,88 @@ syncActionData(actionData, countKey) {
     this.setData({ relatedArticles: related })
   },
 
+  // v3：加载评论
+  async loadComments(articleId) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getComments',
+        data: { targetType: 'article', targetId: String(articleId), pageSize: 200 }
+      })
+      if (res.result && res.result.success) {
+        const { formatDateTimeLocal } = require('../../utils/util')
+        const list = res.result.data.comments || []
+        const byId = new Map(list.map(c => [c._id, c]))
+        const normalized = list.map(c => {
+          const replyToNickName = c.parentId ? (byId.get(c.parentId)?.authorNickName || '') : ''
+          return {
+            ...c,
+            createdAtText: c.createdAt ? formatDateTimeLocal(new Date(c.createdAt)) : '',
+            replyToNickName
+          }
+        })
+        this.setData({ comments: normalized })
+      }
+    } catch (err) {
+      console.error('loadComments failed:', err)
+    }
+  },
+
+  // v3：输入
+  onCommentInput(e) {
+    this.setData({ inputText: e.detail.value })
+  },
+
+  // v3：开始回复
+  startReply(e) {
+    const parentId = e.currentTarget.dataset.id
+    const replyToUid = e.currentTarget.dataset.uid
+    const replyToNickName = e.currentTarget.dataset.name || ''
+    this.setData({
+      replyTo: { parentId, replyToUid, replyToNickName },
+      replyPlaceholder: replyToNickName ? `回复 ${replyToNickName}...` : '回复...'
+    })
+  },
+
+  // v3：提交评论/回复
+  async submitComment() {
+    const content = (this.data.inputText || '').trim()
+    if (!content) return
+    const articleId = String(this.data.article.id)
+    const data = {
+      targetType: 'article',
+      targetId: articleId,
+      content
+    }
+    if (this.data.replyTo && this.data.replyTo.parentId) {
+      data.parentId = this.data.replyTo.parentId
+      data.replyToUid = this.data.replyTo.replyToUid
+    }
+
+    try {
+      const res = await wx.cloud.callFunction({ name: 'createComment', data })
+      if (res.result && res.result.success) {
+        this.setData({
+          inputText: '',
+          replyTo: null,
+          replyPlaceholder: '发表评论...'
+        })
+        await this.loadComments(articleId)
+      } else {
+        wx.showToast({ title: res.result?.errMsg || '发送失败', icon: 'none' })
+      }
+    } catch (err) {
+      console.error('createComment failed:', err)
+      wx.showToast({ title: '发送失败', icon: 'none' })
+    }
+  },
+
+  // v3：头像进入个人主页
+  goProfile(e) {
+    const uid = e.currentTarget.dataset.uid
+    if (!uid) return
+    wx.navigateTo({ url: `/pages/profile/profile?uid=${uid}` })
+  },
+
   // 检查点赞状态
   checkLikeStatus(id) {
     const liked = wx.getStorageSync(`liked_${id}`) || false
@@ -400,4 +489,3 @@ syncActionData(actionData, countKey) {
     }
   }
 })
-

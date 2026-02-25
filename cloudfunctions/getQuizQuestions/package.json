@@ -1,0 +1,10 @@
+{
+  "name": "getQuizQuestions",
+  "version": "1.0.0",
+  "description": "随机抽取趣味答题题目",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

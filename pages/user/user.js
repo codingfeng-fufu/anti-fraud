@@ -23,7 +23,9 @@ Page({
     achievements: 0,
     todaySigned: false,
     equippedTitles: [],
-    allTitles: []
+    allTitles: [],
+    // v3：站内通知未读数
+    unreadCount: 0
   },
 
   onLoad(options) {
@@ -33,6 +35,7 @@ Page({
   onShow() {
     this.loadUserDataFromCloud()
     this.loadUserTitles()
+    this.loadUnreadCount()
   },
 
   onHide() {
@@ -342,6 +345,26 @@ Page({
     wx.navigateTo({
       url: '/pages/title-management/title-management'
     })
+  },
+
+  // v3：加载未读通知数量
+  async loadUnreadCount() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getUnreadCount',
+        data: {}
+      })
+      if (res.result && res.result.success) {
+        this.setData({ unreadCount: res.result.data.unread || 0 })
+      }
+    } catch (err) {
+      // 静默失败
+      console.warn('loadUnreadCount failed:', err?.message || err)
+    }
+  },
+
+  // v3：打开站内通知页
+  openMessages() {
+    wx.navigateTo({ url: '/pages/messages/messages' })
   }
 })
-

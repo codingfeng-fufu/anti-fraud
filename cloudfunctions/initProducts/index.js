@@ -148,6 +148,56 @@ const productsData = [
     isActive: true,
     isHot: false,
     createdAt: new Date()
+  },
+
+  // v3新增：话费/流量（仅记录 + 人工发放）
+  {
+    id: 'tel_10',
+    name: '10元话费充值卡',
+    desc: '人工发放：请填写手机号/运营商',
+    icon: '📱',
+    points: 1200,
+    stock: 50,
+    category: 'virtual',
+    productType: 'mobile_topup',
+    fulfillment: 'manual',
+    requireRedeemInfo: true,
+    limitPerUser: 1,
+    isActive: true,
+    isHot: true,
+    createdAt: new Date()
+  },
+  {
+    id: 'tel_30',
+    name: '30元话费充值卡',
+    desc: '人工发放：请填写手机号/运营商',
+    icon: '📱',
+    points: 3200,
+    stock: 30,
+    category: 'virtual',
+    productType: 'mobile_topup',
+    fulfillment: 'manual',
+    requireRedeemInfo: true,
+    limitPerUser: 1,
+    isActive: true,
+    isHot: false,
+    createdAt: new Date()
+  },
+  {
+    id: 'data_10',
+    name: '10元流量卡',
+    desc: '人工发放：请填写手机号/运营商',
+    icon: '📶',
+    points: 1200,
+    stock: 50,
+    category: 'virtual',
+    productType: 'data_card',
+    fulfillment: 'manual',
+    requireRedeemInfo: true,
+    limitPerUser: 1,
+    isActive: true,
+    isHot: false,
+    createdAt: new Date()
   }
 ]
 
@@ -159,28 +209,26 @@ exports.main = async (event, context) => {
     await ensureCollection('exchange_records')
     await ensureCollection('user_backpack')
     
-    const existingProducts = await db.collection('products').limit(1).get()
-    
-    if (existingProducts.data.length > 0) {
-      return {
-        success: false,
-        message: "商品数据已存在，无需重复初始化"
-      }
-    }
-    
-    console.log('products 集合为空，开始初始化数据...')
-    
+    // v3 修复：以 product.id 作为文档主键写入（幂等执行）
+    let upserted = 0
     for (const product of productsData) {
-      await db.collection('products').add({
-        data: product
+      const docId = product.id
+      if (!docId) continue
+      await db.collection('products').doc(docId).set({
+        data: {
+          ...product,
+          _id: docId,
+          id: docId,
+          updatedAt: new Date()
+        }
       })
+      upserted += 1
     }
-    
-    console.log(`商品数据初始化完成，共添加 ${productsData.length} 个商品`)
     
     return {
       success: true,
-      message: `商品数据初始化完成，共添加 ${productsData.length} 个商品`
+      message: `商品数据初始化/更新完成，共写入 ${upserted} 个商品（v3: _id==id）`,
+      data: { upserted }
     }
   } catch (err) {
     console.error('初始化商品数据失败:', err)

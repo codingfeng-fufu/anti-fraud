@@ -331,7 +331,12 @@ exports.main = async (event, context) => {
       read: user.totalReadCount || 0,
       chat: user.totalChatCount || 0,
       learn: user.continuousLearnDays || 0,
-      points: user.points || 0
+      points: user.points || 0,
+      // 趣味答题（v3新增）
+      quiz_attempts: user.quizTotalAttempts || 0,
+      quiz_correct_total: user.quizTotalCorrect || 0,
+      quiz_max_correct: user.quizMaxCorrect || 0,
+      quiz_points: user.quizPoints || 0
     }
 
     const achievementSyncResult = await syncAchievements(user, stats)
@@ -354,6 +359,15 @@ exports.main = async (event, context) => {
           grade: syncedUser.grade || '',
           isBound: syncedUser.isBound || false,
           points: syncedUser.points || 0,
+          // v3: 趣味答题与展示位
+          quizPoints: syncedUser.quizPoints || 0,
+          quizTotalAttempts: syncedUser.quizTotalAttempts || 0,
+          quizTotalCorrect: syncedUser.quizTotalCorrect || 0,
+          quizMaxCorrect: syncedUser.quizMaxCorrect || 0,
+          lastQuizAt: syncedUser.lastQuizAt || null,
+          quizRewardDailyDate: syncedUser.quizRewardDailyDate || '',
+          quizRewardDailyAwarded: syncedUser.quizRewardDailyAwarded || 0,
+          displayAchievementIds: syncedUser.displayAchievementIds || [],
           signDays: signDays,
           signDates: signDates,
           totalChatCount: syncedUser.totalChatCount || 0,

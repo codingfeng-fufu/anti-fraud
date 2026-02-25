@@ -370,31 +370,21 @@ Page({
       })
       return
     }
-    
-    // 在所有文章中搜索（标题包含关键词）
-    const searchResults = this.data.allArticles.filter(article => 
-      article.title.toLowerCase().includes(keyword.toLowerCase()) ||
-      article.tag.toLowerCase().includes(keyword.toLowerCase())
-    )
-    
-    this.setData({
-      selectedCategory: '全部'  // 搜索时重置分类
+
+    // v3：跳转全局搜索页（支持搜索用户与资讯）
+    wx.navigateTo({
+      url: `/pages/search/search?keyword=${encodeURIComponent(keyword)}`
     })
-    
-    // 格式化并更新列表
-    this.updateArticlesList(searchResults)
-    
-    if (searchResults.length === 0) {
-      wx.showToast({
-        title: '未找到相关内容',
-        icon: 'none'
-      })
-    } else {
-      wx.showToast({
-        title: `找到 ${searchResults.length} 条结果`,
-        icon: 'success'
-      })
-    }
+  },
+
+  // v3：趣味答题入口
+  goQuiz() {
+    wx.navigateTo({ url: '/pages/quiz/quiz' })
+  },
+
+  // v3：诈骗反馈入口
+  goScamReport() {
+    wx.navigateTo({ url: '/pages/scam-report/scam-report' })
   },
 
   // 查看文章详情

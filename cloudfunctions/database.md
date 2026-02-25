@@ -36,12 +36,23 @@
   achievements: [],         // 已获得成就ID数组
   titles: [],               // 已获得称号ID数组
   equippedTitles: [],       // 已装备称号ID数组
+  displayAchievementIds: [], // 主页展示成就ID数组（v3新增，最多6个）
   totalReadCount: 0,        // 总阅读数
   totalChatCount: 0,        // 总对话数
   continuousLearnDays: 0,   // 连续学习天数
   lastLearnDate: null,      // 最后学习日期
   lastChatDate: null,       // 最后聊天日期
   lastReadDate: null,       // 最后阅读日期
+
+  // 趣味答题（v3新增）
+  quizRewardDailyDate: "",     // 答题商城积分奖励日期（YYYY-MM-DD，北京时间）
+  quizRewardDailyAwarded: 0,   // 今日已发放的答题商城积分（上限30）
+  quizPoints: 0,               // 答题排行榜积分（累计答对题数）
+  quizTotalAttempts: 0,        // 累计答题次数
+  quizTotalCorrect: 0,         // 累计答对题数
+  quizMaxCorrect: 0,           // 单次最高答对数（满分10）
+  lastQuizAt: null,            // 最近一次答题时间
+
   createdAt: Date,          // 创建时间
   updatedAt: Date           // 更新时间
 }
@@ -230,6 +241,155 @@
 
 ---
 
+## v3 新增集合（社区/答题/社交/反馈）
+
+### 11. public_profiles - 公共资料表（v3新增）
+
+> 用于对外展示的“安全字段”，避免直接公开读取 users（含学号等敏感信息）。
+
+```javascript
+{
+  _id: "uid",               // 建议与 uid 一致，便于 doc(uid) 查询
+  uid: "用户UID",
+  nickName: "用户昵称",
+  avatarUrl: "头像URL",
+
+  equippedTitleIds: [],      // 展示称号（<=3）
+  displayAchievementIds: [], // 展示成就（<=6）
+
+  quizPoints: 0,             // 答题排行榜积分（累计答对题数）
+  quizTotalAttempts: 0,
+  quizTotalCorrect: 0,
+  quizMaxCorrect: 0,
+  lastQuizAt: Date,
+
+  followerCount: 0,
+  followingCount: 0,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+**索引：**
+- `quizPoints`（降序）
+- `nickName`
+
+### 12. quiz_questions - 趣味答题题库表（v3新增）
+
+```javascript
+{
+  _id: "q001",
+  questionId: "q001",
+  question: "题干",
+  options: ["A","B","C","D"],
+  answerIndex: 0,           // 仅服务端判分，不下发
+  explanation: "解析",
+  difficulty: 1-5,
+  tags: [],
+  isActive: true,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### 13. quiz_attempts - 答题记录表（v3新增）
+
+```javascript
+{
+  _id: "自动生成",
+  uid: "用户UID",
+  questionIds: [],
+  answers: [],
+  correctCount: 0,
+  earnedQuizPoints: 0,      // = correctCount
+  earnedMallPoints: 0,      // = min(correctCount, 当日剩余额度<=30)
+  createdAt: Date
+}
+```
+
+### 14. posts - 社区帖子表（v3新增）
+
+```javascript
+{
+  _id: "自动生成",
+  authorUid: "作者UID",
+  authorNickName: "作者昵称快照",
+  authorAvatarUrl: "作者头像快照",
+  content: "内容",
+  images: [],
+  status: "published",      // 预留：hidden
+  commentCount: 0,
+  likeCount: 0,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### 15. comments - 评论表（v3新增，文章/帖子通用）
+
+```javascript
+{
+  _id: "自动生成",
+  targetType: "article",    // article | post
+  targetId: "目标ID",
+  authorUid: "作者UID",
+  authorNickName: "作者昵称快照",
+  authorAvatarUrl: "作者头像快照",
+  content: "评论内容",
+  parentId: null,           // 一级评论为空；回复则为被回复评论ID
+  replyToUid: null,         // 回复对象UID
+  status: "published",      // 预留：hidden
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### 16. follows - 关注关系表（v3新增）
+
+```javascript
+{
+  _id: "followerUid_followeeUid", // 建议用该组合主键
+  followerUid: "关注者UID",
+  followeeUid: "被关注者UID",
+  createdAt: Date
+}
+```
+
+### 17. notifications - 站内通知表（v3新增）
+
+```javascript
+{
+  _id: "自动生成",
+  toUid: "接收者UID",
+  fromUid: "触发者UID",
+  type: "new_post",         // new_post | reply | ...
+  payload: {},              // { postId?, targetType?, targetId?, commentId?, previewText? }
+  isRead: false,
+  createdAt: Date
+}
+```
+
+### 18. scam_reports - 诈骗反馈表（v3新增）
+
+```javascript
+{
+  _id: "自动生成",
+  reporterUid: "反馈者UID",
+  reporterNickName: "反馈者昵称快照",
+  reporterAvatarUrl: "反馈者头像快照",
+  type: "诈骗类型",
+  channel: "渠道",
+  scamAccount: "对方账号/电话",
+  scamLink: "相关链接",
+  content: "详细描述",
+  images: [],
+  createdAt: Date
+}
+```
+
+---
+
 ## 数据库权限配置
 
 ### 推荐权限设置
@@ -328,6 +488,14 @@
 - user_achievements
 - points_records
 - read_records
+- public_profiles (v3)
+- quiz_questions (v3)
+- quiz_attempts (v3)
+- posts (v3)
+- comments (v3)
+- follows (v3)
+- notifications (v3)
+- scam_reports (v3)
 - schools
 - colleges
 - majors
@@ -394,4 +562,3 @@ A: 云开发控制台 -> 云函数 -> 选择函数 -> 日志
 ---
 
 **文档更新时间**：2026-01-07
-

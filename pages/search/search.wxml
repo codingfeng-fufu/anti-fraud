@@ -1,0 +1,56 @@
+<!--
+搜索页面 - 搜索模块 (v3)
+
+上游依赖：云函数(searchArticles/searchUsers)
+入口：/pages/search/search?keyword=xxx (可选)
+主要功能：搜索资讯与用户
+输出：搜索结果列表
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">搜索</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="search-box">
+    <input class="search-input" placeholder="搜索资讯或用户..." value="{{keyword}}"
+      bindinput="onInput" confirm-type="search" bindconfirm="doSearch"/>
+    <button class="search-btn" bindtap="doSearch">搜索</button>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{tab==='articles'?'active':''}}" bindtap="switchTab" data-tab="articles">资讯</view>
+    <view class="tab {{tab==='users'?'active':''}}" bindtap="switchTab" data-tab="users">用户</view>
+  </view>
+
+  <view class="result">
+    <view wx:if="{{loading}}" class="loading">搜索中...</view>
+
+    <view wx:if="{{!loading && tab==='articles'}}">
+      <view wx:if="{{articles.length===0}}" class="empty">暂无资讯结果</view>
+      <view wx:for="{{articles}}" wx:key="id" class="a-item" bindtap="openArticle" data-id="{{item.id}}">
+        <view class="a-title">{{item.title}}</view>
+        <view class="a-meta">
+          <text class="a-tag">{{item.tag}}</text>
+          <text class="a-views">👁️ {{item.views}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && tab==='users'}}">
+      <view wx:if="{{users.length===0}}" class="empty">暂无用户结果</view>
+      <view wx:for="{{users}}" wx:key="uid" class="u-item" bindtap="openUser" data-uid="{{item.uid}}">
+        <image class="u-avatar" wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+        <view class="u-avatar placeholder" wx:else>👤</view>
+        <view class="u-info">
+          <view class="u-name">{{item.nickName}}</view>
+          <view class="u-sub">UID: {{item.uid}} · 答题积分 {{item.quizPoints || 0}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+

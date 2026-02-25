@@ -196,7 +196,10 @@ Page({
       unlocked: 0,
       total: 0,
       progress: 0
-    }
+    },
+
+    // v3：主页展示成就（用户可选，最多6个）
+    displayAchievementIds: []
   },
 
   onLoad() {
@@ -221,6 +224,9 @@ Page({
         const readArticles = userInfo.totalReadCount || 0
         const chatTimes = userInfo.totalChatCount || 0
         const achievementList = this.normalizeAchievementList(response.achievementList || [])
+        const displayAchievementIds = Array.isArray(userInfo.displayAchievementIds)
+          ? userInfo.displayAchievementIds
+          : []
 
         console.log('Loaded stats from cloud:', { signDays, points, readArticles, chatTimes })
 
@@ -228,17 +234,18 @@ Page({
           signDays,
           totalPoints: points,
           readArticles,
-          chatTimes
+          chatTimes,
+          displayAchievementIds
         }
 
         if (achievementList.length > 0) {
-          nextData.achievements = achievementList
+          nextData.achievements = this.applyDisplayedFlags(achievementList, displayAchievementIds)
         }
 
         this.setData(nextData)
 
         if (achievementList.length > 0) {
-          this.updateAchievementStats(achievementList)
+          this.updateAchievementStats(nextData.achievements)
         } else {
           this.checkAchievements()
         }
@@ -346,6 +353,14 @@ Page({
     return normalized
   },
 
+  applyDisplayedFlags(achievements, displayAchievementIds) {
+    const set = new Set(displayAchievementIds || [])
+    return (achievements || []).map(a => ({
+      ...a,
+      isDisplayed: a.unlocked ? set.has(a.id) : false
+    }))
+  },
+
   updateAchievementStats(achievements) {
     const unlocked = achievements.filter(item => item.unlocked).length
     const total = achievements.length
@@ -410,8 +425,11 @@ Page({
     
     console.log('成就统计:', { unlocked, total, progress })
     
+    const displayAchievementIds = Array.isArray(this.data.displayAchievementIds)
+      ? this.data.displayAchievementIds
+      : []
     this.setData({
-      achievements,
+      achievements: this.applyDisplayedFlags(achievements, displayAchievementIds),
       'stats.unlocked': unlocked,
       'stats.total': total,
       'stats.progress': progress
@@ -452,6 +470,52 @@ Page({
       title: '分享功能开发中',
       icon: 'none'
     })
+  },
+
+  // v3：设置/取消成就展示（最多6个）
+  async toggleDisplayAchievement(e) {
+    const id = e.currentTarget.dataset.id
+    const item = this.data.achievements.find(x => x.id === id)
+    if (!item || !item.unlocked) {
+      wx.showToast({ title: '该成就尚未解锁', icon: 'none' })
+      return
+    }
+
+    const current = Array.isArray(this.data.displayAchievementIds) ? [...this.data.displayAchievementIds] : []
+    const exists = current.includes(id)
+    let next = []
+    if (exists) {
+      next = current.filter(x => x !== id)
+    } else {
+      if (current.length >= 6) {
+        wx.showToast({ title: '最多展示6个成就', icon: 'none' })
+        return
+      }
+      next = current.concat(id)
+    }
+
+    wx.showLoading({ title: '保存中...' })
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'updateProfileDisplay',
+        data: { displayAchievementIds: next }
+      })
+      wx.hideLoading()
+      if (res.result && res.result.success) {
+        const ids = res.result.data.displayAchievementIds || next
+        this.setData({
+          displayAchievementIds: ids,
+          achievements: this.applyDisplayedFlags(this.data.achievements, ids)
+        })
+        wx.showToast({ title: exists ? '已取消展示' : '已设为展示', icon: 'success' })
+      } else {
+        wx.showToast({ title: res.result?.errMsg || '保存失败', icon: 'none' })
+      }
+    } catch (err) {
+      wx.hideLoading()
+      console.error('updateProfileDisplay failed:', err)
+      wx.showToast({ title: '保存失败', icon: 'none' })
+    }
   },
 
   // 返回上一页

@@ -1,0 +1,13 @@
+.container{min-height:100vh;background:#f0f9ff;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
+.back-icon{font-size:44rpx;}
+.header-title{font-size:34rpx;font-weight:700;}
+.card{margin:20rpx;background:#fff;border-radius:20rpx;padding:22rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.field{margin-bottom:18rpx;}
+.label{font-size:26rpx;color:#334155;margin-bottom:8rpx;}
+.picker{background:#f1f5f9;border-radius:14rpx;padding:14rpx 16rpx;font-size:28rpx;color:#0f172a;}
+.input{background:#f1f5f9;border-radius:14rpx;padding:14rpx 16rpx;font-size:28rpx;}
+.textarea{background:#f1f5f9;border-radius:14rpx;padding:14rpx 16rpx;font-size:28rpx;min-height:220rpx;line-height:1.5;}
+.hint{text-align:right;color:#94a3b8;font-size:24rpx;margin-top:8rpx;}
+.submit{margin-top:10rpx;background:#0ea5e9;color:#fff;border-radius:14rpx;font-size:30rpx;}
+

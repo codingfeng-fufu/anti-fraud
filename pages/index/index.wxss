@@ -92,6 +92,25 @@
   color: #0ea5e9;
 }
 
+/* v3 快捷入口 */
+.quick-actions{
+  display:flex;
+  gap:18rpx;
+  padding: 18rpx 40rpx 0 40rpx;
+}
+.qa-item{
+  flex:1;
+  background:#ffffff;
+  border-radius:24rpx;
+  padding:18rpx 18rpx;
+  display:flex;
+  align-items:center;
+  gap:14rpx;
+  box-shadow: 0 10rpx 26rpx rgba(14,165,233,0.12);
+}
+.qa-icon{font-size:40rpx;}
+.qa-text{font-size:28rpx;font-weight:700;color:#0f172a;}
+
 /* 轮播图 */
 .banner-slider {
   margin: 40rpx 40rpx 30rpx 40rpx;

@@ -85,6 +85,32 @@
     </view>
   </view>
 
+  <!-- v3：主页展示成就 -->
+  <view class="titles-card">
+    <view class="section-title">主页展示成就</view>
+    <view class="title-stats">已选择 {{displayAchievements.length}}/6</view>
+    <view wx:if="{{displayAchievements.length === 0}}" class="empty-text">暂无展示成就，可在“我的成就”中设置</view>
+    <view wx:else class="title-list">
+      <view wx:for="{{displayAchievements}}" wx:key="id" class="title-item">
+        <view class="title-icon">{{item.icon}}</view>
+        <view class="title-info">
+          <view class="title-name">{{item.title}}</view>
+          <view class="title-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="menu-card" bindtap="navigateToAchievements">
+      <view class="menu-item">
+        <view class="menu-icon">🏆</view>
+        <view class="menu-content">
+          <view class="menu-title">管理展示成就</view>
+          <view class="menu-desc">在“我的成就”中设置主页展示内容</view>
+        </view>
+        <view class="menu-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
   <!-- 学习记录入口 -->
   <view class="menu-card" bindtap="navigateToLearningRecords">
     <view class="menu-item">

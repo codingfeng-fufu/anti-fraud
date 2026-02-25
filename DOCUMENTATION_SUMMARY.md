@@ -1,4 +1,4 @@
-# 项目文档建设总结
+# 项目文档建设总结（更新至 v3）
 
 ## 文档建设目标
 
@@ -29,6 +29,16 @@
 - [x] `pages/bind-student/FOLDER.md` - 学生绑定页面目录说明
 - [x] `pages/article-detail/FOLDER.md` - 文章详情页面目录说明
 - [x] `pages/about/FOLDER.md` - 关于页面目录说明
+- [x] `pages/community/FOLDER.md` - 社区页面目录说明（v3）
+- [x] `pages/community-post-create/FOLDER.md` - 发帖页面目录说明（v3）
+- [x] `pages/community-post-detail/FOLDER.md` - 帖子详情页面目录说明（v3）
+- [x] `pages/messages/FOLDER.md` - 站内消息页面目录说明（v3）
+- [x] `pages/profile/FOLDER.md` - 个人主页页面目录说明（v3）
+- [x] `pages/search/FOLDER.md` - 搜索页面目录说明（v3）
+- [x] `pages/quiz/FOLDER.md` - 趣味答题页面目录说明（v3）
+- [x] `pages/quiz-leaderboard/FOLDER.md` - 答题排行榜页面目录说明（v3）
+- [x] `pages/scam-report/FOLDER.md` - 诈骗反馈页面目录说明（v3）
+- [x] `pages/redeem-info/FOLDER.md` - 兑换信息填写页面目录说明（v3）
 
 ### 3. Cloudfunctions目录文档
 - [x] `cloudfunctions/FOLDER.md` - 云函数目录总览
@@ -39,6 +49,7 @@
 - [x] `cloudfunctions/getArticleDetail/FOLDER.md` - 获取文章详情云函数目录说明
 - [x] `cloudfunctions/bindStudent/FOLDER.md` - 学生绑定云函数目录说明
 - [x] `cloudfunctions/getSchools/FOLDER.md` - 获取学校信息云函数目录说明
+- [x] `cloudfunctions/FOLDER.md` - 云函数目录总览（更新至v3）
 
 ### 4. 其他目录文档
 - [x] `utils/FOLDER.md` - 工具函数目录说明
@@ -73,6 +84,12 @@
 ### 6. 项目架构文档
 - [x] `ARCHITECTURE.md` - 项目整体架构文档
 - [x] `cloudfunctions/database.md` - 数据库设计文档（增强版）
+
+### 8. v3 版本文档
+- [x] `docs/v3/v3_update_plan.md` - v3 更新方案（可落地）
+- [x] `docs/v3/v3_implementation_guide.md` - v3 实施指南（任务清单/接口/验收）
+- [x] `docs/v3/quiz_questions_seed.json` - 趣味答题题库种子数据（50题）
+- [x] `docs/v3/v3_update_summary.md` - v3 版本更新总结（实现完成）
 
 ### 7. 项目主文档
 - [x] `README.md` - 项目说明文档（已有）

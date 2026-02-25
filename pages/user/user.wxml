@@ -10,6 +10,14 @@
 -->
 <!--pages/user/user.wxml-->
 <view class="user-container">
+  <!-- v3：站内通知入口（右上角） -->
+  <view class="notify-entry" bindtap="openMessages">
+    <text class="notify-icon">🔔</text>
+    <view wx:if="{{unreadCount > 0}}" class="notify-dot">
+      <text class="notify-text">{{unreadCount > 99 ? '99+' : unreadCount}}</text>
+    </view>
+  </view>
+
   <!-- 用户信息头部 -->
   <view class="user-header">
 <view class="user-info">
@@ -115,4 +123,3 @@
     </view>
   </view>
 </view>
-

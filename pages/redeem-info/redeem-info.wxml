@@ -1,0 +1,42 @@
+<!--
+兑换信息填写页面 - 积分商城模块 (v3)
+
+上游依赖：云函数(redeemProduct)
+入口：/pages/redeem-info/redeem-info?productId=xxx&name=xxx&points=xxx
+主要功能：为需要人工发放的商品填写手机号/运营商并提交兑换
+输出：生成兑换记录（pending_fulfillment）并扣除积分
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">填写兑换信息</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="card">
+    <view class="product">{{productName}}（{{productPoints}}积分）</view>
+
+    <view class="field">
+      <view class="label">手机号</view>
+      <input class="input" placeholder="请输入11位手机号" value="{{phone}}" bindinput="onPhone"/>
+    </view>
+
+    <view class="field">
+      <view class="label">运营商</view>
+      <picker mode="selector" range="{{carrierOptions}}" value="{{carrierIndex}}" bindchange="onCarrier">
+        <view class="picker">{{carrierOptions[carrierIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="label">备注（选填）</view>
+      <input class="input" placeholder="如面额、特殊说明等" value="{{note}}" bindinput="onNote"/>
+    </view>
+
+    <button class="submit" bindtap="submit" disabled="{{submitting}}">{{submitting ? '提交中...' : '确认兑换'}}</button>
+    <view class="tip">提示：本商品为人工发放，兑换后将在后台处理。</view>
+  </view>
+</view>
+

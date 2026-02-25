@@ -1,0 +1,10 @@
+{
+  "name": "submitQuizAttempt",
+  "version": "1.0.0",
+  "description": "提交趣味答题并判分发放积分",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

@@ -1,0 +1,13 @@
+.container{min-height:100vh;background:#f0f9ff;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
+.back-icon{font-size:44rpx;}
+.header-title{font-size:34rpx;font-weight:700;}
+.card{margin:20rpx;background:#fff;border-radius:20rpx;padding:22rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.product{font-size:30rpx;font-weight:800;color:#0f172a;margin-bottom:16rpx;}
+.field{margin-bottom:18rpx;}
+.label{font-size:26rpx;color:#334155;margin-bottom:8rpx;}
+.input{background:#f1f5f9;border-radius:14rpx;padding:14rpx 16rpx;font-size:28rpx;}
+.picker{background:#f1f5f9;border-radius:14rpx;padding:14rpx 16rpx;font-size:28rpx;color:#0f172a;}
+.submit{margin-top:8rpx;background:#0ea5e9;color:#fff;border-radius:14rpx;font-size:30rpx;}
+.tip{margin-top:14rpx;color:#64748b;font-size:24rpx;line-height:1.5;}
+

@@ -18,6 +18,8 @@ data: {
     points: 0,
     achievements: 0,
     totalReadCount: 0,
+    // v3：主页展示成就
+    displayAchievements: [],
     displayTitles: [],
     titleStats: {
       owned: 0,
@@ -90,12 +92,20 @@ const achievements = achievementList
              : (wx.getStorageSync('achievements') || 0))
         const totalReadCount = userInfo.totalReadCount || 0
 
+        const displayAchievementIds = Array.isArray(userInfo.displayAchievementIds)
+          ? userInfo.displayAchievementIds
+          : []
+        const displayAchievements = achievementList
+          ? achievementList.filter(item => item.unlocked && displayAchievementIds.includes(item.id)).slice(0, 6)
+          : []
+
         this.setData({
           userInfo,
           signDays,
           points,
           achievements,
           totalReadCount,
+          displayAchievements,
           tempNickname: userInfo.nickName || ''
         })
 
@@ -277,6 +287,13 @@ const achievements = achievementList
   navigateToPoints() {
     wx.navigateTo({
       url: '/pages/points/points'
+    })
+  },
+
+  // v3：管理展示成就
+  navigateToAchievements() {
+    wx.navigateTo({
+      url: '/pages/achievements/achievements'
     })
   },
 

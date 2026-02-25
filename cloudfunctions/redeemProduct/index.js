@@ -49,7 +49,7 @@ exports.main = async (event, context) => {
     await ensureCollection('user_backpack')
     await ensureCollection('points_records')
     
-    const { productId } = event
+    const { productId, redeemInfo } = event
     
     if (!productId) {
       return {
@@ -72,19 +72,10 @@ exports.main = async (event, context) => {
     
     const user = userResult.data[0]
     
-    // 查找商品
-    const productResult = await db.collection('products')
-      .doc(productId)
-      .get()
-    
-    if (!productResult.data) {
-      return {
-        success: false,
-        errMsg: '商品不存在'
-      }
-    }
-    
+    // 查找商品（v3：products._id == products.id == productId）
+    const productResult = await db.collection('products').doc(productId).get()
     const product = productResult.data
+    if (!product) return { success: false, errMsg: '商品不存在' }
     
     // 检查商品是否上架
     if (!product.isActive) {
@@ -127,24 +118,58 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 开始兑换事务
-    const newPoints = user.points - product.points
-    const newStock = product.stock - 1
-    
-    // 扣除积分
-    await db.collection('users').doc(user._id).update({
-      data: {
-        points: newPoints
+    // 兑换信息校验（仅记录 + 人工发放）
+    let normalizedRedeemInfo = null
+    if (product.requireRedeemInfo) {
+      const phone = String(redeemInfo?.phone || '').trim()
+      const carrier = String(redeemInfo?.carrier || '').trim()
+      const note = String(redeemInfo?.note || '').trim().slice(0, 100)
+      if (!/^1\\d{10}$/.test(phone)) {
+        return { success: false, errMsg: '请填写正确的手机号' }
       }
-    })
-    
-    // 减少库存
-    await db.collection('products').doc(productId).update({
-      data: {
-        stock: newStock
+      if (!carrier) {
+        return { success: false, errMsg: '请选择运营商' }
       }
-    })
+      normalizedRedeemInfo = { phone, carrier, note }
+    }
+
+    // v3 修复：使用原子更新保证“积分不为负/库存不为负”
+    const cost = Number(product.points) || 0
+
+    // 先扣库存，再扣积分；任一步失败则补偿回滚
+    const stockRes = await db.collection('products')
+      .where({ _id: productId, stock: _.gt(0) })
+      .update({ data: { stock: _.inc(-1) } })
+
+    if (!stockRes.stats || stockRes.stats.updated !== 1) {
+      return { success: false, errMsg: '商品已售罄' }
+    }
+
+    const pointsRes = await db.collection('users')
+      .where({ _id: user._id, points: _.gte(cost) })
+      .update({ data: { points: _.inc(-cost) } })
+
+    if (!pointsRes.stats || pointsRes.stats.updated !== 1) {
+      // 补偿回滚库存
+      try {
+        await db.collection('products').doc(productId).update({ data: { stock: _.inc(1) } })
+      } catch (e) {}
+      return { success: false, errMsg: `积分不足，需要${cost}积分` }
+    }
+
+    // 重新获取用户积分（用于返回/记录）
+    const refreshedUser = await db.collection('users').doc(user._id).get()
+    const newPoints = refreshedUser.data?.points ?? (user.points - cost)
+    const newStock = Math.max(0, (product.stock || 0) - 1)
     
+    // 兑换状态：充值类（人工发放）使用 pending_fulfillment
+    let exchangeStatus = 'completed'
+    if (product.fulfillment === 'manual' && product.requireRedeemInfo) {
+      exchangeStatus = 'pending_fulfillment'
+    } else if (product.category === 'physical') {
+      exchangeStatus = 'pending_shipment'
+    }
+
     // 添加兑换记录
     const exchangeRecordId = await db.collection('exchange_records').add({
       data: {
@@ -158,12 +183,13 @@ exports.main = async (event, context) => {
         productPoints: product.points,
         userPointsBefore: user.points,
         userPointsAfter: newPoints,
-        status: 'completed',
+        status: exchangeStatus,
+        redeemInfo: normalizedRedeemInfo,
         createdAt: new Date()
       }
     })
     
-    // 发放商品到背包或立即生效
+    // 发放商品到背包或立即生效（人工发放类仅记录，不自动发放）
     if (product.category === 'tool' && product.productType === 'checkin_card') {
       // 补签卡：立即使用，补签一次
       console.log('发放补签卡...')
@@ -250,7 +276,8 @@ exports.main = async (event, context) => {
         newPoints,
         productName: product.name,
         productType: product.productType,
-        productCategory: product.category
+        productCategory: product.category,
+        status: exchangeStatus
       },
       message: `兑换成功！花费${product.points}积分`
     }

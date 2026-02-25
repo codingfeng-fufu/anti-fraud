@@ -75,7 +75,12 @@ exports.main = async (event, context) => {
     const products = productsResult.data.map(product => ({
       ...product,
       purchasedCount: purchasedCounts[product.id] || 0,
-      canPurchase: (purchasedCounts[product.id] || 0) < (product.limitPerUser || 0)
+      // limitPerUser <= 0 视为不限购
+      canPurchase: (product.limitPerUser && product.limitPerUser > 0)
+        ? ((purchasedCounts[product.id] || 0) < product.limitPerUser)
+        : true,
+      // 前端兼容字段
+      hot: !!product.isHot
     }))
     
     return {

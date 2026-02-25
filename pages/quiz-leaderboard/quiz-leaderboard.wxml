@@ -1,0 +1,29 @@
+<!--
+答题排行榜页面 - 趣味答题模块 (v3)
+
+上游依赖：云函数(getQuizLeaderboard)
+入口：/pages/quiz-leaderboard/quiz-leaderboard
+主要功能：展示答题排行榜（quizPoints）
+输出：排行榜列表
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">答题排行榜</view>
+    <view class="header-right" bindtap="refresh"><text class="refresh">刷新</text></view>
+  </view>
+
+  <view class="card">
+    <view wx:if="{{list.length === 0}}" class="empty">暂无数据</view>
+    <view wx:for="{{list}}" wx:key="uid" class="row">
+      <view class="rank">{{item.rank}}</view>
+      <image class="avatar" wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" mode="aspectFill" bindtap="goProfile" data-uid="{{item.uid}}"></image>
+      <view class="avatar placeholder" wx:else bindtap="goProfile" data-uid="{{item.uid}}">👤</view>
+      <view class="name">{{item.nickName}}</view>
+      <view class="points">{{item.quizPoints}} 分</view>
+    </view>
+  </view>
+</view>
+

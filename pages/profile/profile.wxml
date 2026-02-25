@@ -1,0 +1,69 @@
+<!--
+个人主页页面 - 社交/个人主页模块 (v3)
+
+上游依赖：云函数(getPublicProfile/followUser)
+入口：/pages/profile/profile?uid=xxx
+主要功能：展示他人公共主页信息；关注/取消关注
+输出：渲染主页内容
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">个人主页</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="card" wx:if="{{profile}}">
+    <view class="top">
+      <image class="avatar" wx:if="{{profile.avatarUrl}}" src="{{profile.avatarUrl}}" mode="aspectFill"></image>
+      <view class="avatar placeholder" wx:else>👤</view>
+      <view class="info">
+        <view class="name">{{profile.nickName || '未设置昵称'}}</view>
+        <view class="uid">UID: {{profile.uid}}</view>
+      </view>
+      <button class="follow-btn {{isFollowing ? 'secondary' : ''}}" bindtap="toggleFollow">
+        {{isFollowing ? '已关注' : '关注'}}
+      </button>
+    </view>
+
+    <view class="stats">
+      <view class="stat">
+        <view class="v">{{profile.quizPoints || 0}}</view>
+        <view class="k">答题积分</view>
+      </view>
+      <view class="stat">
+        <view class="v">{{profile.followerCount || 0}}</view>
+        <view class="k">粉丝</view>
+      </view>
+      <view class="stat">
+        <view class="v">{{profile.followingCount || 0}}</view>
+        <view class="k">关注</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{displayTitles.length > 0}}">
+    <view class="section-title">称号</view>
+    <view class="chips">
+      <view wx:for="{{displayTitles}}" wx:key="titleId" class="chip">{{item.icon}} {{item.name}}</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{displayAchievements.length > 0}}">
+    <view class="section-title">展示成就</view>
+    <view class="ach-list">
+      <view wx:for="{{displayAchievements}}" wx:key="achievementId" class="ach">
+        <view class="ach-icon">{{item.icon}}</view>
+        <view class="ach-info">
+          <view class="ach-name">{{item.name}}</view>
+          <view class="ach-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!profile && !loading}}" class="empty">加载失败</view>
+</view>
+

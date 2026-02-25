@@ -1,0 +1,53 @@
+<!--
+诈骗反馈页面 - 诈骗反馈模块 (v3)
+
+上游依赖：云函数(createScamReport)
+入口：/pages/scam-report/scam-report
+主要功能：用户提交遇到的诈骗行为；成功后提示拨打96110
+输出：反馈记录入库
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">诈骗反馈</view>
+    <view class="header-right"></view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="label">诈骗类型</view>
+      <picker mode="selector" range="{{typeOptions}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="picker">{{typeOptions[typeIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="label">渠道</view>
+      <picker mode="selector" range="{{channelOptions}}" value="{{channelIndex}}" bindchange="onChannelChange">
+        <view class="picker">{{channelOptions[channelIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="label">对方账号/电话（选填）</view>
+      <input class="input" placeholder="如手机号/微信号/QQ号/银行卡等" value="{{scamAccount}}" bindinput="onAccountInput"/>
+    </view>
+
+    <view class="field">
+      <view class="label">相关链接（选填）</view>
+      <input class="input" placeholder="如网页链接/下载地址" value="{{scamLink}}" bindinput="onLinkInput"/>
+    </view>
+
+    <view class="field">
+      <view class="label">详细描述</view>
+      <textarea class="textarea" placeholder="请尽量描述对方话术、转账要求、时间线等..." maxlength="1000"
+        value="{{content}}" bindinput="onContentInput"/>
+      <view class="hint">{{content.length}}/1000</view>
+    </view>
+
+    <button class="submit" bindtap="submit" disabled="{{submitting}}">{{submitting ? '提交中...' : '提交反馈'}}</button>
+  </view>
+</view>
+

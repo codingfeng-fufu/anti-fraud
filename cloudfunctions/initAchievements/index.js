@@ -215,6 +215,68 @@ const achievementsData = [
     rewardTitleId: "learn_star_7",
     isActive: true,
     createdAt: new Date()
+  },
+
+  // 趣味答题类成就（v3新增）
+  {
+    achievementId: "quiz_1",
+    name: "答题首秀",
+    desc: "完成首次趣味答题",
+    icon: "🧠",
+    type: "quiz_attempts",
+    target: 1,
+    points: 0,
+    rewardTitleId: null,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    achievementId: "quiz_attempt_10",
+    name: "勤学善思",
+    desc: "累计完成10次趣味答题",
+    icon: "📌",
+    type: "quiz_attempts",
+    target: 10,
+    points: 0,
+    rewardTitleId: "quiz_rookie",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    achievementId: "quiz_correct_50",
+    name: "识骗高手",
+    desc: "累计答对50道题",
+    icon: "🎯",
+    type: "quiz_correct_total",
+    target: 50,
+    points: 0,
+    rewardTitleId: "quiz_expert",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    achievementId: "quiz_perfect_1",
+    name: "满分通关",
+    desc: "单次答题10/10满分",
+    icon: "🏅",
+    type: "quiz_max_correct",
+    target: 10,
+    points: 0,
+    rewardTitleId: "quiz_perfect",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    achievementId: "quiz_points_500",
+    name: "反诈答题王者",
+    desc: "答题排行榜积分达到500",
+    icon: "👑",
+    type: "quiz_points",
+    target: 500,
+    points: 0,
+    rewardTitleId: "quiz_master",
+    isActive: true,
+    createdAt: new Date()
   }
 ]
 
@@ -223,31 +285,28 @@ exports.main = async (event, context) => {
   
   try {
     await ensureCollection('achievements')
-    
-    // 检查是否已有成就数据
-    const existingAchievements = await db.collection('achievements').limit(1).get()
-    
-    if (existingAchievements.data.length > 0) {
-      return {
-        success: false,
-        message: "成就数据已存在，无需重复初始化"
-      }
-    }
-    
-    console.log('achievements 集合为空，开始初始化数据...')
-    
-    // 批量添加成就数据
+
+    // v3：幂等初始化（按 achievementId 查重，只补齐缺失项）
+    let inserted = 0
+    let skipped = 0
     for (const achievement of achievementsData) {
-      await db.collection('achievements').add({
-        data: achievement
-      })
+      const achievementId = achievement.achievementId
+      if (!achievementId) continue
+      const exists = await db.collection('achievements')
+        .where({ achievementId })
+        .count()
+      if (exists.total > 0) {
+        skipped += 1
+        continue
+      }
+      await db.collection('achievements').add({ data: achievement })
+      inserted += 1
     }
-    
-    console.log(`成就数据初始化完成，共添加 ${achievementsData.length} 个成就`)
     
     return {
       success: true,
-      message: `成就数据初始化完成，共添加 ${achievementsData.length} 个成就`
+      message: `成就数据初始化完成：新增 ${inserted} 个，已存在跳过 ${skipped} 个`,
+      data: { inserted, skipped }
     }
   } catch (err) {
     console.error('初始化成就数据失败:', err)

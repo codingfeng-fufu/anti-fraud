@@ -1,0 +1,66 @@
+<!--
+趣味答题页面 - 趣味答题模块 (v3)
+
+上游依赖：云函数(getQuizQuestions/submitQuizAttempt)
+入口：/pages/quiz/quiz
+主要功能：随机抽取10题，答题后服务端判分，发放积分与展示解析
+输出：答题结果与积分提示，可跳转排行榜
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">趣味答题</view>
+    <view class="header-right" bindtap="goLeaderboard"><text class="rank-btn">排行榜</text></view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载题目中...</view>
+
+  <!-- 答题区 -->
+  <view wx:if="{{!loading && !submitted && currentQuestion}}" class="card">
+    <view class="progress">第 {{currentIndex + 1}} / {{questions.length}} 题</view>
+    <view class="question">{{currentQuestion.question}}</view>
+
+    <view class="options">
+      <view wx:for="{{currentQuestion.options}}" wx:key="index"
+        class="option {{selectedIndex === index ? 'selected' : ''}}"
+        bindtap="selectOption" data-index="{{index}}">
+        <text class="opt-key">{{['A','B','C','D'][index]}}</text>
+        <text class="opt-text">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="btn secondary" bindtap="prev" disabled="{{currentIndex === 0}}">上一题</button>
+      <button class="btn" bindtap="nextOrSubmit">{{currentIndex === questions.length - 1 ? '交卷' : '下一题'}}</button>
+    </view>
+  </view>
+
+  <!-- 结果区 -->
+  <view wx:if="{{submitted}}" class="result">
+    <view class="result-card">
+      <view class="score">本次答对 {{result.correctCount}} / {{questions.length}}</view>
+      <view class="gain">
+        <view>排行榜积分 +{{result.earnedQuizPoints}}</view>
+        <view>商城积分 +{{result.earnedMallPoints}}（今日 {{result.dailyAwarded}}/{{result.dailyCap}}）</view>
+      </view>
+      <view class="result-actions">
+        <button class="btn" bindtap="restart">再来一局</button>
+        <button class="btn secondary" bindtap="goLeaderboard">查看排行榜</button>
+      </view>
+    </view>
+
+    <view class="analysis-card">
+      <view class="analysis-title">答题解析</view>
+      <view wx:for="{{result.results}}" wx:key="questionId" class="analysis-item">
+        <view class="analysis-q">
+          <text class="tag {{item.correct ? 'ok' : 'bad'}}">{{item.correct ? '正确' : '错误'}}</text>
+          <text class="qid">{{item.questionId}}</text>
+        </view>
+        <view class="analysis-exp">{{item.explanation}}</view>
+      </view>
+    </view>
+  </view>
+</view>
+

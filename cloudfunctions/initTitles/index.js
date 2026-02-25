@@ -151,6 +151,52 @@ const titlesData = [
     achievementId: "sign_100",
     isActive: true,
     createdAt: new Date()
+  },
+
+  // 趣味答题称号（v3新增）
+  {
+    titleId: "quiz_rookie",
+    name: "答题新手",
+    desc: "累计完成10次趣味答题",
+    icon: "🧠",
+    type: "achievement",
+    rarity: "common",
+    achievementId: "quiz_attempt_10",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    titleId: "quiz_expert",
+    name: "识骗达人",
+    desc: "累计答对50道题",
+    icon: "🎯",
+    type: "achievement",
+    rarity: "rare",
+    achievementId: "quiz_correct_50",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    titleId: "quiz_perfect",
+    name: "满分选手",
+    desc: "单次答题10/10满分",
+    icon: "🏅",
+    type: "achievement",
+    rarity: "rare",
+    achievementId: "quiz_perfect_1",
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    titleId: "quiz_master",
+    name: "反诈答题王者",
+    desc: "答题排行榜积分达到500",
+    icon: "👑",
+    type: "achievement",
+    rarity: "epic",
+    achievementId: "quiz_points_500",
+    isActive: true,
+    createdAt: new Date()
   }
 ]
 
@@ -158,26 +204,27 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   
   try {
-    // 检查是否已有称号数据，避免重复初始化
-    const existingTitles = await db.collection('titles').limit(1).get()
-    
-    if (existingTitles.data.length > 0) {
-      return {
-        success: false,
-        message: "称号数据已存在，无需重复初始化"
-      }
-    }
-    
-    // 批量添加称号数据
+    // v3：幂等初始化（按 titleId 查重，只补齐缺失项）
+    let inserted = 0
+    let skipped = 0
     for (const title of titlesData) {
-      await db.collection('titles').add({
-        data: title
-      })
+      const titleId = title.titleId
+      if (!titleId) continue
+      const exists = await db.collection('titles')
+        .where({ titleId })
+        .count()
+      if (exists.total > 0) {
+        skipped += 1
+        continue
+      }
+      await db.collection('titles').add({ data: title })
+      inserted += 1
     }
     
     return {
       success: true,
-      message: `称号数据初始化完成，共添加 ${titlesData.length} 个称号`
+      message: `称号数据初始化完成：新增 ${inserted} 个，已存在跳过 ${skipped} 个`,
+      data: { inserted, skipped }
     }
   } catch (err) {
     return {

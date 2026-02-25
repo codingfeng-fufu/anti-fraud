@@ -94,6 +94,9 @@
 - 写入 `exchange_records.redeemInfo`，并将记录状态设为 `pending_fulfillment`（待人工发放）
 - 仍需完成：扣积分、扣库存、写积分流水（`points_records`）——均在事务内完成
 
+前端实现建议：
+- 新增 `pages/redeem-info/redeem-info` 页面用于填写手机号/运营商等信息，再调用 `redeemProduct` 完成兑换
+
 ---
 
 ### 3) 检查“我的界面”称号展示逻辑：用户可自行选择展示已获得的成就

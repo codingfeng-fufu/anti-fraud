@@ -1,0 +1,34 @@
+<!--
+站内消息页面 - 消息模块 (v3)
+
+上游依赖：云函数(getNotifications/markNotificationRead)
+入口：/pages/messages/messages
+主要功能：展示通知列表，支持点击跳转并标记已读
+输出：消息列表渲染
+
+重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
+-->
+<view class="container">
+  <view class="page-header">
+    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <view class="header-title">站内通知</view>
+    <view class="header-right" bindtap="refresh"><text class="refresh">刷新</text></view>
+  </view>
+
+  <scroll-view scroll-y class="list" bindscrolltolower="loadMore">
+    <view wx:if="{{list.length === 0 && !loading}}" class="empty">暂无通知</view>
+
+    <view wx:for="{{list}}" wx:key="_id" class="item {{item.isRead ? '' : 'unread'}}" bindtap="openNotification" data-id="{{item._id}}">
+      <view class="icon">{{item.typeIcon}}</view>
+      <view class="body">
+        <view class="title">{{item.title}}</view>
+        <view class="desc">{{item.desc}}</view>
+        <view class="time">{{item.createdAtText}}</view>
+      </view>
+      <view class="dot" wx:if="{{!item.isRead}}"></view>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+    <view wx:if="{{!hasMore && list.length > 0}}" class="no-more">没有更多了</view>
+  </scroll-view>
+</view>

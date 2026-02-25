@@ -316,6 +316,20 @@
   white-space: nowrap;
 }
 
+/* v3：主页展示成就按钮 */
+.display-btn {
+  margin-top: 12rpx;
+}
+
+.display-btn.active {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+.display-btn.active .action-text {
+  color: #ffffff;
+}
+
 /* 进度区域 */
 .achievement-progress {
   flex-shrink: 0;

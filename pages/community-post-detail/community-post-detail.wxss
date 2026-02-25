@@ -1,0 +1,34 @@
+.container{min-height:100vh;background:#f0f9ff;padding-bottom:120rpx;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
+.back-icon{font-size:44rpx;}
+.header-title{font-size:34rpx;font-weight:700;}
+.post-card{margin:20rpx;background:#fff;border-radius:20rpx;padding:22rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.post-header{display:flex;align-items:center;}
+.avatar{width:72rpx;height:72rpx;border-radius:36rpx;background:#e2e8f0;}
+.avatar.placeholder{display:flex;align-items:center;justify-content:center;}
+.meta{margin-left:16rpx;}
+.name{font-size:30rpx;font-weight:600;color:#0f172a;}
+.time{font-size:24rpx;color:#64748b;margin-top:4rpx;}
+.content{margin-top:14rpx;font-size:28rpx;color:#0f172a;line-height:1.5;word-break:break-all;}
+.images{display:flex;flex-wrap:wrap;margin-top:12rpx;gap:10rpx;}
+.img{width:210rpx;height:210rpx;border-radius:16rpx;background:#f1f5f9;}
+.comments-card{margin:20rpx;background:#fff;border-radius:20rpx;padding:18rpx 20rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
+.comments-title{font-size:30rpx;font-weight:700;color:#0f172a;margin-bottom:10rpx;}
+.empty{color:#94a3b8;font-size:26rpx;padding:18rpx 0;text-align:center;}
+.comment-item{display:flex;padding:16rpx 0;border-top:1rpx solid #f1f5f9;}
+.comment-item:first-child{border-top:none;}
+.comment-item.reply{padding-left:36rpx;}
+.c-avatar{width:60rpx;height:60rpx;border-radius:30rpx;background:#e2e8f0;}
+.c-avatar.placeholder{display:flex;align-items:center;justify-content:center;}
+.c-body{flex:1;margin-left:14rpx;}
+.c-top{display:flex;align-items:center;justify-content:space-between;}
+.c-name{font-size:28rpx;font-weight:600;color:#0f172a;}
+.c-time{font-size:22rpx;color:#94a3b8;}
+.c-content{margin-top:6rpx;font-size:28rpx;color:#0f172a;line-height:1.5;word-break:break-all;}
+.reply-to{color:#0ea5e9;}
+.c-actions{margin-top:6rpx;}
+.c-reply{font-size:24rpx;color:#0ea5e9;}
+.input-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1rpx solid #e2e8f0;display:flex;align-items:center;padding:14rpx 16rpx;gap:12rpx;}
+.input{flex:1;background:#f1f5f9;border-radius:999rpx;padding:14rpx 18rpx;font-size:28rpx;}
+.send{background:#0ea5e9;color:#fff;border-radius:999rpx;font-size:28rpx;padding:0 26rpx;height:72rpx;line-height:72rpx;}
+
