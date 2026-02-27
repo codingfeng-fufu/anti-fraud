@@ -249,7 +249,6 @@ exports.main = async (event, context) => {
       await db.collection('products').doc(docId).set({
         data: {
           ...product,
-          _id: docId,
           id: docId,
           updatedAt: new Date()
         }

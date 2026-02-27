@@ -1,6 +1,4 @@
 {
-  "navigationBarTitleText": "反诈卫士",
-  "navigationBarBackgroundColor": "#0ea5e9",
-  "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
   "usingComponents": {}
 }

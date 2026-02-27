@@ -3,7 +3,7 @@
   background:#f0f9ff;
 }
 .top-bar{
-  padding:24rpx 28rpx;
+  padding: calc(24rpx + env(safe-area-inset-top)) 28rpx 24rpx 28rpx;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -18,7 +18,7 @@
   padding:8rpx 22rpx;
   border-radius:999rpx;
 }
-.list{height:calc(100vh - 96rpx); padding:20rpx 20rpx;}
+.list{height:calc(100vh - 96rpx - env(safe-area-inset-top)); padding:20rpx 20rpx;}
 .post-card{
   background:#fff;
   border-radius:20rpx;

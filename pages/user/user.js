@@ -117,33 +117,45 @@ Page({
         name: 'getUserInfo',
         data: {}
       })
-      
+
       if (result.result.success) {
         const data = result.result.data
         const signDates = data.userInfo.signDates || []
         const signDays = this.calculateConsecutiveDays(signDates)
-        
+
+        // 获取展示成就数据
+        const achievementList = Array.isArray(data.achievementList) ? data.achievementList : []
+        const displayAchievementIds = Array.isArray(data.userInfo.displayAchievementIds)
+          ? data.userInfo.displayAchievementIds
+          : []
+        const displayAchievements = achievementList
+          .filter(item => item.unlocked && displayAchievementIds.includes(item.id))
+          .slice(0, 6)
+
         if (signDates.length > 0) {
           wx.setStorageSync('signDates', signDates)
           wx.setStorageSync('lastSignDate', signDates[signDates.length - 1])
         }
-        
+
         const todaySigned = this.checkTodaySigned(signDates)
-        
-        this.setData({ 
+
+        this.setData({
           userInfo: data.userInfo,
           signDays,
           signDates,
           points: data.userInfo.points || 0,
           achievements: data.userInfo.achievements?.length || 0,
+          displayAchievements,
           todaySigned: todaySigned
         })
-        
+
         wx.setStorageSync('userInfo', data.userInfo)
         wx.setStorageSync('openid', data.openid)
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
+        wx.setStorageSync('displayAchievements', displayAchievements)
+        wx.setStorageSync('displayAchievementIds', displayAchievementIds)
       }
     } catch (err) {
       console.error('从云端加载用户数据失败：', err)
