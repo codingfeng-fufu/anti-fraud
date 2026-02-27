@@ -53,6 +53,12 @@
         "selectedIconPath": "images/社区 (1).png"
       },
       {
+        "pagePath": "pages/quiz/quiz",
+        "text": "答题",
+        "iconPath": "images/quiz.png",
+        "selectedIconPath": "images/quiz-active.png"
+      },
+      {
         "pagePath": "pages/chat/chat",
         "text": "AI助手",
         "iconPath": "images/ai-聊天-思考-copy.png",

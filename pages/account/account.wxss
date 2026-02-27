@@ -10,22 +10,19 @@
   padding: 20rpx 40rpx;
   background: white;
   border-bottom: 1rpx solid #e0e0e0;
-}
-
-.header-left,
-.header-right {
-  width: 80rpx;
-}
-
-.back-icon {
-  font-size: 48rpx;
-  color: #333;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
 }
 
 .header-title {
-  font-size: 32rpx;
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
   font-weight: 600;
-  color: #333;
+  color: #0f172a;
+}
+
+.header-right {
+  width: 80rpx;
 }
 
 .account-section {

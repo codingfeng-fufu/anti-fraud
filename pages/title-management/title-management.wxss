@@ -1,14 +1,11 @@
 .page-header {
   display: flex;
   align-items: center;
-  padding: 40rpx 40rpx 20rpx;
-  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-  color: white;
-}
-
-.header-left {
-  font-size: 48rpx;
-  margin-right: 20rpx;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-bottom: 2rpx solid #e0f2fe;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
 }
 
 .header-title {
@@ -16,6 +13,11 @@
   text-align: center;
   font-size: 36rpx;
   font-weight: bold;
+  color: #0f172a;
+}
+
+.header-right {
+  width: 80rpx;
 }
 
 .section-title {

@@ -63,6 +63,34 @@
 
 .article-content rich-text {
   word-break: break-all;
+  display: block;
+}
+
+/* rich-text 内部元素样式 */
+.article-content rich-text p {
+  margin-bottom: 20rpx;
+  color: #1e293b;
+  background: transparent;
+}
+
+.article-content rich-text h1,
+.article-content rich-text h2,
+.article-content rich-text h3 {
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+  margin: 30rpx 0 20rpx;
+}
+
+.article-content rich-text strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.article-content rich-text div,
+.article-content rich-text span {
+  background: transparent;
+  color: #1e293b;
 }
 
 /* v3 评论区 */

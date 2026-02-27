@@ -1,8 +1,7 @@
 .container{min-height:100vh;background:#f0f9ff;}
-.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
-.back-icon{font-size:44rpx;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#fff;color:#0f172a;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.05);}
 .header-title{font-size:34rpx;font-weight:700;}
-.refresh{font-size:28rpx;}
+.refresh{font-size:28rpx;color:#0ea5e9;}
 .list{padding:20rpx;}
 .item{display:flex;gap:16rpx;align-items:flex-start;background:#fff;border-radius:18rpx;padding:18rpx;margin-bottom:14rpx;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);position:relative;}
 .item.unread{border:2rpx solid #0ea5e9;}

@@ -10,7 +10,6 @@
 -->
 <view class="container">
   <view class="page-header">
-    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
     <view class="header-title">诈骗反馈</view>
     <view class="header-right"></view>
   </view>

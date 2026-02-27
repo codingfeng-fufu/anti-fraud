@@ -23,26 +23,19 @@
   padding: 20rpx 40rpx;
   background: white;
   border-bottom: 2rpx solid #e0f2fe;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left,
-.header-right {
-  width: 80rpx;
-}
-
-.back-icon {
-  font-size: 64rpx;
-  color: #0ea5e9;
-  line-height: 1;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
 }
 
 .header-title {
+  flex: 1;
+  text-align: center;
   font-size: 36rpx;
   font-weight: 600;
-  color: #1e293b;
+  color: #0f172a;
+}
+
+.header-right {
+  width: 80rpx;
 }
 
 /* 学习统计卡片 */

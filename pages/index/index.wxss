@@ -5,6 +5,16 @@
   padding-bottom: 40rpx;
 }
 
+/* 固定顶部区域 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #f0f9ff;
+}
+
 /* 顶部栏 */
 .top-bar {
   background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
@@ -34,20 +44,6 @@
   height: 300rpx;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-}
-
-.top-title {
-  font-size: 48rpx;
-  font-weight: 700;
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.title-icon {
-  font-size: 52rpx;
 }
 
 .subtitle {
@@ -92,28 +88,45 @@
   color: #0ea5e9;
 }
 
-/* v3 快捷入口 */
-.quick-actions{
-  display:flex;
-  gap:18rpx;
-  padding: 18rpx 40rpx 0 40rpx;
+/* 分类标签（横向滚动） */
+.category-tabs {
+  white-space: nowrap;
+  padding: 30rpx 40rpx;
+  background: #f0f9ff;
 }
-.qa-item{
-  flex:1;
-  background:#ffffff;
-  border-radius:24rpx;
-  padding:18rpx 18rpx;
-  display:flex;
-  align-items:center;
-  gap:14rpx;
-  box-shadow: 0 10rpx 26rpx rgba(14,165,233,0.12);
+
+.tab-item {
+  display: inline-block;
+  padding: 20rpx 40rpx;
+  background: white;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  color: #64748b;
+  transition: all 0.3s;
+  font-weight: 500;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  margin-right: 20rpx;
+  flex-shrink: 0;
 }
-.qa-icon{font-size:40rpx;}
-.qa-text{font-size:28rpx;font-weight:700;color:#0f172a;}
+
+.tab-item:last-child {
+  margin-right: 0;
+}
+
+.tab-item.active {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: white;
+  box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
+}
+
+/* 占位区域 */
+.header-placeholder {
+  height: 320rpx;
+}
 
 /* 轮播图 */
 .banner-slider {
-  margin: 40rpx 40rpx 30rpx 40rpx;
+  margin: 0 40rpx 30rpx 40rpx;
 }
 
 .slider-container {
@@ -181,31 +194,6 @@
   font-size: 26rpx;
   opacity: 0.95;
   text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
-}
-
-/* 分类标签 */
-.category-tabs {
-  padding: 30rpx 40rpx;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20rpx;
-}
-
-.tab-item {
-  padding: 20rpx 40rpx;
-  background: white;
-  border-radius: 50rpx;
-  font-size: 28rpx;
-  color: #64748b;
-  transition: all 0.3s;
-  font-weight: 500;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-
-.tab-item.active {
-  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-  color: white;
-  box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
 }
 
 /* 内容区域 */

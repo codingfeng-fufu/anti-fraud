@@ -9,10 +9,9 @@
 重要：每当所属的代码发生变化时，必须对相应的文档进行更新操作！
 -->
 <view class="container">
-  <view class="page-header">
-    <view class="header-left" bindtap="goBack"><text class="back-icon">‹</text></view>
-    <view class="header-title">趣味答题</view>
-    <view class="header-right" bindtap="goLeaderboard"><text class="rank-btn">排行榜</text></view>
+  <!-- 顶部操作栏 -->
+  <view class="top-bar">
+    <view class="header-right" bindtap="goLeaderboard"><text class="rank-btn">🏆 排行榜</text></view>
   </view>
 
   <view wx:if="{{loading}}" class="loading">加载题目中...</view>
@@ -63,4 +62,3 @@
     </view>
   </view>
 </view>
-

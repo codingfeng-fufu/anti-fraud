@@ -65,10 +65,10 @@ Page({
       }
     ],
     
-    // 分类数据（简化，只保留核心分类）
+    // 分类数据（使用官方分类，保留简写以保证简洁性）
     categories: [
-      '全部', '大学生', '刷单诈骗', '校园贷', '电信诈骗', 
-      '网购退款', '杀猪盘', '投资理财'
+      '全部', '刷单返利', '虚假投资理财', '虚假购物服务', '冒充电商客服',
+      '虚假贷款', '虚假征信', '冒充领导熟人', '冒充公检法', '网络婚恋交友', '网游虚假交易'
     ],
     selectedCategory: '全部',
     
@@ -81,7 +81,7 @@ Page({
         title: '警惕！"刷单兼职"骗局又出新花样，多名学生被骗',
         timestamp: Date.now() - 2 * 60 * 60 * 1000, // 2小时前
         views: 12300,
-        category: '刷单诈骗'
+        category: '刷单返利'
       },
       {
         id: 2,
@@ -90,7 +90,7 @@ Page({
         title: '大学生网购遇"退款诈骗"，一步步掉入陷阱',
         timestamp: Date.now() - 5 * 60 * 60 * 1000, // 5小时前
         views: 8700,
-        category: '网购退款'
+        category: '冒充电商客服'
       },
       {
         id: 3,
@@ -99,7 +99,7 @@ Page({
         title: '校园贷、培训贷...大学生必知的5种贷款陷阱',
         timestamp: Date.now() - 30 * 60 * 60 * 1000, // 约昨天
         views: 15200,
-        category: '校园贷'
+        category: '虚假贷款'
       },
       {
         id: 4,
@@ -108,7 +108,7 @@ Page({
         title: '大学生求职防骗指南：识破"高薪兼职"套路',
         timestamp: Date.now() - 10 * 60 * 60 * 1000, // 10小时前
         views: 6500,
-        category: '大学生'
+        category: '刷单返利'
       },
       {
         id: 5,
@@ -117,7 +117,7 @@ Page({
         title: '3分钟了解"杀猪盘"：大学生恋爱交友防骗攻略',
         timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12小时前
         views: 9800,
-        category: '杀猪盘'
+        category: '网络婚恋交友'
       },
       {
         id: 6,
@@ -126,7 +126,7 @@ Page({
         title: '新型电信诈骗：冒充公检法人员要求转账',
         timestamp: Date.now() - 24 * 60 * 60 * 1000, // 1天前
         views: 18500,
-        category: '电信诈骗'
+        category: '冒充公检法'
       },
       {
         id: 7,
@@ -135,7 +135,7 @@ Page({
         title: '投资理财骗局揭秘：高收益背后的陷阱',
         timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2天前
         views: 11200,
-        category: '投资理财'
+        category: '虚假投资理财'
       },
       {
         id: 8,
@@ -144,7 +144,7 @@ Page({
         title: '如何识别钓鱼邮件？这些特征要注意',
         timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000, // 3天前
         views: 7800,
-        category: '电信诈骗'
+        category: '冒充公检法'
       },
       {
         id: 9,
@@ -153,7 +153,7 @@ Page({
         title: '校园贷的"套路"有多深？真实案例告诉你',
         timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000, // 4天前
         views: 13600,
-        category: '校园贷'
+        category: '虚假贷款'
       },
       {
         id: 10,
@@ -162,7 +162,7 @@ Page({
         title: '网购退款诈骗升级！这些话术要警惕',
         timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5天前
         views: 10500,
-        category: '网购退款'
+        category: '冒充电商客服'
       }
     ],
     
@@ -337,8 +337,8 @@ Page({
     if (category === '全部') {
       filteredArticles = this.data.allArticles
     } else {
-      filteredArticles = this.data.allArticles.filter(article => 
-        article.category === category || article.category === '大学生'
+      filteredArticles = this.data.allArticles.filter(article =>
+        article.category === category
       )
     }
     
@@ -363,10 +363,10 @@ Page({
     const keyword = e.detail.value.trim()
     if (!keyword) {
       // 如果搜索为空，恢复当前分类的文章
-      this.selectCategory({ 
-        currentTarget: { 
-          dataset: { category: this.data.selectedCategory } 
-        } 
+      this.selectCategory({
+        currentTarget: {
+          dataset: { category: this.data.selectedCategory }
+        }
       })
       return
     }
@@ -375,16 +375,6 @@ Page({
     wx.navigateTo({
       url: `/pages/search/search?keyword=${encodeURIComponent(keyword)}`
     })
-  },
-
-  // v3：趣味答题入口
-  goQuiz() {
-    wx.navigateTo({ url: '/pages/quiz/quiz' })
-  },
-
-  // v3：诈骗反馈入口
-  goScamReport() {
-    wx.navigateTo({ url: '/pages/scam-report/scam-report' })
   },
 
   // 查看文章详情

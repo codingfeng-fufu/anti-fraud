@@ -1,8 +1,7 @@
 .container{min-height:100vh;background:#f0f9ff;}
-.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#0ea5e9;color:#fff;}
-.back-icon{font-size:44rpx;}
+.page-header{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;background:#fff;color:#0f172a;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.05);}
 .header-title{font-size:34rpx;font-weight:700;}
-.refresh{font-size:28rpx;}
+.refresh{font-size:28rpx;color:#0ea5e9;}
 .card{margin:20rpx;background:#fff;border-radius:20rpx;overflow:hidden;box-shadow:0 10rpx 24rpx rgba(2,132,199,0.10);}
 .row{display:flex;align-items:center;padding:18rpx 18rpx;border-bottom:1rpx solid #f1f5f9;}
 .row:last-child{border-bottom:none;}

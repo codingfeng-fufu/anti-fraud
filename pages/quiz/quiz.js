@@ -125,9 +125,5 @@ Page({
 
   goLeaderboard() {
     wx.navigateTo({ url: '/pages/quiz-leaderboard/quiz-leaderboard' })
-  },
-
-  goBack() {
-    wx.navigateBack()
   }
 })

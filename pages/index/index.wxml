@@ -1,51 +1,58 @@
 <!--pages/index/index.wxml-->
 <view class="index-container">
-  <!-- 顶部搜索栏 -->
-  <view class="top-bar">
-    <view class="subtitle">守护校园，识破骗局</view>
+  <!-- 固定顶部区域 -->
+  <view class="fixed-header">
+    <!-- 顶部搜索栏 -->
+    <view class="top-bar">
+      <view class="subtitle">守护校园，识破骗局</view>
+    </view>
+
+    <view class="search-bar">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="搜索反诈知识、典型案例..."
+        bindconfirm="handleSearch"
+      />
+      <text class="search-icon">🔍</text>
+    </view>
+
+    <!-- 分类标签（横向滚动） -->
+    <scroll-view class="category-tabs" scroll-x enable-flex>
+      <view
+        wx:for="{{categories}}"
+        wx:key="index"
+        class="tab-item {{selectedCategory === item ? 'active' : ''}}"
+        bindtap="selectCategory"
+        data-category="{{item}}"
+      >
+        {{item}}
+      </view>
+    </scroll-view>
   </view>
 
-  <view class="search-bar">
-    <input 
-      class="search-input" 
-      type="text" 
-      placeholder="搜索反诈知识、典型案例..."
-      bindconfirm="handleSearch"
-    />
-    <text class="search-icon">🔍</text>
-  </view>
-
-  <!-- v3 快捷入口 -->
-  <view class="quick-actions">
-    <view class="qa-item" bindtap="goQuiz">
-      <view class="qa-icon">🧠</view>
-      <view class="qa-text">趣味答题</view>
-    </view>
-    <view class="qa-item" bindtap="goScamReport">
-      <view class="qa-icon">📣</view>
-      <view class="qa-text">诈骗反馈</view>
-    </view>
-  </view>
+  <!-- 占位区域 -->
+  <view class="header-placeholder"></view>
 
   <!-- 轮播图 -->
   <view class="banner-slider">
-    <swiper 
-      class="slider-container" 
-      indicator-dots 
+    <swiper
+      class="slider-container"
+      indicator-dots
       indicator-color="rgba(255,255,255,0.5)"
       indicator-active-color="#ffffff"
-      autoplay 
-      interval="3000" 
+      autoplay
+      interval="3000"
       circular
     >
       <swiper-item wx:for="{{banners}}" wx:key="id" bindtap="onBannerTap" data-link="{{item.link}}">
         <view class="slide-content" style="background: {{item.bgColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}};">
           <!-- 如果有云存储图片，显示图片 -->
           <image wx:if="{{item.image}}" class="slide-bg" src="{{item.image}}" mode="aspectFill"></image>
-          
+
           <!-- 半透明遮罩（有图片时显示，让文字更清晰） -->
           <view wx:if="{{item.image}}" class="slide-overlay"></view>
-          
+
           <!-- 文字内容 -->
           <view class="slide-text">
             <view wx:if="{{item.icon}}" class="slide-icon">{{item.icon}}</view>
@@ -57,25 +64,12 @@
     </swiper>
   </view>
 
-  <!-- 分类标签 -->
-  <view class="category-tabs">
-    <view 
-      wx:for="{{categories}}" 
-      wx:key="index"
-      class="tab-item {{selectedCategory === item ? 'active' : ''}}"
-      bindtap="selectCategory"
-      data-category="{{item}}"
-    >
-      {{item}}
-    </view>
-  </view>
-
   <!-- 新闻列表 -->
   <view class="content-area">
     <view class="section-title">🔥 最新资讯</view>
 
-    <view 
-      wx:for="{{articles}}" 
+    <view
+      wx:for="{{articles}}"
       wx:key="id"
       class="news-card"
       bindtap="viewArticle"
