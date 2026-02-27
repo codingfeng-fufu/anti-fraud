@@ -180,6 +180,15 @@
   white-space: nowrap;
 }
 
+.achievement-tag-inline {
+  font-size: 24rpx;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+
 .no-title-inline {
   font-size: 24rpx;
   color: #94a3b8;

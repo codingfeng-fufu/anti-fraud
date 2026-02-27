@@ -87,6 +87,38 @@ exports.main = async (event) => {
       }))
     }
 
+    if (!questions || questions.length === 0) {
+      try {
+        await cloud.callFunction({ name: 'initQuizQuestions', data: {} })
+        const res = await db.collection('quiz_questions')
+          .where({ isActive: true })
+          .limit(count)
+          .get()
+        questions = (res.data || []).map(item => ({
+          questionId: item.questionId,
+          question: item.question,
+          options: item.options,
+          difficulty: item.difficulty || 1,
+          tags: item.tags || []
+        }))
+      } catch (err) {
+        console.warn('initQuizQuestions failed:', err?.message || err)
+      }
+    }
+
+    if (!questions || questions.length === 0) {
+      const res = await db.collection('quiz_questions')
+        .limit(count)
+        .get()
+      questions = (res.data || []).map(item => ({
+        questionId: item.questionId,
+        question: item.question,
+        options: item.options,
+        difficulty: item.difficulty || 1,
+        tags: item.tags || []
+      }))
+    }
+
     return {
       success: true,
       data: { questions, count: questions.length }

@@ -198,6 +198,38 @@ const productsData = [
     isActive: true,
     isHot: false,
     createdAt: new Date()
+  },
+  {
+    id: 'data_30',
+    name: '30元流量卡',
+    desc: '人工发放：请填写手机号/运营商',
+    icon: '📶',
+    points: 3200,
+    stock: 30,
+    category: 'virtual',
+    productType: 'data_card',
+    fulfillment: 'manual',
+    requireRedeemInfo: true,
+    limitPerUser: 1,
+    isActive: true,
+    isHot: false,
+    createdAt: new Date()
+  },
+  {
+    id: 'milk_tea_1',
+    name: '奶茶券',
+    desc: '门店兑换券（口味任选）',
+    icon: '🧋',
+    points: 300,
+    stock: 100,
+    category: 'virtual',
+    productType: 'coupon',
+    fulfillment: 'manual',
+    requireRedeemInfo: false,
+    limitPerUser: 1,
+    isActive: true,
+    isHot: true,
+    createdAt: new Date()
   }
 ]
 

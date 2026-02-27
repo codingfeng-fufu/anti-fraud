@@ -39,7 +39,8 @@
             <text class="title-label-inline">当前称号:</text>
             <view class="current-titles-inline">
               <text wx:for="{{equippedTitles}}" wx:key="id" class="title-tag-inline">{{item.name}}</text>
-              <text wx:if="{{equippedTitles.length === 0}}" class="no-title-inline">暂无称号</text>
+              <text wx:for="{{displayAchievements}}" wx:key="id" class="achievement-tag-inline">{{item.icon}}{{item.title}}</text>
+              <text wx:if="{{equippedTitles.length === 0 && displayAchievements.length === 0}}" class="no-title-inline">暂无称号</text>
             </view>
           </view>
         </view>

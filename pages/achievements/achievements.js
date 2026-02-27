@@ -261,6 +261,7 @@ Page({
         wx.setStorageSync('points', points)
         wx.setStorageSync('readArticles', readArticles)
         wx.setStorageSync('chatTimes', chatTimes)
+        wx.setStorageSync('displayAchievementIds', displayAchievementIds)
         if (achievementList.length > 0) {
           wx.setStorageSync('achievements', achievementList.filter(item => item.unlocked).length)
         }
@@ -294,6 +295,9 @@ Page({
       const points = wx.getStorageSync('points') || 0
       const readArticles = wx.getStorageSync('readArticles') || 0
       const chatTimes = wx.getStorageSync('chatTimes') || 0
+      const displayAchievementIds = wx.getStorageSync('displayAchievementIds')
+        || (wx.getStorageSync('userInfo') || {}).displayAchievementIds
+        || []
       
       console.log('加载用户数据:', { signDays, points, readArticles, chatTimes })
       
@@ -301,7 +305,8 @@ Page({
         signDays,
         totalPoints: points,
         readArticles,
-        chatTimes
+        chatTimes,
+        displayAchievementIds
       })
     } catch (e) {
       console.error('加载用户数据失败：', e)
@@ -507,6 +512,11 @@ Page({
           displayAchievementIds: ids,
           achievements: this.applyDisplayedFlags(this.data.achievements, ids)
         })
+        wx.setStorageSync('displayAchievementIds', ids)
+        const cachedUserInfo = wx.getStorageSync('userInfo') || {}
+        if (cachedUserInfo && typeof cachedUserInfo === 'object') {
+          wx.setStorageSync('userInfo', { ...cachedUserInfo, displayAchievementIds: ids })
+        }
         wx.showToast({ title: exists ? '已取消展示' : '已设为展示', icon: 'success' })
       } else {
         wx.showToast({ title: res.result?.errMsg || '保存失败', icon: 'none' })

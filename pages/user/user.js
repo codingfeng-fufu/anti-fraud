@@ -21,6 +21,7 @@ Page({
     signDates: [],
     points: 0,
     achievements: 0,
+    displayAchievements: [],
     todaySigned: false,
     equippedTitles: [],
     allTitles: [],
@@ -51,6 +52,11 @@ Page({
     wx.setStorageSync('signDates', this.data.signDates)
     wx.setStorageSync('points', this.data.points)
     wx.setStorageSync('achievements', this.data.achievements)
+    wx.setStorageSync('displayAchievements', this.data.displayAchievements || [])
+    const displayAchievementIds = (this.data.displayAchievements || [])
+      .map(item => item?.id)
+      .filter(Boolean)
+    wx.setStorageSync('displayAchievementIds', displayAchievementIds)
     if (this.data.signDates.length > 0) {
       wx.setStorageSync('lastSignDate', this.data.signDates[this.data.signDates.length - 1])
     }
@@ -67,6 +73,13 @@ Page({
         const data = result.result.data
         const signDates = data.userInfo.signDates || []
         const signDays = this.calculateConsecutiveDays(signDates)
+        const achievementList = Array.isArray(data.achievementList) ? data.achievementList : []
+        const displayAchievementIds = Array.isArray(data.userInfo.displayAchievementIds)
+          ? data.userInfo.displayAchievementIds
+          : []
+        const displayAchievements = achievementList
+          .filter(item => item.unlocked && displayAchievementIds.includes(item.id))
+          .slice(0, 6)
         
         if (signDates.length > 0) {
           wx.setStorageSync('signDates', signDates)
@@ -81,6 +94,7 @@ Page({
           signDates,
           points: data.userInfo.points || 0,
           achievements: data.userInfo.achievements?.length || 0,
+          displayAchievements,
           todaySigned: todaySigned
         })
         
@@ -89,6 +103,8 @@ Page({
         wx.setStorageSync('signDays', signDays)
         wx.setStorageSync('points', data.userInfo.points || 0)
         wx.setStorageSync('achievements', data.userInfo.achievements?.length || 0)
+        wx.setStorageSync('displayAchievements', displayAchievements)
+        wx.setStorageSync('displayAchievementIds', displayAchievementIds)
       }
     } catch (err) {
       console.error('自动登录失败：', err)
@@ -144,6 +160,7 @@ Page({
       ? userInfo.achievements.length
       : (wx.getStorageSync('achievements') || 0)
     const todaySigned = this.checkTodaySigned(signDates)
+    const displayAchievements = wx.getStorageSync('displayAchievements') || []
 
     this.setData({
       userInfo,
@@ -151,6 +168,7 @@ Page({
       signDates,
       points,
       achievements,
+      displayAchievements,
       todaySigned
     })
   },

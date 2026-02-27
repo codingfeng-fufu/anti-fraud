@@ -49,10 +49,29 @@ exports.main = async (event, context) => {
       whereCondition.category = category
     }
     
-    const productsResult = await db.collection('products')
+    let productsResult = await db.collection('products')
       .where(whereCondition)
       .orderBy('stock', 'asc')
       .get()
+    let productRows = productsResult.data || []
+
+    if (productRows.length === 0 || category === 'all') {
+      const requiredProductIds = ['tel_10', 'tel_30', 'data_10', 'data_30', 'milk_tea_1']
+      const existingIds = new Set(productRows.map(item => item.id || item._id))
+      const missing = requiredProductIds.filter(id => !existingIds.has(id))
+      if (productRows.length === 0 || (category === 'all' && missing.length > 0)) {
+        try {
+          await cloud.callFunction({ name: 'initProducts', data: {} })
+          productsResult = await db.collection('products')
+            .where(whereCondition)
+            .orderBy('stock', 'asc')
+            .get()
+          productRows = productsResult.data || []
+        } catch (err) {
+          console.warn('initProducts failed:', err?.message || err)
+        }
+      }
+    }
     
     // 检查用户已购买数量
     let purchasedCounts = {}
@@ -72,7 +91,7 @@ exports.main = async (event, context) => {
     }
     
     // 为每个商品添加已购买数量信息
-    const products = productsResult.data.map(product => ({
+    const products = productRows.map(product => ({
       ...product,
       purchasedCount: purchasedCounts[product.id] || 0,
       // limitPerUser <= 0 视为不限购

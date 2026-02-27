@@ -79,7 +79,6 @@ async function ensurePublicProfile(user) {
   }
 
   const profile = {
-    _id: docId,
     uid: uid,
     nickName: user.nickName || '',
     avatarUrl: user.avatarUrl || '',
@@ -227,28 +226,34 @@ exports.main = async (event, context) => {
           // ignore
         }
         const profileMax = Math.max(Number(profile?.quizMaxCorrect) || 0, correctCount)
-        const profileUpdate = {
+        const baseProfile = {
+          uid: profileDocId,
           nickName: latestUser.nickName || '',
           avatarUrl: latestUser.avatarUrl || '',
           equippedTitleIds: Array.isArray(latestUser.equippedTitles) ? latestUser.equippedTitles : [],
           displayAchievementIds: Array.isArray(latestUser.displayAchievementIds) ? latestUser.displayAchievementIds : [],
-          quizPoints: _.inc(correctCount),
-          quizTotalAttempts: _.inc(1),
-          quizTotalCorrect: _.inc(correctCount),
+          quizPoints: (Number(profile?.quizPoints) || 0) + correctCount,
+          quizTotalAttempts: (Number(profile?.quizTotalAttempts) || 0) + 1,
+          quizTotalCorrect: (Number(profile?.quizTotalCorrect) || 0) + correctCount,
           quizMaxCorrect: profileMax,
           lastQuizAt: new Date(),
           updatedAt: new Date()
         }
-        await col('public_profiles').doc(profileDocId).set({
-          data: {
-            _id: profileDocId,
-            uid: profileDocId,
-            followerCount: profile?.followerCount || 0,
-            followingCount: profile?.followingCount || 0,
-            createdAt: profile?.createdAt || new Date(),
-            ...profileUpdate
-          }
-        })
+
+        if (profile) {
+          await col('public_profiles').doc(profileDocId).update({
+            data: baseProfile
+          })
+        } else {
+          await col('public_profiles').doc(profileDocId).set({
+            data: {
+              followerCount: 0,
+              followingCount: 0,
+              createdAt: new Date(),
+              ...baseProfile
+            }
+          })
+        }
       }
 
       if (award > 0) {
