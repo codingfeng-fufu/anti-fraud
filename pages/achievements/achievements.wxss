@@ -15,36 +15,6 @@
   padding-bottom: 40rpx;
 }
 
-/* 顶部导航 */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: calc(20rpx + env(safe-area-inset-top)) 40rpx 20rpx 40rpx;
-  background: white;
-  border-bottom: 2rpx solid #e0f2fe;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left,
-.header-right {
-  width: 80rpx;
-}
-
-.back-icon {
-  font-size: 64rpx;
-  color: #0ea5e9;
-  line-height: 1;
-}
-
-.header-title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #1e293b;
-}
-
 /* 成就概览卡片 */
 .stats-card {
   margin: 40rpx;

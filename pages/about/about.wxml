@@ -1,13 +1,5 @@
 <!--pages/about/about.wxml-->
 <view class="about-container">
-  <view class="page-header">
-    <view class="header-left" bindtap="goBack">
-      <text class="back-icon">‹</text>
-    </view>
-    <view class="header-title">关于我们</view>
-    <view class="header-right"></view>
-  </view>
-
   <!-- 应用信息 -->
   <view class="app-info">
     <view class="app-logo">🛡️</view>

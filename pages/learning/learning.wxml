@@ -1,16 +1,5 @@
 <!--pages/learning/learning.wxml-->
 <view class="learning-container">
-  <!-- 顶部导航 -->
-  <view class="page-header">
-    <view class="header-left" bindtap="goBack">
-      <text class="back-icon">‹</text>
-    </view>
-    <view class="header-title">学习记录</view>
-    <view class="header-right" bindtap="clearHistory">
-      <text class="clear-btn">清空</text>
-    </view>
-  </view>
-
   <!-- 学习统计卡片 -->
   <view class="stats-grid">
     <view class="stat-card">

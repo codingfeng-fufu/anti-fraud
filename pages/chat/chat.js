@@ -283,12 +283,56 @@ Page({
   },
 
   uploadImage() {
-    wx.chooseImage({
+    wx.chooseMedia({
       count: 1,
+      mediaType: ['image'],
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
-        const tempFilePath = res.tempFilePaths[0]
+      success: async (res) => {
+        const tempFile = res.tempFiles[0]
+        let tempFilePath = tempFile.tempFilePath
+        const fileSize = tempFile.size
+
+        console.log('选择图片成功:', tempFilePath, '文件大小:', fileSize)
+
+        // 检查文件大小（限制5MB）
+        if (fileSize > 5 * 1024 * 1024) {
+          wx.showToast({
+            title: '图片太大，请选择小于5MB的图片',
+            icon: 'none'
+          })
+          return
+        }
+
+        // 如果是网络地址，需要先下载到本地
+        if (tempFilePath.startsWith('http://') || tempFilePath.startsWith('https://')) {
+          wx.showLoading({
+            title: '正在下载图片...',
+            mask: true
+          })
+
+          try {
+            const downloadRes = await new Promise((resolve, reject) => {
+              wx.downloadFile({
+                url: tempFilePath,
+                success: resolve,
+                fail: reject
+              })
+            })
+
+            tempFilePath = downloadRes.tempFilePath
+            console.log('图片下载成功:', tempFilePath)
+            wx.hideLoading()
+          } catch (err) {
+            console.error('图片下载失败:', err)
+            wx.hideLoading()
+            wx.showToast({
+              title: '图片下载失败',
+              icon: 'none'
+            })
+            return
+          }
+        }
 
         // 显示加载提示
         wx.showLoading({
@@ -297,11 +341,13 @@ Page({
         })
 
         // 将图片转为 base64
-        wx.getFileSystemManager().readFile({
+        const fs = wx.getFileSystemManager()
+        fs.readFile({
           filePath: tempFilePath,
           encoding: 'base64',
           success: async (fileRes) => {
             const base64Image = fileRes.data
+            console.log('图片转base64成功，长度:', base64Image.length)
 
             // 添加用户消息（显示图片）
             const userMsg = {
@@ -415,15 +461,22 @@ Page({
           fail: (err) => {
             console.error('读取图片失败：', err)
             wx.hideLoading()
-            wx.showToast({
+            wx.showModal({
               title: '读取图片失败',
-              icon: 'none'
+              content: '无法读取图片文件，请尝试重新选择图片。\n错误信息: ' + (err.errMsg || JSON.stringify(err)),
+              showCancel: false
             })
           }
         })
       },
       fail: (err) => {
         console.error('选择图片失败：', err)
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          wx.showToast({
+            title: '选择图片失败',
+            icon: 'none'
+          })
+        }
       }
     })
   }

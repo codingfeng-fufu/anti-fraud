@@ -10,11 +10,6 @@
 -->
 <!--pages/community/community.wxml-->
 <view class="community-container">
-  <view class="top-bar">
-    <view class="title">社区</view>
-    <button class="create-btn" bindtap="goCreate">发帖</button>
-  </view>
-
   <scroll-view scroll-y class="list" bindscrolltolower="loadMore">
     <view wx:if="{{posts.length === 0 && !loading}}" class="empty">
       <text class="empty-icon">📝</text>
@@ -45,4 +40,9 @@
     <view wx:if="{{loading}}" class="loading">加载中...</view>
     <view wx:if="{{!hasMore && posts.length > 0}}" class="no-more">没有更多了</view>
   </scroll-view>
+
+  <!-- 右下角浮动发帖按钮 -->
+  <view class="fab-btn" bindtap="goCreate">
+    <text class="fab-icon">+</text>
+  </view>
 </view>

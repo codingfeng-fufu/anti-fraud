@@ -10,15 +10,6 @@
 -->
 <!--pages/sign-in/sign-in.wxml-->
 <view class="sign-in-container">
-  <!-- 顶部导航 -->
-  <view class="page-header">
-    <view class="header-left" bindtap="goBack">
-      <text class="back-icon">←</text>
-    </view>
-    <view class="header-title">每日签到</view>
-    <view class="header-right"></view>
-  </view>
-
   <!-- 签到信息卡 -->
   <view class="sign-card">
     <view class="sign-main">

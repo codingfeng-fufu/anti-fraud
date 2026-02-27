@@ -2,23 +2,7 @@
   min-height:100vh;
   background:#f0f9ff;
 }
-.top-bar{
-  padding: calc(24rpx + env(safe-area-inset-top)) 28rpx 24rpx 28rpx;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#0ea5e9;
-  color:#fff;
-}
-.title{font-size:36rpx;font-weight:700;}
-.create-btn{
-  background:#fff;
-  color:#0ea5e9;
-  font-size:28rpx;
-  padding:8rpx 22rpx;
-  border-radius:999rpx;
-}
-.list{height:calc(100vh - 96rpx - env(safe-area-inset-top)); padding:20rpx 20rpx;}
+.list{height:calc(100vh - 20rpx); padding:20rpx 20rpx;}
 .post-card{
   background:#fff;
   border-radius:20rpx;
@@ -40,4 +24,30 @@
 .empty-icon{font-size:64rpx;}
 .empty-text{margin-top:16rpx;font-size:28rpx;}
 .loading,.no-more{text-align:center;color:#94a3b8;font-size:26rpx;padding:20rpx 0;}
+
+/* 右下角浮动发帖按钮 */
+.fab-btn{
+  position:fixed;
+  right:40rpx;
+  bottom:calc(10rpx + env(safe-area-inset-bottom));
+  width:100rpx;
+  height:100rpx;
+  border-radius:50%;
+  background:linear-gradient(135deg,#0ea5e9 0%,#06b6d4 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8rpx 32rpx rgba(14,165,233,0.4);
+  z-index:100;
+}
+.fab-btn:active{
+  transform:scale(0.95);
+  opacity:0.9;
+}
+.fab-icon{
+  color:#fff;
+  font-size:56rpx;
+  font-weight:300;
+  line-height:1;
+}
 

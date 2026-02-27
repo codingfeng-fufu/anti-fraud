@@ -37,8 +37,9 @@
 /* 消息区域 */
 .chat-messages {
   flex: 1;
-  padding: 40rpx;
+  padding: 20rpx 0;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* 单条消息 */
@@ -48,6 +49,7 @@
   animation: fadeIn 0.3s ease;
   width: 100%;
   box-sizing: border-box;
+  padding: 0 20rpx;
 }
 
 @keyframes fadeIn {
@@ -63,12 +65,10 @@
 
 .message.bot {
   justify-content: flex-start;
-  padding-left: -10rpx;
 }
 
 .message.user {
   justify-content: flex-end;
-  padding-right: 60rpx;
 }
 
 /* 消息头像 */
@@ -98,12 +98,13 @@
 
 /* 消息内容 */
 .message-content {
-  max-width: calc(100% - 120rpx);
+  max-width: 70%;
   padding: 28rpx 36rpx;
   border-radius: 32rpx;
   font-size: 28rpx;
   line-height: 1.7;
-  word-break: break-all;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 /* 消息内容中的文本 - 保留换行符 */
@@ -154,7 +155,7 @@
 .chat-input-area {
   background: white;
   padding: 30rpx 40rpx;
-  padding-bottom: calc(-35rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
   border-top: 2rpx solid #e0f2fe;
   box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.08);
 }

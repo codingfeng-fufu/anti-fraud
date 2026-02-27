@@ -1,13 +1,5 @@
 <!--pages/feedback/feedback.wxml-->
 <view class="feedback-container">
-  <view class="page-header">
-    <view class="header-left" bindtap="goBack">
-      <text class="back-icon">‹</text>
-    </view>
-    <view class="header-title">帮助与反馈</view>
-    <view class="header-right"></view>
-  </view>
-
   <view class="tab-bar">
     <view class="tab-item {{currentTab === 'help' ? 'active' : ''}}" bindtap="switchTab" data-tab="help">
       常见问题

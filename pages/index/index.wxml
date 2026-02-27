@@ -2,10 +2,6 @@
 <view class="index-container">
   <!-- 顶部搜索栏 -->
   <view class="top-bar">
-    <view class="top-title">
-      <text class="title-icon">🛡️</text>
-      <text class="title-text">反诈卫士</text>
-    </view>
     <view class="subtitle">守护校园，识破骗局</view>
   </view>
 

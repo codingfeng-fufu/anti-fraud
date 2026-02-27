@@ -1,5 +1,6 @@
 {
-  "usingComponents": {},
-  "navigationStyle": "custom",
-  "backgroundColor": "#f0f9ff"
+  "navigationBarTitleText": "个人主页",
+  "navigationBarBackgroundColor": "#0ea5e9",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {}
 }
