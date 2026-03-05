@@ -2,13 +2,15 @@
 .bind-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
-  padding-bottom: 40rpx;
+  padding: 0 30rpx 40rpx;
+  box-sizing: border-box;
 }
 
 /* 顶部提示 */
 .bind-header {
   background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-  padding: 60rpx 40rpx;
+  padding: 60rpx 30rpx;
+  margin: 0 -30rpx;
   color: white;
   text-align: center;
 }
@@ -33,10 +35,11 @@
 /* 表单 */
 .bind-form {
   background: white;
-  margin: 30rpx 40rpx;
+  margin: 30rpx 0;
   border-radius: 32rpx;
   padding: 40rpx;
   box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
 }
 
 .form-item {
@@ -70,13 +73,22 @@
 
 .form-input {
   width: 100%;
+  min-height: 88rpx;
   padding: 24rpx 32rpx;
   background: #f8fafc;
   border: 2rpx solid #e0f2fe;
   border-radius: 16rpx;
   font-size: 28rpx;
+  line-height: 40rpx;
   color: #1e293b;
   transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+  font-size: 28rpx;
+  line-height: 40rpx;
 }
 
 .form-input:focus {
@@ -86,13 +98,18 @@
 
 .picker-value {
   width: 100%;
+  min-height: 88rpx;
   padding: 24rpx 32rpx;
   background: #f8fafc;
   border: 2rpx solid #e0f2fe;
   border-radius: 16rpx;
   font-size: 28rpx;
+  line-height: 40rpx;
   color: #1e293b;
   position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .picker-value::after {
@@ -108,6 +125,7 @@
 /* 固定学校显示 */
 .school-fixed {
   width: 100%;
+  min-height: 88rpx;
   padding: 24rpx 32rpx;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 2rpx solid #0ea5e9;
@@ -115,10 +133,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .school-name {
   font-size: 28rpx;
+  line-height: 40rpx;
   color: #0ea5e9;
   font-weight: 600;
 }
@@ -137,11 +157,12 @@
 
 /* 提示信息 */
 .bind-tips {
-  margin: 0 40rpx;
+  margin: 30rpx 0;
   padding: 30rpx;
   background: #f0f9ff;
   border-radius: 24rpx;
   border-left: 6rpx solid #0ea5e9;
+  box-sizing: border-box;
 }
 
 .tip-item {
@@ -157,7 +178,7 @@
 
 /* 提交按钮 */
 .bind-actions {
-  margin: 40rpx 40rpx 0;
+  margin: 40rpx 0 0;
 }
 
 .submit-btn {
@@ -171,6 +192,7 @@
   font-weight: 600;
   box-shadow: 0 8rpx 24rpx rgba(14, 165, 233, 0.3);
   transition: all 0.3s;
+  box-sizing: border-box;
 }
 
 .submit-btn:active {
