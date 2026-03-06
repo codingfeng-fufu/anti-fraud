@@ -22,21 +22,24 @@ const _ = db.command
 
 exports.main = async (event, context) => {
   try {
-    const { 
+    const {
       category = '全部',  // 分类
       page = 1,           // 页码
       pageSize = 10,      // 每页数量
       keyword = ''        // 搜索关键词
     } = event
-    
+
+    console.log('getArticles 接收参数：', { category, page, pageSize, keyword })
+
     // 构建查询条件
     let query = {}
-    
+
     // 分类筛选
     if (category && category !== '全部') {
       query.category = category
+      console.log('添加分类筛选：', category)
     }
-    
+
     // 关键词搜索
     if (keyword) {
       query.title = db.RegExp({
@@ -44,20 +47,26 @@ exports.main = async (event, context) => {
         options: 'i'  // 不区分大小写
       })
     }
-    
-    // 查询文章列表
+
+    console.log('查询条件：', JSON.stringify(query))
+
+    // 查询文章列表（使用 timestamp 排序，因为 publishTime 可能不存在）
     const result = await db.collection('articles')
       .where(query)
-      .orderBy('publishTime', 'desc')
+      .orderBy('timestamp', 'desc')
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .get()
-    
+
+    console.log(`查询结果：找到 ${result.data.length} 篇文章`)
+
     // 获取总数
     const countResult = await db.collection('articles')
       .where(query)
       .count()
-    
+
+    console.log(`总数：${countResult.total} 篇`)
+
     return {
       success: true,
       data: {

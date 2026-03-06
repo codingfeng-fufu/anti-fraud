@@ -14,25 +14,26 @@
 
 .tag {
   display: inline-block;
-  padding: 10rpx 28rpx;
-  border-radius: 40rpx;
-  font-size: 24rpx;
-  margin-bottom: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  margin-bottom: 20rpx;
   font-weight: 600;
+  letter-spacing: 0.5rpx;
 }
 
 .tag-danger {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  background: #fee2e2;
   color: #dc2626;
 }
 
 .tag-warning {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: #fef3c7;
   color: #d97706;
 }
 
 .tag-info {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  background: #dbeafe;
   color: #2563eb;
 }
 

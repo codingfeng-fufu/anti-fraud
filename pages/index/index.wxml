@@ -84,11 +84,17 @@
     </view>
 
     <!-- 加载更多 -->
-    <view class="load-more" wx:if="{{hasMore}}">
-      <text>下拉加载更多</text>
+    <view class="load-more" wx:if="{{hasMore}}" bindtap="loadMoreArticles">
+      <text wx:if="{{isLoading}}">正在加载...</text>
+      <text wx:else>点击加载更多</text>
     </view>
-    <view class="load-more" wx:else>
-      <text>没有更多了</text>
+    <view class="load-more" wx:elif="{{articles.length > 0}}">
+      <text>—— 我是有底线的 ——</text>
+    </view>
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📭</view>
+      <view class="empty-text">暂无相关资讯</view>
+      <view class="empty-tip">试试切换其他分类吧</view>
     </view>
   </view>
 </view>
